@@ -1,0 +1,122 @@
+---
+title: "Text Mining Final Project"
+format: html
+editor: visual
+---
+
+
+## Introduction
+
+**Está en el google doc, incluirla al final**
+**Está en el google doc, incluirla al final**
+**Está en el google doc, incluirla al final**
+**Está en el google doc, incluirla al final**
+**Está en el google doc, incluirla al final**
+**Está en el google doc, incluirla al final**
+**Está en el google doc, incluirla al final**
+
+## Setup, data loading, and preprocessing
+
+### Packages
+
+We begin by loading all R packages required throughout this project.
+
+```{r}
+#| message: false
+#| warning: false
+
+# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS # REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS
+
+# Core data wrangling, visualization, and string handling
+library(tidyverse)
+library(tidytext)
+library(textdata)
+library(sentimentr)
+library(topicmodels)
+library(quanteda)
+library(quanteda.textplots)
+library(textstem)
+library(igraph)
+library(ggraph)
+library(widyr)
+library(reshape2)
+library(RColorBrewer)
+library(wordcloud)
+library(explore)
+```
+
+### Loading the data
+
+Our corpus was downloaded from [OpenAlex](https://openalex.org/). We created a custom R script (`openalex_download.R`, included in this project folder, along with documentation) to bulk-download article data from our target journals.
+
+Having run the script, we load the `.RData` file, containing all data structures exactly as they were returned by the OpenAlex API.
+
+```{r}
+# Load the RData file. This creates the object `articles_raw` in the environment
+load("data/articles_sample.RData")
+```
+
+### Initial Inspection
+
+We begin by examining the structure of the raw dataset: variable types, missing values, and basic summary statistics.
+```{r}
+#| label: inspect-structure
+
+# Overview of all variables: types, missing values, and distributions
+describe(articles_raw)
+```
+
+Not all records include abstracts — OpenAlex coverage varies by journal and year. Since our entire analysis is based on abstract text, we remove records without abstracts and restrict the corpus to our study period (2016–2025).
+```{r}
+#| label: filter-corpus
+
+# Filter: keep only records with an abstract, within our study period
+articles <- articles_raw |> 
+  filter(!is.na(abstract)) |>
+  filter(publication_year >= 2016, publication_year <= 2025)
+
+# How many articles remain after filtering
+nrow(articles)
+```
+```{r}
+#| label: corpus-by-journal-year
+
+# Articles per journal and year — the basic shape of our corpus
+articles |>
+  count(source_display_name, publication_year) |>
+  pivot_wider(names_from = source_display_name, values_from = n, values_fill = 0)
+```
+```{r}
+#| label: corpus-plot
+
+# Visualize the distribution of abstracts over time, by journal
+articles |>
+  count(source_display_name, publication_year) |>
+  ggplot(aes(x = publication_year, y = n, fill = source_display_name)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Number of abstracts per year and journal",
+    x = "Publication year",
+    y = "Number of abstracts",
+    fill = "Journal"
+  ) +
+  theme_minimal()
+```
+
+The corpus is now loaded, filtered, and ready for preprocessing.
+
+### Preprocessing
+
+HERE WE NEED TO DO A PREPROCESSING PHASE, COMMON FOR ALL THE PARTS. OR WE CAN DO PREPROCESSING FOR EACH PART. BUT MAYBE IT IS BETTER TO DO SOMETHING COMMON FOR ALL.
+
+## Section 3. Topic analysis [RQ1 + RQ2] 
+
+## Section 4. WRITING STYLE AND THE RISE OF AI [RQ3] 
+
+## Section 5. SENTIMENT TOWARDS AI IN SOCIAL SCIENCE ABSTRACTS [RQ4]
+
+## Section 6. IF WE CAN [RQ5]
+
+## Section 7. Conclussions and limitations
+
+## Section 8. References
