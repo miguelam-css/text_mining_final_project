@@ -20,7 +20,6 @@ We begin by loading all R packages required throughout this project.
 
 # REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS # REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS
 
-# Core data wrangling, visualization, and string handling
 library(tidyverse)
 library(tidytext)
 library(textdata)
@@ -46,7 +45,7 @@ Having run the script, we load the `.RData` file, containing all data structures
 
 ```{r}
 # Load the RData file. This creates the object `articles_raw` in the environment
-load("articles.RData")
+load("data/articles.RData")
 ```
 
 ### Initial Inspection
@@ -58,7 +57,7 @@ We begin by examining the structure of the raw dataset: variable types, missing 
 describe(articles_raw)
 ```
 
-Not all records include abstracts — OpenAlex coverage varies by journal and year. Since our entire analysis is based on abstract text, we remove records without abstracts and restrict the corpus to our study period (2016–2025).
+Not all records include abstracts. Since our entire analysis is based on abstract text, we remove records without abstracts and restrict the corpus to our study period (2016–2025).
 
 ```{r}
 # Filter: keep only records with an abstract, within our study period
@@ -67,10 +66,10 @@ articles <- articles_raw |>
   filter(publication_year >= 2016, publication_year <= 2025)
 
 # Let's observe our new filtered data:
-glimpse(articles)
+describe(articles)
 ```
 
-Our new data passed from 9482 to 6670 articles. We have 44 columns from which we will later select only a few ones for our analysis.
+Our new data passed from 9482 to 6670 articles. We have 44 columns from which we will later select only the relevant ones for our analysis.
 
 ```{r}
 # Articles per journal and year
@@ -120,7 +119,7 @@ tidy_abstracts_raw <- articles |>
 tidy_abstracts_raw
 ```
 
-As it can be see, after tokenizing words we need to remove all those stopwords that are not useful for analysis, due to they are typically extremely common words in language such as "the", "of", "to", and so forth in English. 
+As it can be see, after tokenizing words we need to remove all those stopwords that are not useful for analysis, due to they are typically extremely common words in language such as "the", "of", "to", and so forth in English.
 
 #### Filtering standard and domain-specific stopwords
 
@@ -135,13 +134,12 @@ tidy_abstracts
 
 Not only stopwords, but also academic abstracts contain high-frequency words that carry no topical meaning and would pollute TF-IDF rankings and LDA topics if left in.
 
-We attached Claude AI a .csv document of our data after filtering standard stopwords, and then asked it to identificate and create a list of the domain-specific stopwords that we need to remove too. We asked it to keep all words that carry sentiment meaning for later sentiment analysis. We had to later add some other generic verbs and words such us "abstract", "enables", "responses", "based", "effect", "effects" that were not include in the list. 
+We attached Claude AI a .csv document of our data after filtering standard stopwords, and then asked it to identify and create a list of the domain-specific stopwords that we need to remove too. We asked it to keep all words that carry sentiment meaning for later sentiment analysis. We had to later add some other generic verbs and words such us "abstract", "enables", "responses", "based", "effect", "effects" that were not include in the list.
 
 We define two tiers for filtering:
 
-  (a) Generic academic boilerplate: words common to all scientific writing
-  (b) Method/corpus noise: reporting verbs, general adjectives and adverbs without sentiment component, numbers as words, single characters, statistics and document-structure wording, and encoding artefacts
-  
+(a) Generic academic boilerplate: words common to all scientific writing
+(b) Method/corpus noise: reporting verbs, general adjectives and adverbs without sentiment component, numbers as words, single characters, statistics and document-structure wording, and encoding artefacts
 
 ```{r}
 custom_stopwords <- tibble(word = c(
@@ -345,15 +343,15 @@ tidy_abstracts
 
 This is the prompt we used to get this list:
 
-  *You are a text mining assistant helping with an academic research project in social sciences.*
-  
-  *I am sharing a CSV file containing word frequencies from a corpus of social science journal abstracts (Nature Human Behaviour and Humanities and Social Sciences Communications, 2016–2025), after standard English stopwords have already been removed using the tidytext stop_words lexicon in R.*
-  
-  *Your task is to identify and generate a list of domain-specific stopwords that should be removed from this corpus before topic modelling (LDA) and TF-IDF analysis. These are words that appear at high frequency but carry no thematic or discriminative value for social science research — such as academic boilerplate verbs ("suggest", "examine", "findings"), generic methodological terms ("survey", "quantitative", "framework"), and encoding artefacts.*
-  
-  *Critical constraint: do NOT include in the stopword list any word that carries sentiment meaning and could be useful for sentiment analysis. This includes words with positive or negative valence in standard sentiment lexicons (AFINN, Bing, NRC), such as evaluative adjectives ("innovative", "robust", "limited"), directional verbs ("improve", "achieve"), and explicit sentiment adverbs ("positively", "negatively"). These words must be preserved in the corpus.*
-  
-  *Return a clean, categorised R tibble with the final list of domain-specific stopwords to remove, with comments explaining each category.*
+*You are a text mining assistant helping with an academic research project in social sciences.*
+
+*I am sharing a CSV file containing word frequencies from a corpus of social science journal abstracts (Nature Human Behaviour and Humanities and Social Sciences Communications, 2016–2025), after standard English stopwords have already been removed using the tidytext stop_words lexicon in R.*
+
+*Your task is to identify and generate a list of domain-specific stopwords that should be removed from this corpus before topic modelling (LDA) and TF-IDF analysis. These are words that appear at high frequency but carry no thematic or discriminative value for social science research — such as academic boilerplate verbs ("suggest", "examine", "findings"), generic methodological terms ("survey", "quantitative", "framework"), and encoding artefacts.*
+
+*Critical constraint: do NOT include in the stopword list any word that carries sentiment meaning and could be useful for sentiment analysis. This includes words with positive or negative valence in standard sentiment lexicons (AFINN, Bing, NRC), such as evaluative adjectives ("innovative", "robust", "limited"), directional verbs ("improve", "achieve"), and explicit sentiment adverbs ("positively", "negatively"). These words must be preserved in the corpus.*
+
+*Return a clean, categorised R tibble with the final list of domain-specific stopwords to remove, with comments explaining each category.*
 
 There are still some words we do not need for the analysis: pure numbers, tokens under 3 characters, any remaining numeric strings. So we filter them:
 
@@ -366,9 +364,9 @@ tidy_abstracts <- tidy_abstracts |>
   )
 ```
 
-The 3-character filter above drops "ai", but "ai" is substantively crucial for our RQ2. We add it back by filtering >= 2 chars only for that token. 
+The 3-character filter above drops "ai", but "ai" is substantively crucial for our RQ2. We add it back by filtering \>= 2 chars only for that token.
 
-Simpler approach: lower the threshold to 2 but re-apply the custom list. Here we just relax to nchar >= 2, since our custom list already handles noise.
+Simpler approach: lower the threshold to 2 but re-apply the custom list. Here we just relax to nchar \>= 2, since our custom list already handles noise.
 
 ```{r}
 tidy_abstracts <- tidy_abstracts_raw |>
