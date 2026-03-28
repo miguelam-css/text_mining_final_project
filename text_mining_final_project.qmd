@@ -46,7 +46,7 @@ Having run the script, we load the `.RData` file, containing all data structures
 
 ```{r}
 # Load the RData file. This creates the object `articles_raw` in the environment
-load("data/articles_sample.RData")
+load("articles.RData")
 ```
 
 ### Initial Inspection
@@ -66,14 +66,17 @@ articles <- articles_raw |>
   filter(!is.na(abstract)) |>
   filter(publication_year >= 2016, publication_year <= 2025)
 
-# How many articles remain after filtering
-nrow(articles)
+# Let's observe our new filtered data:
+glimpse(articles)
 ```
+
+Our new data passed from 9482 to 6670 articles. We have 44 columns from which we will later select only a few ones for our analysis.
 
 ```{r}
 # Articles per journal and year
 articles |>
   count(source_display_name, publication_year) |>
+  arrange(publication_year) |>
   pivot_wider(names_from = source_display_name, values_from = n, values_fill = 0)
 ```
 
@@ -94,11 +97,356 @@ articles |>
 
 The corpus is now loaded, filtered, and ready for preprocessing.
 
-### Preprocessing
-
-HERE WE NEED TO DO A PREPROCESSING PHASE, COMMON FOR ALL THE PARTS. OR WE CAN DO PREPROCESSING FOR EACH PART. BUT MAYBE IT IS BETTER TO DO SOMETHING COMMON FOR ALL.
+*Aquí hay un problemilla y es que no hay artículos de todos los journals para todos los años. Creo que es una limitacion que habría que mencionar, ya que no nos permite comparar la IA como tema o herramienta en las tres revistas a lo largo del periodo de tiempo que hemos elegido. Por ejemplo, para comparar el empleo de uso de IA en la escritura a partir de 2022, no hay observaciones para Palgrave. Tampoco hay articulos de Humanities de 2016 a 2019. Yo creo que lo mencionamos como limitación y ya, pero decid qué pensáis.*
 
 ## Section 3. Topic analysis \[RQ1 + RQ2\]
+
+### Preprocessing
+
+#### Tokenization
+
+```{r}
+# We tokenize at the word level, keeping key metadata columns as identifiers.
+# Each row will be one token, linked to its document (id), journal, year, etc.
+
+tidy_abstracts_raw <- articles |>
+  select(id, publication_year, source_display_name, abstract) |>
+  unnest_tokens(
+    output = word,
+    input  = abstract,
+    token  = "words"   # default: lowercase, strips punctuation
+  )
+
+tidy_abstracts_raw
+```
+
+As it can be see, after tokenizing words we need to remove all those stopwords that are not useful for analysis, due to they are typically extremely common words in language such as "the", "of", "to", and so forth in English. 
+
+#### Filtering standard and domain-specific stopwords
+
+```{r}
+# tidytext bundles three lexicons (SMART, Snowball, Onix). We use them all.
+
+tidy_abstracts <- tidy_abstracts_raw |>
+  anti_join(stop_words, by = "word")
+
+tidy_abstracts
+```
+
+Not only stopwords, but also academic abstracts contain high-frequency words that carry no topical meaning and would pollute TF-IDF rankings and LDA topics if left in.
+
+We attached Claude AI a .csv document of our data after filtering standard stopwords, and then asked it to identificate and create a list of the domain-specific stopwords that we need to remove too. We asked it to keep all words that carry sentiment meaning for later sentiment analysis. We had to later add some other generic verbs and words such us "abstract", "enables", "responses", "based", "effect", "effects" that were not include in the list. 
+
+We define two tiers for filtering:
+
+  (a) Generic academic boilerplate: words common to all scientific writing
+  (b) Method/corpus noise: reporting verbs, general adjectives and adverbs without sentiment component, numbers as words, single characters, statistics and document-structure wording, and encoding artefacts
+  
+
+```{r}
+custom_stopwords <- tibble(word = c(
+
+  # Academic words: what the paper is / what it does, not what it's about
+  "study", "studies",
+  "paper", "abstract", "article", "articles",
+  "research", "researchers", "scholars",
+  "findings", "finding",
+  "objective", "purpose", "aims", "aim", "aimed",
+  "literature", "academic", "scientific", "interdisciplinary",
+  "published", "corpus",
+
+  # Methodological words: how it was done, not the topic
+  "results", "result",
+  "analysis", "analyses", "analyzed", "analyze", "analysed", "analyzing",
+  "methods", "method", "methodology",
+  "approach", "approaches",
+  "framework", "frameworks",
+  "review", "reviews", "reviewed",
+  "data", "dataset", "collected", "collection",
+  "survey", "questionnaire",
+  "interviews", "respondents", "participants",
+  "experiment", "experimental",
+  "quantitative", "qualitative",
+  "empirical", "theoretical",
+  "systematic", "mixed",
+  "conducted", "designed", "selected",
+  "modeling", "mediating", "moderating",
+  "panel", "equation", "indicators",
+  "assessment", "evaluation", "index",
+  "association", "comparative", "temporal",
+  "sem", "ci",                              # statistical abbreviations
+  "thematic", "conceptual",
+  "techniques", "categories",
+  "hypothesis",
+
+  # Reporting verbs: "This paper X...", carry no topical signal
+  "reveal", "revealed", "reveals",
+  "show", "showed", "shown",
+  "suggest", "suggested", "suggests", "suggesting",
+  "indicate", "indicated", "indicates",
+  "demonstrate", "demonstrated", "demonstrates",
+  "highlight", "highlighted", "highlights", "highlighting",
+  "argue", "argues",
+  "examine", "examined", "examines", "examining",
+  "explore", "explored", "explores", "exploring",
+  "enables", "responses",
+  "investigate", "investigated", "investigates",
+  "discuss", "discussed", "discusses",
+  "propose", "proposed", "proposes",
+  "develop", "developed", "develops",
+  "apply", "applied", "applies",
+  "identify", "identified", "identifies",
+  "include", "included", "includes",
+  "consider", "considered", "considers",
+  "focus", "focused", "focuses", "focusing",
+  "address", "addressed", "addresses", "addressing",
+  "assess", "assessed", "assesses",
+  "measure", "measured", "measures",
+  "report", "reported", "reports",
+  "find", "found",
+  "compare", "compared", "compares",
+  "predict", "predicted", "predicts",
+  "observe", "observed", "observes",
+  "provide", "provided", "provides", "providing",
+  "offer", "offers", "offering",
+  "contribute", "contributes", "contributing",
+  "employ", "employed", "employs", "employing",
+  "utilize", "utilized", "utilizes", "utilizing",
+  "draw", "draws", "drawing", "drawn",
+  "determine", "determined", "determines",
+  "serve", "serves",
+  "explain", "explained", "explains",
+  "understand",
+  "remains", "remain",
+  "highlighting", "drawing", "focusing", "addressing",
+  "plays", "driven", "shaped", "shaping",
+  "influenced", "influencing", "influences",
+  "analyzes", "analysed",
+  "contributes", "based",
+
+  # Generic structural nouns (no topical value) 
+  "role", "roles",
+  "relationship", "relationships",
+  "understanding",
+  "implications", "implication",
+  "outcomes", "outcome",
+  "perspective", "perspectives",
+  "factors", "factor",
+  "patterns", "pattern",
+  "context", "contexts",
+  "aspects", "aspect",
+  "type", "types",
+  "form", "forms",
+  "series", "body",
+  "subject", "account",
+  "extent", "basis",
+  "complexity",
+  "phenomenon",
+  "topic", "topics",
+  "field", "fields",
+  "term", "terms",
+  "characteristics",
+  "scale",
+  "degree",
+  "elements", "element",
+  "dimensions", "dimension",
+  "mechanisms", "mechanism",
+  "structure", "structures",
+  "process", "processes",
+  "concept", "concepts",
+  "theories", "theory",      
+  "themes",
+  "relations",
+  "functions",
+  "responses",
+  "words",
+  "texts",
+  "sources",
+  "strategies",              
+  "approaches",
+  "activities",
+  "tasks", "task",
+  "questions", "question",
+  "settings",
+  "core",
+  "scope",
+  "views",
+  "purpose", "effect", "effects",
+
+  # Generic adjectives and adverbs
+  # NOTE: adjectives with sentiment value (innovative, robust, limited,
+  # critical, comprehensive, substantial, practical, crucial, essential,
+  # valuable, major, effective, strong, diverse) are deliberately EXCLUDED
+  # from this list so they are preserved for sentiment analysis.
+  "specific", "specifically",
+  "central", "primary", "main",
+  "existing", "current", "recent",
+  "broader",
+  "initial", "established",
+  "independent", "integrated",
+  "increasingly", "primarily",
+  "significant", "significantly",
+  "including",
+  "similar",
+  "multiple",
+  "total",
+  "external", "internal",
+  "single",
+  "common",
+  "distinct",
+  "relevant",
+  "real",
+  "short",
+  "direct",
+  "related",
+  "selected",
+  "designed",
+  "conducted",
+  "technical",
+  "growing",
+  "past",
+  "contemporary",
+  "key",                    
+  "top",
+  "secondary",
+  "structured",
+  "comparative",
+  "temporal",
+  "underlying",
+  "systematic",
+  "frequency",
+
+  # Connectors that survive standard stopword removal 
+  "additionally", "furthermore", "however", "thus",
+  "therefore", "whereas", "despite", "although",
+  "i.e", "e.g", "ie", "eg", "et", "al",
+  "due",
+  "addition",
+  "contrast",
+  "finally",
+  "notably",
+  "broadly",
+
+  # Numbers and years tokenized as words 
+  "1", "2", "3", "4", "5", "10", "19", "95",
+  "2016", "2017", "2018", "2019", "2020",
+  "2021", "2022", "2023", "2024", "2025",
+
+  # Encoding artefacts and OpenAlex noise 
+  "â", "ã", "ï", "œ",
+  "pre", "multi"             # prefix fragments tokenized as standalone words
+))
+
+tidy_abstracts <- tidy_abstracts |>
+  anti_join(custom_stopwords, by = "word")
+
+tidy_abstracts
+```
+
+This is the prompt we used to get this list:
+
+  *You are a text mining assistant helping with an academic research project in social sciences.*
+  
+  *I am sharing a CSV file containing word frequencies from a corpus of social science journal abstracts (Nature Human Behaviour and Humanities and Social Sciences Communications, 2016–2025), after standard English stopwords have already been removed using the tidytext stop_words lexicon in R.*
+  
+  *Your task is to identify and generate a list of domain-specific stopwords that should be removed from this corpus before topic modelling (LDA) and TF-IDF analysis. These are words that appear at high frequency but carry no thematic or discriminative value for social science research — such as academic boilerplate verbs ("suggest", "examine", "findings"), generic methodological terms ("survey", "quantitative", "framework"), and encoding artefacts.*
+  
+  *Critical constraint: do NOT include in the stopword list any word that carries sentiment meaning and could be useful for sentiment analysis. This includes words with positive or negative valence in standard sentiment lexicons (AFINN, Bing, NRC), such as evaluative adjectives ("innovative", "robust", "limited"), directional verbs ("improve", "achieve"), and explicit sentiment adverbs ("positively", "negatively"). These words must be preserved in the corpus.*
+  
+  *Return a clean, categorised R tibble with the final list of domain-specific stopwords to remove, with comments explaining each category.*
+
+There are still some words we do not need for the analysis: pure numbers, tokens under 3 characters, any remaining numeric strings. So we filter them:
+
+```{r}
+tidy_abstracts <- tidy_abstracts |>
+  filter(
+    !str_detect(word, "^[0-9]+$"),   # pure digits
+    !str_detect(word, "^[0-9]"),     # starts with a digit (e.g. "2023")
+    str_length(word) >= 3            # drop "ai", "er", etc. (will keep "ai" intentionally — see below)
+  )
+```
+
+The 3-character filter above drops "ai", but "ai" is substantively crucial for our RQ2. We add it back by filtering >= 2 chars only for that token. 
+
+Simpler approach: lower the threshold to 2 but re-apply the custom list. Here we just relax to nchar >= 2, since our custom list already handles noise.
+
+```{r}
+tidy_abstracts <- tidy_abstracts_raw |>
+  anti_join(stop_words, by = "word") |>
+  anti_join(custom_stopwords, by = "word") |>
+  filter(
+    !str_detect(word, "^[0-9]"),
+    str_length(word) >= 2
+  )
+```
+
+#### Summary and visualizations of the clean corpus
+
+```{r}
+# Total tokens after preprocessing
+nrow(tidy_abstracts)
+
+# Unique vocabulary size
+n_distinct(tidy_abstracts$word)
+
+# Tokens per journal
+tidy_abstracts |>
+  count(source_display_name, name = "n_tokens")
+
+# Top 20 most frequent words overall — sanity check
+tidy_abstracts |>
+  count(word, sort = TRUE) |>
+  slice_head(n = 20)
+```
+
+```{r}
+# Visualize top words
+tidy_abstracts |>
+  count(word, sort = TRUE) |>
+  slice_head(n = 25) |>
+  mutate(word = reorder(word, n)) |>
+  ggplot(aes(n, word)) +
+  geom_col(fill = "#2C3E6B", width = 0.7) +
+  geom_text(aes(label = scales::comma(n)), 
+            hjust = -0.15, size = 3, color = "#2C3E6B", family = "serif") +
+  scale_x_continuous(
+    expand = expansion(mult = c(0, 0.15)),
+    labels = scales::comma
+  ) +
+  labs(
+    title = "Most frequent terms after preprocessing",
+    subtitle = "Top 25 tokens across all abstracts (2016–2025)",
+    x = "Token frequency",
+    y = NULL,
+    caption = "Source: Nature Human Behaviour & HSSC — OpenAlex corpus"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title       = element_text(size = 14, face = "bold", color = "#1a1a2e",
+                                    margin = margin(b = 4)),
+    plot.subtitle    = element_text(size = 10, color = "#4a4a6a",
+                                    margin = margin(b = 12)),
+    plot.caption     = element_text(size = 7, color = "#7a7a9a", hjust = 0,
+                                    margin = margin(t = 10)),
+    axis.text.y      = element_text(size = 10, color = "#1a1a2e"),
+    axis.text.x      = element_text(size = 8,  color = "#4a4a6a"),
+    axis.title.x     = element_text(size = 9,  color = "#4a4a6a",
+                                    margin = margin(t = 8)),
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "#e8e8f0", linewidth = 0.4),
+    panel.grid.minor   = element_blank(),
+    plot.background    = element_rect(fill = "white", color = NA),
+    plot.margin        = margin(20, 25, 15, 15)
+  )
+```
+
+The top 25 terms paint a coherent picture of the corpus. The dominance of social, development, impact, and economic confirms these journals prioritise research on societal outcomes and economic processes. The cluster of health, policy, and public points to a strong strand of public health and governance research. The public health topic may come from the pandemic years (2020-2021) that covers our time period of research.
+
+The prominence of china and chinese (both in the top 15) is notable and likely reflects the journals' broad international scope combined with the scale of Chinese academic output over the study period.
+
+The education–learning–students cluster suggests that educational research is one of the most represented subfields, while digital, information, and media signal a sustained interest in technology and communication topics throughout the decade, which has relevance for our research questions about AI.
+
+Finally, the presence of positive and influence among the top 25 reveals that sentiment-bearing vocabulary is surviving preprocessing as intended.
 
 ## Section 4. WRITING STYLE AND THE RISE OF AI \[RQ3\]
 
