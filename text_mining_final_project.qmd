@@ -229,19 +229,17 @@ tidy_abstracts <- tidy_abstracts_raw |>
 tidy_abstracts
 ```
 
-Academic abstracts also contain high-frequency words that carry no topical meaning and would pollute TF-IDF rankings and LDA topics if left in.
+Academic abstracts also contain high-frequency words that carry no topical meaning and would pollute our analysis, particularly when exploring absolute frequencies
 
-Using Claude Sonnet 4.6 to identify and create a list of domain-specif words without informative value ---see full prompt in Appendix I---. We manually reviewed this list, removing words we thought had informational value and adding some other little informative words. We also added "palgrave", which we found to have a high influence in some of the metrics if not excluded.
+TF-IDF rankings and LDA topics if left in.
 
-We define two tiers for filtering: *[IGUAL QUITABA ESTO; NO ENTIENDO EN QUÉ ESTAMOS HACIENDO DOS TIERS]*
-(a) Generic academic boilerplate: words common to all scientific writing
-(b) Method/corpus noise: reporting verbs, general adjectives and adverbs without sentiment component, numbers as words, single characters, statistics and document-structure wording, and encoding artefacts
+Using Claude Sonnet 4.6 to identify and create a list of domain-specif words without informative value ---see full prompt in Appendix I---. We manually reviewed this list, removing words we thought had informational value and adding some other little informative words (like "palgrave" or "collection").
 
 ```{r}
 # Create the custom domain stopwords
 domain_stopwords <- tibble(
   word = c(
-
+    
     # 1. Academic boilerplate verbs
     # Verbs used generically across all abstracts regardless of topic.
     # Includes base forms, 3rd-person singular, past/passive, and gerund inflections.
@@ -387,8 +385,10 @@ domain_stopwords <- tibble(
     "plos", "arxiv", "preprint", "open", "access", "publication", "publications", "publish",
     "publisher", "publishing", "editor", "editors", "editorial", "peer", "reviewed", "accepted",
     "submission", "submitted", "revised", "revision", "correspondence", "email", "orcid", "affiliation",
-    "affiliations", "department", "university", "universities", "keywords", "keyword", "jel", "classification",
-
+    "affiliations", "department", "university", "universities", "keywords", "keyword", "jel",
+    "classification", "palgrave", "collection", "published", "cambridge.org", "doi.org", "10.1093",
+    "s41599", "10.1057",
+    
     # 6. Encoding artefacts and noise
     # Tokens from PDF/HTML extraction, encoding issues, OCR, or tokenisation:
     # Latin abbreviations, single characters, URL fragments, Greek letter tokens,
@@ -404,7 +404,7 @@ domain_stopwords <- tibble(
     "sigma", "omega", "lambda", "mu", "nu", "rho", "phi", "chi",
     "eta", "kappa", "tau", "theta", "epsilon", "zeta", "table", "appendix",
     "supplementary", "supplement", "support", "supporting", "information", "available", "request",
-
+    
     # 7. High-frequency functions
     # Discourse connectives, hedging adverbs, academic filler adjectives,
     # numbers-as-words, and filler nouns that standard lists (Snowball, SMART,
@@ -427,51 +427,51 @@ domain_stopwords <- tibble(
     "understandings", "knowledge", "advancement", "progress", "step", "steps", "effort", "efforts",
     "attempt", "attempts", "need", "needs", "opportunity", "opportunities", "gap", "gaps",
     "concern", "concerns", "issues", "debate", "debates", "discussions", "attention", "lack",
-    "absence", "presence", "existence",
+    "absence", "presence", "existence"
     
     # 8. Other
     # Other words we found out needed to be filter out while working on the
     # project.
-    "palgrave"
     
-
+    
+    
   ),
   category = c(
-
+    
     # 1. Academic boilerplate verbs
     # Verbs used generically across all abstracts regardless of topic.
     # Includes base forms, 3rd-person singular, past/passive, and gerund inflections.
     rep("boilerplate_verb", 310),
-
+    
     # 2. Generic methodological terms
     # Words describing research designs, data types, statistical procedures,
     # and analytical approaches ubiquitous across all social science.
     rep("methodological_term", 215),
-
+    
     # 3. Abstract structure boilerplate
     # Organisational scaffolding recurring formulaically in academic abstracts:
     # document labels, rhetorical-move markers, literature-positioning words,
     # linking tokens, and non-discriminative evaluative fillers.
     rep("abstract_boilerplate", 176),
-
+    
     # 4. Generic social science concepts
     # Terms so broadly used in social science that they provide no discriminative
     # topical signal: generic agents, process/mechanism words, structural terms,
     # effect/outcome nouns, generic descriptors, and temporal/spatial terms.
     rep("generic_social_science", 209),
-
+    
     # 5. Journal specific and publication boilerplate
     # Words introduced by journal formatting, editorial conventions, copyright
     # notices, metadata fragments, and abstract-template boilerplate specific
     # to these six journals.
-    rep("publication_boilerplate", 72),
-
+    rep("publication_boilerplate", 80),
+    
     # 6. Encoding artefacts and noise
     # Tokens from PDF/HTML extraction, encoding issues, OCR, or tokenisation:
     # Latin abbreviations, single characters, URL fragments, Greek letter tokens,
     # ligature remnants, and other non-linguistic noise.
     rep("encoding_artefact", 87),
-
+    
     # 7. High-frequency functions
     # Discourse connectives, hedging adverbs, academic filler adjectives,
     # numbers-as-words, and filler nouns that standard lists (Snowball, SMART,
@@ -481,7 +481,7 @@ domain_stopwords <- tibble(
     # 8. Other
     # Other words we found out needed to be filter out while working on the
     # project.
-    rep("other", 1)
+    rep("other", 0)
   )
 )
 
@@ -511,7 +511,7 @@ tidy_abstracts <- tidy_abstracts |>
   filter(!word %in% as.character(2015:2025))
 ```
 
-#### Summary and visualizations of the clean corpus
+#### Summary and visualizations of the clean corpus [¿IGUAL ESTO HABRÍA QUE QUITARLO?] ¿realmente es preprocessing?
 
 ```{r}
 # Total tokens after preprocessing
@@ -578,11 +578,11 @@ The top 25 terms paint a coherent picture of the corpus. The dominance of *polic
 
 In order to address RQ1 and RQ2, we will use three complementary techniques: TF-IDF to identify distinctive vocabulary by year (and also for the period before and after the public release of ChatGPT); word frequency analysis using a custom set of AI-related words to measure the growth of AI-related terminology by year; and LDA topic modelling.
 
-#### Distinctive vocabulary by year and period (TF-IDF)
+#### Distinctive vocabulary by year (TF-IDF)
 
-We use TF-IDF to identify the most distinctive words of each year and of each period (2016–2022, before Chat GPT, and 2023–2025, after it's public release), treating each time unit as a document.
+We use TF-IDF to identify the most distinctive terms of each year, treating each year as a single document. We apply this at three levels: unigram, bigram, and trigram level.
 
-##### TF-IDF by year
+##### Unigram TF-IDF by year
 
 ```{r}
 # Count how many times each word appears in each year
@@ -594,18 +594,17 @@ tfidf_by_year <- words_by_year |>
   bind_tf_idf(word, publication_year, n) |>
   arrange(desc(tf_idf))
 
-# To check it worked (hard to read, we address that in the next chunk)
 tfidf_by_year
 ```
 
 ```{r}
 #| fig-width: 8
-#| fig-height: 10
+#| fig-height: 12
 
-# Top 10 most distinctive words per year (to make our tf-idf results readable)
+# Top 8 most distinctive words per year
 tfidf_by_year |>
   group_by(publication_year) |>
-  slice_max(tf_idf, n = 10) |>
+  slice_max(tf_idf, n = 8) |>
   ungroup() |>
   mutate(word = reorder_within(word, tf_idf, publication_year)) |>
   ggplot(aes(tf_idf, word, fill = factor(publication_year))) +
@@ -624,21 +623,165 @@ tfidf_by_year |>
   )
 ```
 
-- A bote pronto no sé muy bien como intepretarlo (sobre todo los primeros años). Hay cosas muy llamativas e interesantes: covid, pandemic, etc. a partir de 2020 (), la envan vayendo en favor de otras palabras con el paso del tiempo), la entrada de "ai" en 2023 (lo cual parece confirmar nuestras hipótesis). Al menos nos deja ver dos momentos de ruptura (pandemia y chatgpt).
-- Busco en  google "400th shakespeare" y resulta que ese año fue el 400 aniversario de la muerte de Shakespeare (eso explica también que haya otras palabras relacionadas con shakepeare). El fracking sé que era un temón del momento porque en 2019 (un poco tarde ya, yo hice un trabajo de relaciones internacionales sobre el fracking).
-- Pregunta: ¿tendrán que ver "gun" con school shootings? ¿Habría mucho debate en torno a las armas en EEUU?
+INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR
+- que aparezca gun y guns
+- el aniversario de la muerte de shakespeare
+- ¿por qué tanto gothic?
+- lo más evidente: la ruptura de covid 19
+- ai a partir de 2023
+Lo suyo sería buscar  lo que significan cosas como: esg, efl, csr, mml, dms, geg, etc. (Y no en google, buscarlo en el contexto de nuestro corpus usando lo de la context window, pero qué perezote). ¿Metemos el filtro que proponía alicia aunque nos estemos cargando "gun", pea", "ai"?
+*- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?*
+-> En realidad podemos disfrazarlo escribiendo un parrafillo que mencione un par de anécdotas rollo (vemos el aniversario de shakespeare.. guns... cosas de crisis climática... la influencia de la pandemia... PERO CENTRÁNDONOS EN LO QUE NOS OCUPA: parece claro el interés despertado por la ia a partir del public release de chatgpt... con la palabra ia, chatgpt, digitalization)
+
+##### Bigram TF-IDF by year
+
+For bigrams we tokenize from the raw abstracts, we separate bigrams into their component words, filter standard stopwords from each position, and reunite them before computing TF-IDF. We do not filter by the full domain-specific stopwords here: words like "social" or "people" do not have informative value by themselves, but can be very meaningful in bigrams like "social media" or "Roma people". We do filter out abstract struture terms and metadata noise.
+
+```{r}
+# We subset abstract category from our domain-specific stopwords tibble,
+# we will need this to get substantive results in TF-IDF and not noise
+# when using bigrams. We also exclude recent years, since those add noise.
+ngram_stopwords <- domain_stopwords |>
+  filter(category %in% c("abstract_boilerplate",
+                         "boilerplate_verb",
+                         "publication_boilerplate",
+                         "encoding_artefact"))
+year_noise <- tibble(word = as.character(2015:2025),
+                     category = "year_noise")
+ngram_stopwords <- bind_rows(ngram_stopwords, year_noise)
 
 
-**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
-**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
-**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
-**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
-**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
-**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
+# Tokenize into bigrams from raw abstracts
+bigrams_by_year <- articles |>
+  select(id, publication_year, abstract) |>
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) |>
+  filter(!is.na(bigram)) |>
+  # Separate into two columns to filter stopwords per position
+  separate(bigram, c("word1", "word2"), sep = " ") |>
+  filter(
+    !word1 %in% stop_words$word,
+    !word2 %in% stop_words$word,
+    !word1 %in% ngram_stopwords$word,
+    !word2 %in% ngram_stopwords$word
+  ) |>
+  # Reunite into a single bigram column
+  unite(bigram, word1, word2, sep = " ") |>
+  # Count by year
+  count(publication_year, bigram, sort = TRUE)
+
+bigrams_by_year
+```
+
+```{r}
+# Compute TF-IDF on bigrams, treating each year as a "document"
+tfidf_bigrams_by_year <- bigrams_by_year |>
+  bind_tf_idf(bigram, publication_year, n) |>
+  arrange(desc(tf_idf))
+
+tfidf_bigrams_by_year
+```
+
+```{r}
+#| fig-width: 9
+#| fig-height: 12
+
+# Top 8 most distinctive bigrams per year
+tfidf_bigrams_by_year |>
+  group_by(publication_year) |>
+  slice_max(tf_idf, n = 8) |>
+  ungroup() |>
+  mutate(bigram = reorder_within(bigram, tf_idf, publication_year)) |>
+  ggplot(aes(tf_idf, bigram, fill = factor(publication_year))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ publication_year, scales = "free", ncol = 2) +
+  scale_y_reordered() +
+  labs(
+    title = "Most distinctive bigrams per year (TF-IDF)",
+    x = "TF-IDF",
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 8)
+  )
+```
+INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETARINTERPRETAR INTERPRETAR INTERPRETAR (algunas ideas)
+- Algo evidente: la ruptura de "covid 19", que pasa a estar en el top 2 en los últimos cinco años;
+- Algo relacionado con nuestro tema: digitial economy, digital transformation
+- Climate change related: carbon emissions, green innovation, green consumption, crude oil, green finance
+*- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?*
+
+
+##### Trigram TF-IDF by year
+
+```{r}
+# Same workflow for trigrams: tokenize, separate, filter, reunite
+trigrams_by_year <- articles |>
+  select(id, publication_year, abstract) |>
+  unnest_tokens(trigram, abstract, token = "ngrams", n = 3) |>
+  filter(!is.na(trigram)) |>
+  separate(trigram, c("word1", "word2", "word3"), sep = " ") |>
+  filter(
+    !word1 %in% stop_words$word,
+    !word2 %in% stop_words$word,
+    !word3 %in% stop_words$word,      # <--- Check 1: Standard list
+    !word1 %in% ngram_stopwords$word,
+    !word2 %in% ngram_stopwords$word,
+    !word3 %in% ngram_stopwords$word   # <--- Check 2: Your custom list
+  ) |>
+  unite(trigram, word1, word2, word3, sep = " ") |>
+  count(publication_year, trigram, sort = TRUE)
+
+trigrams_by_year
+```
+
+```{r}
+# Compute TF-IDF on trigrams
+tfidf_trigrams_by_year <- trigrams_by_year |>
+  bind_tf_idf(trigram, publication_year, n) |>
+  arrange(desc(tf_idf))
+
+tfidf_trigrams_by_year
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 12
+
+# Top 8 most distinctive trigrams per year
+tfidf_trigrams_by_year |>
+  group_by(publication_year) |>
+  slice_max(tf_idf, n = 8) |>
+  ungroup() |>
+  mutate(trigram = reorder_within(trigram, tf_idf, publication_year)) |>
+  ggplot(aes(tf_idf, trigram, fill = factor(publication_year))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ publication_year, scales = "free", ncol = 2) +
+  scale_y_reordered() +
+  labs(
+    title = "Most distinctive trigrams per year (TF-IDF)",
+    x = "TF-IDF",
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 7)
+  )
+```
+
+INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR
+- De nuevo: evidente covid 19 pandemic
+- ecological crisis:  ecological civilization construction, regional carbon efficiency, extreme weather impacts, farmers sustainable likelihood, green development behavior...
+- artificial intelligence aparece en  2024 (un valor super bajo)
+- Otros relacionados con nuestra movida (enterprise digital transformation, )
+*- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?*
+- NOTA DEL CLAUDE: Trigrams are sparser than bigrams, so some years may have very few distinctive entries — that itself is informative.
 
 #### AI as an emerging topic using an AI-related lexicon
 
-In this subsection we operationalise AI as a topic through a keyword lexicon built from the works of Liu, Shapira, and Yue (2021) and Ding, Lawson, and Shapira (2025). These works ---which fully cover our study period--- explore bibliometric search strategies for identifying AI-related publications, providing validated lexicons that are useful for our purposes. We built three sets from these sources: unigrams, bigrams, and trigrams.
+In this subsection we operationalise AI as a topic through a keyword lexicon built from the works of Liu, Shapira, and Yue (2021) and Ding, Lawson, and Shapira (2025). These works ---which fully cover our study period--- explore bibliometric search strategies for identifying AI-related publications, the lexicons they build well thought out and validated by their research, and can prove useful for our purposes. We built three lexicons from these sources: a unigrams, a bigrams, and a trigram lexicon.
 
 ##### Building the AI lexicon
 
