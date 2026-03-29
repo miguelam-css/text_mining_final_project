@@ -847,13 +847,14 @@ We observe a clear trend, let's explore which terms are driving it.
 ```{r}
 #| fig-width: 6
 #| fig-height: 8
-# Top AI terms per year by absolute article count
 
+# Top AI terms per year by absolute article count
 ai_hits |>
   # Keep only unique combinations of article, year, and term
   distinct(id, publication_year, term) |>
   # Count the absolute number of articles per term per year
   count(publication_year, term, name = "article_count") |>
+  # Group by publication year and get most frequent terms
   group_by(publication_year) |>
   slice_max(article_count, n = 5, with_ties = FALSE) |>
   # Assign a rank (1 to 5) to the top terms
@@ -862,13 +863,13 @@ ai_hits |>
   # Add 0 value to missing ranks so every year has exactly ranks 1 through 5
   # and all bars have the same width
   complete(publication_year, rank = 1:5, fill = list(article_count = 0)) |>
-  # Create invisible unique names for the blank bars using spaces:
+  # Create invisible unique names for the blank bars using spaces
   mutate(
     term = ifelse(is.na(term), strrep(" ", rank), term),
     term = reorder_within(term, -rank, publication_year) 
   ) |>
   
-  # Plot it:
+  # Plot it
   ggplot(aes(x = article_count, y = term, fill = factor(publication_year))) +
   geom_col(show.legend = FALSE, fill = "#2C3E6B") +
   facet_wrap(~ publication_year, scales = "free", ncol = 2) +
@@ -904,3 +905,7 @@ ai_hits |>
 ## Section 7. Conclussions and limitations
 
 ## Section 8. References
+
+Ding, L., Lawson, C., & Shapira, P. (2025). Rise of generative artificial intelligence in science. Scientometrics, 130(9), 5093–5114. https://doi.org/10.1007/s11192-025-05413-z
+
+Liu, N., Shapira, P., & Yue, X. (2021). Tracking developments in artificial intelligence research: Constructing and applying a new search strategy. Scientometrics, 126(4), 3153–3192. https://doi.org/10.1007/s11192-021-03868-4
