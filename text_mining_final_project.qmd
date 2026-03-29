@@ -238,10 +238,9 @@ tidy_abstracts
 
 Academic abstracts also contain high-frequency words that carry no topical meaning and would pollute TF-IDF rankings and LDA topics if left in.
 
-Using Claude **[QUÉ VERSIÓN]** to identify and create a list of domain-specif stopwords ---we attached a .csv document of our data after filtering, asking to create a list of little informational value words that should be removed---. We manually reviewed this list, removing words we thought had informational value and adding some other little informative verbs and words such as "abstract", "enables", "responses", "based", "effect", "effects", which were not included in the list.
+Using Claude **[QUÉ VERSIÓN]** to identify and create a list of domain-specif stopwords ---we attached a .csv document of our data after filtering, asking to create a list of little informational value words that should be removed---. We manually reviewed this list, removing words we thought had informational value and adding some other little informative verbs and words such as "abstract", "enables", "responses", "based", "effect", "effects", which were not included in the list. We also added "palgrave", which we found to have a high influence in some of the metrics if not excluded.
 
-We define two tiers for filtering:
-
+We define two tiers for filtering: *[IGUAL QUITABA ESTO; NO ENTIENDO EN QUÉ ESTAMOS HACIENDO DOS TIERS]*
 (a) Generic academic boilerplate: words common to all scientific writing
 (b) Method/corpus noise: reporting verbs, general adjectives and adverbs without sentiment component, numbers as words, single characters, statistics and document-structure wording, and encoding artefacts
 
@@ -429,14 +428,17 @@ custom_stopwords <- tibble(word = c(
   "notably",
   "broadly",
 
-  # Numbers and years tokenized as words 
-  "1", "2", "3", "4", "5", "10", "19", "95",
-  "2016", "2017", "2018", "2019", "2020",
-  "2021", "2022", "2023", "2024", "2025",
+  # Numbers and years tokenized as words [yo lo quitaría]
+  # "1", "2", "3", "4", "5", "10", "19", "95",
+  # "2016", "2017", "2018", "2019", "2020",
+  # "2021", "2022", "2023", "2024", "2025",
 
   # Encoding artefacts and OpenAlex noise 
   "â", "ã", "ï", "œ",
-  "pre", "multi"             # prefix fragments tokenized as standalone words
+  "pre", "multi",             # prefix fragments tokenized as standalone words
+  
+  # Other:
+  "palgrave"
 ))
 
 tidy_abstracts <- tidy_abstracts |>
@@ -551,6 +553,116 @@ The prominence of *China* and *Chinese* (both in the top 15) is notable and like
 The *education*–*learning*–*students* cluster suggests that educational research is one of the most represented subfields, while *digital*, *information*, and *media* signal a sustained interest in technology and communication topics throughout the decade, which has relevance for our research questions about AI.
 
 Finally, the presence of positive and influence among the top 25 reveals that sentiment-bearing vocabulary is surviving preprocessing as intended.
+
+
+### Analysis [RQ1 + RQ2]
+
+In order to address RQ1 and RQ2, we will use three complementary techniques: TF-IDF to identify distinctive vocabulary by year (and also for the period before and after the public release of ChatGPT); word frequency analysis using a custom set of AI-related words to measure the growth of AI-related terminology by year; and LDA topic modelling.
+
+#### Distinctive vocabulary by year and period (TF-IDF)
+
+We use TF-IDF to identify the most distinctive words of each year and of each period (2016–2022, before Chat GPT, and 2023–2025, after it's public release), treating each time unit as a document.
+
+##### TF-IDF by year
+
+```{r}
+# Count how many times each word appears in each year
+words_by_year <- tidy_abstracts |>
+  count(publication_year, word, sort = TRUE)
+
+# Compute TF-IDF treating each year as a "document"
+tfidf_by_year <- words_by_year |>
+  bind_tf_idf(word, publication_year, n) |>
+  arrange(desc(tf_idf))
+
+# To check it worked (hard to read, we address that in the next chunk)
+tfidf_by_year
+```
+
+```{r}
+#| fig-width: 8
+#| fig-height: 10
+
+# Top 10 most distinctive words per year (to make our tf-idf results readable)
+tfidf_by_year |>
+  group_by(publication_year) |>
+  slice_max(tf_idf, n = 10) |>
+  ungroup() |>
+  mutate(word = reorder_within(word, tf_idf, publication_year)) |>
+  ggplot(aes(tf_idf, word, fill = factor(publication_year))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ publication_year, scales = "free", ncol = 2) +
+  scale_y_reordered() +
+  labs(
+    title = "Most distinctive words per year (TF-IDF)",
+    x = "TF-IDF",
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 8)
+  )
+```
+
+- A bote pronto no sé muy bien como intepretarlo (sobre todo los primeros años). Hay cosas muy llamativas e interesantes: covid, pandemic, etc. a partir de 2020 (), la envan vayendo en favor de otras palabras con el paso del tiempo), la entrada de "ai" en 2023 (lo cual parece confirmar nuestras hipótesis). Al menos nos deja ver dos momentos de ruptura (pandemia y chatgpt).
+- Busco en  google "400th shakespeare" y resulta que ese año fue el 400 aniversario de la muerte de Shakespeare (eso explica también que haya otras palabras relacionadas con shakepeare). El fracking sé que era un temón del momento porque en 2019 (un poco tarde ya, yo hice un trabajo de relaciones internacionales sobre el fracking).
+- Pregunta: ¿tendrán que ver "gun" con school shootings? ¿Habría mucho debate en torno a las armas en EEUU?
+
+
+##### TF-IDF by period (before and after ChatGPT)
+
+```{r}
+# Create a period variable: pre-ChatGPT (2016–2022) vs post-ChatGPT (2023–2025)
+words_by_period <- tidy_abstracts |>
+  mutate(period = if_else(publication_year <= 2022, "2016–2022", "2023–2025")) |>
+  count(period, word, sort = TRUE)
+
+# Compute TF-IDF treating each period as a "document"
+tfidf_by_period <- words_by_period |>
+  bind_tf_idf(word, period, n) |>
+  arrange(desc(tf_idf))
+
+# To check it worked (hard to read, we address that in the next chunk)
+tfidf_by_period
+```
+```{r}
+# Top 15 most distinctive words per period (to make our tf-idf results readable)
+tfidf_by_period |>
+  group_by(period) |>
+  slice_max(tf_idf, n = 15) |>
+  ungroup() |>
+  mutate(word = reorder_within(word, tf_idf, period)) |>
+  ggplot(aes(tf_idf, word, fill = period)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ period, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = "Most distinctive words: pre- vs. post-ChatGPT era",
+    subtitle = "TF-IDF treating each period as a single document",
+    x = "TF-IDF",
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+- Clara diferencia, many AI related terms appear in the top 15: "chagpt", "llms", "gpt". 
+- Also cryptocurrency words: "blockchain", "cryptocurrency"-
+- También metaverse ("vr", "metaverse").
+- Deberíamos buscar las que no sabemos qué son.
+- Sería interesante buscar también por qué está el número 10.1093
+
+¿¿¿TIENE SENTIDO USAR TF-IDF ENTRE DOS PERIODOS ÚNICAMENTE???
+
+**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
+
+#### Term frequency using custom "AI" dictionary (continue form here)
+
+*RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ*
+
 
 ## Section 4. WRITING STYLE AND THE RISE OF AI \[RQ3\]
 
