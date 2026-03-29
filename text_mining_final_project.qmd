@@ -1,6 +1,14 @@
 ---
 title: "Text Mining Final Project"
-format: html
+format: 
+  html:
+    theme: flatly
+    toc: true
+    toc-depth: 4
+    toc-title: "Table of Contents"
+    number-sections: true
+    embed-resources: true
+    df-print: paged
 editor: visual
 ---
 
@@ -667,13 +675,15 @@ tfidf_by_period |>
 
 #### AI as an emerging topic using an AI-related lexicon
 
-In this subsection we operationalise AI as a topic through a keyword lexicon built from the works of Liu, Shapira, and Yue (2021) and Ding, Lawson, and Shapira (2025). These works — which fully cover our study period — explore bibliometric search strategies for identifying AI-related publications, providing validated lexicons that are useful for our purposes. We built three sets from these sources: unigrams, bigrams, and trigrams.
+In this subsection we operationalise AI as a topic through a keyword lexicon built from the works of Liu, Shapira, and Yue (2021) and Ding, Lawson, and Shapira (2025). These works ---which fully cover our study period--- explore bibliometric search strategies for identifying AI-related publications, providing validated lexicons that are useful for our purposes. We built three sets from these sources: unigrams, bigrams, and trigrams.
 
 ##### Building the AI lexicon
 
-We manually excluded a significant number of n-grams from these lexicons, prioritising precision over recall. That is, we accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded terms like "random forest" or "decision tree" because they refer to statistical methods often used in social science and not necessarily related to AI; to keep our lexicon easily manageable, we also excluded terms that are too technical and unlikely to appear in social science journal abstracts; and we excluded ambiguous terms, such as "ai" which Liu et al. (2021, p. 3171) reject for being an abbreviation with up to 164 meanings — and a hit ratio of just 17.8% in their analysis. This approach is more than sufficient to capture broad trends and answer our research questions.
+We manually excluded a significant number of n-grams from these lexicons, prioritising precision over recall. That is, we accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded terms like "random forest" or "decision tree" because they refer to statistical methods often used in social science and not necessarily related to AI; to keep our lexicon easily manageable, we also excluded terms that are too technical and unlikely to appear in social science journal abstracts; and we excluded ambiguous terms, such as "ai" which Liu et al. (2021, p. 3171) reject for being an abbreviation with up to 164 meanings ---and a hit ratio of just 17.8%---. 
 
-In addition, we included extra unigrams, bigrams, and trigrams to capture named generative AI models and providers absent from both sources, such as GPT-4, Gemini, Claude, LLaMA, and DeepSeek, which Ding et al. deliberately excluded due to noise concerns at large corpus scales but which are unambiguous at our scope of approximately 9,500 abstracts.
+In addition, we included extra unigrams, bigrams, and trigrams to capture named generative AI models and providers absent from both sources, such as GPT-4, Gemini, Claude, or LLama ---while the names by themselves could lead to ambiguity (the zodiac sign, Claude Lévi-Strauss, the animal, etc.), including the version in bigrams solves this ambiguity---.
+
+While not perfect, this approach is more than sufficient to capture broad trends necessary to answer our research questions.
 
 ```{r}
 # AI unigram lexicon
@@ -708,7 +718,6 @@ ai_lexicon_bigrams <- c(
   # Ding et al. (2025)
   "generative ai",
   "language model",
-  "large language model",
   "pretrained transformer",
   "ai-generated content",
   "openai gpt",
@@ -726,7 +735,7 @@ ai_lexicon_bigrams <- c(
   "llama 2",
   "llama 3",
   "stable diffusion",
-  "gpt 4o",
+  "gpt 5",
   "gpt 4",
   "gpt 3",
   "gpt 2",
@@ -906,6 +915,198 @@ ai_hits |>
 
 ## Section 8. References
 
-Ding, L., Lawson, C., & Shapira, P. (2025). Rise of generative artificial intelligence in science. Scientometrics, 130(9), 5093–5114. https://doi.org/10.1007/s11192-025-05413-z
+Ding, L., Lawson, C., & Shapira, P. (2025). Rise of generative artificial intelligence in science. *Scientometrics*, 130(9), 5093–5114. https://doi.org/10.1007/s11192-025-05413-z
 
-Liu, N., Shapira, P., & Yue, X. (2021). Tracking developments in artificial intelligence research: Constructing and applying a new search strategy. Scientometrics, 126(4), 3153–3192. https://doi.org/10.1007/s11192-021-03868-4
+Liu, N., Shapira, P., & Yue, X. (2021). Tracking developments in artificial intelligence research: Constructing and applying a new search strategy. *Scientometrics*, 126(4), 3153–3192. https://doi.org/10.1007/s11192-021-03868-4
+
+
+## Appendix I - Domain specific stopword list prompt
+
+The domain-specific stopword list used in Section 3 was generated with the assistance of a large language model (Claude Sonnet 4.6, Anthropic). The complete prompt is reproduced below.
+
+::: {style="border: 1px solid #ccc; padding: 1em; border-radius: 4px;"}
+```
+You are an expert computational linguist and text mining specialist with deep 
+knowledge of social science research and academic writing conventions. You are 
+working on a large-scale corpus analysis project described in the context below.
+
+<project_context>
+The project analyzes a corpus of journal abstracts drawn from six leading social 
+science journals over the period 2016–2025:
+
+  - Nature Human Behaviour (behavioral science, interdisciplinary)
+  - Humanities and Social Sciences Communications (interdisciplinary)
+  - American Sociological Review (sociology, North America)
+  - American Political Science Review (political science, North America)
+  - European Sociological Review (sociology, Europe)
+  - European Journal of Political Research (political science, Europe)
+
+The corpus spans the period before and after the public rise of generative AI 
+(November 2022, release of ChatGPT). Section 3 of the project — for which these 
+stopwords are being prepared — addresses two research questions:
+
+  RQ1: What are the predominant topics in top social science journals, by journal 
+       and by year?
+  RQ2: Has AI (in the broad sense) become one of the predominant topics, and has 
+       it influenced the broader topical landscape?
+
+The downstream analyses using this stopword list are:
+
+  - LDA topic modelling: requires removing high-frequency words that flatten topic 
+    distributions without contributing discriminative thematic signal
+  - TF-IDF analysis: requires removing words whose document frequency is so high 
+    that their IDF weight collapses to near zero, making them useless for 
+    distinguishing documents
+
+The unit of analysis is the abstract — short, dense, highly formulaic texts 
+averaging 150–250 words, written in academic English.
+</project_context>
+
+<corpus_frequency_data>
+The file corpus_word_freq.csv is attached. It contains the top words in the corpus 
+after removing standard English stopwords (Snowball + SMART + onix lists) and 
+numeric tokens, generated directly from 10,120 abstracts using tidytext. Columns:
+  - word: the token (lowercase)
+  - n: raw frequency count across all abstracts
+
+Use this frequency data as empirical grounding for your stopword list:
+  - Words that appear here at high frequency AND carry no thematic/discriminative 
+    value are strong candidates for inclusion in the stopword list
+  - Do not limit yourself to words in this list — be exhaustive across all 7 
+    categories — but treat high-frequency words as a priority checklist to 
+    ensure nothing obvious is missed
+  - High-frequency words that carry topical signal (per the preservation rules 
+    below) must NOT be added to the stopword list even if they rank highly
+    (e.g. "policy", "political", "education", "health")
+</corpus_frequency_data>
+
+<task>
+Generate a comprehensive, categorised list of domain-specific stopwords to be 
+removed from this corpus prior to LDA and TF-IDF analysis. These are words that:
+
+  (a) appear at high frequency across the corpus, AND
+  (b) carry no thematic or discriminative value for social science research
+
+Before generating each category, cross-check it against the corpus_frequency_data 
+above to ensure all high-frequency uninformative words are captured.
+
+Return the list as a clean, categorised R tibble with a column for the stopword 
+and a column for its category, preceded by commented section headers explaining 
+the rationale for each category.
+</task>
+
+<categories_to_cover>
+Generate stopwords across ALL of the following categories. For each category, think 
+systematically about what words in that class appear in social science abstracts, words like:
+
+1. ACADEMIC BOILERPLATE VERBS
+   Verbs used generically across all abstracts regardless of topic: reporting verbs 
+   ("examine", "investigate", "explore", "suggest", "find", "show", "demonstrate", 
+   "analyze", "assess", "evaluate", "discuss", "argue", "propose", "address", 
+   "consider", "focus", "aim", "seek", "test", "draw", "provide", "offer", 
+   "highlight", "reveal", "indicate", "identify", "contribute", "develop"), 
+   and their inflected forms where relevant.
+
+2. GENERIC METHODOLOGICAL TERMS
+   Words describing research designs, data types, and analytical approaches that 
+   are ubiquitous across social science and carry no topical signal: "survey", 
+   "questionnaire", "interview", "sample", "dataset", "quantitative", "qualitative", 
+   "longitudinal", "cross-sectional", "regression", "model", "framework", 
+   "approach", "method", "methodology", "analysis", "data", "measure", "variable", 
+   "coefficient", "estimate", "robustness", "validity", "reliability", etc.
+
+3. ABSTRACT-STRUCTURAL BOILERPLATE
+   Phrases and words used to signal the structure of an abstract itself rather than 
+   its content: "paper", "study", "article", "research", "literature", "review", 
+   "background", "objective", "purpose", "contribution", "implication", "finding", 
+   "result", "conclusion", "evidence", "prior", "existing", "previous", "recent", 
+   "current", "present", "based", "using", "used", "given", "among", "across".
+
+4. GENERIC SOCIAL SCIENCE CONCEPTS
+   Terms so broadly used in social science that they provide no discriminative 
+   topical signal between documents: "society", "social", "individual", "group", 
+   "population", "people", "person", "human", "behavior", "behaviour", "attitude", 
+   "perception", "factor", "role", "relationship", "impact", "effect", "influence", 
+   "context", "level", "process", "system", "structure", "pattern", "change", 
+   "difference", "association", "correlation", etc.
+
+5. JOURNAL-SPECIFIC AND PUBLICATION BOILERPLATE
+   Words likely introduced by journal formatting, editorial conventions, or abstract 
+   templates specific to these six journals: copyright notices, volume/issue markers, 
+   DOI fragments, and any words that appear due to systematic metadata leakage.
+
+6. ENCODING ARTEFACTS AND NOISE
+   Tokens that result from text extraction, encoding issues, or tokenisation: 
+   single characters (except meaningful ones), numeric tokens, garbled unicode 
+   fragments, OCR noise, HTML remnants, and other non-linguistic tokens.
+
+7. HIGH-FREQUENCY FUNCTION WORDS NOT CAUGHT BY STANDARD STOPWORD LISTS
+   Domain-specific function-like words that standard English stopword lists 
+   (e.g., the Snowball or SMART lists) miss but which are uninformative in this 
+   corpus: discipline-specific connectives, hedging phrases reduced to single tokens 
+   ("however", "furthermore", "moreover", "nevertheless", "thus", "therefore", 
+   "hence", "whereas", "whereby", "therein"), and academic filler adjectives 
+   ("important", "significant", "key", "major", "critical", "novel", "robust", 
+   "comprehensive", "systematic", "rigorous", "substantial").
+</categories_to_cover>
+
+<preservation_rules>
+CRITICAL: The following word classes must NOT appear in the stopword list, even if 
+they are frequent. Removing them would destroy the thematic signal needed for RQ1 
+and RQ2:
+
+  - AI and technology terms: any term related to artificial intelligence, machine 
+    learning, large language models, specific model names, or related technology. 
+    These are central to RQ2 and must be preserved.
+  - Substantive social science topic terms: words indexing real research topics 
+    such as "inequality", "democracy", "migration", "climate", "health", "labor", 
+    "race", "gender", "education", "voting", "polarization", "trust", "identity", 
+    "discrimination", "poverty", "welfare", etc.
+  - Sentiment-bearing terms: words with clear positive or negative valence that 
+    will be needed for the sentiment analysis in Section 5.
+  - Proper nouns and named entities: country names, institutional names, author 
+    names — these may carry topical signal.
+  - Temporally specific terms: words that may index pre/post ChatGPT content, 
+    which are needed for the temporal analyses in Sections 3–6.
+
+When in doubt about whether a word carries signal, err on the side of keeping it.
+</preservation_rules>
+
+<output_format>
+Return only executable R code. Structure it as follows:
+
+  library(tibble)
+
+  domain_stopwords <- tibble(
+    word = c(
+      # 1. ACADEMIC BOILERPLATE VERBS
+      # These verbs appear in virtually every abstract regardless of topic.
+      # Removing them prevents them from dominating topic-word distributions
+      # in LDA and collapsing IDF weights in TF-IDF.
+      "examine", "investigate", ...
+
+      # 2. GENERIC METHODOLOGICAL TERMS
+      # ...
+
+      # [continue for all 7 categories]
+    ),
+    category = c(
+      # mirror the word vector exactly, one category label per word
+      "boilerplate_verb", "boilerplate_verb", ...
+    )
+  )
+
+Rules:
+  - All stopwords in lowercase
+  - One row per word (not per phrase — single tokens only, as LDA and TF-IDF 
+    operate on unigrams after tokenisation)
+  - The word and category vectors must be exactly the same length
+  - Category labels should be short snake_case strings matching the 7 categories
+  - Add a final comment line reporting the total count: # Total: N stopwords
+  - No prose before or after the code block
+  - Be exhaustive, put lots of effort
+</output_format>
+```
+:::
+
+## Appendix II - 
