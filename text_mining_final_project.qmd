@@ -657,9 +657,240 @@ tfidf_by_period |>
 
 ¿¿¿TIENE SENTIDO USAR TF-IDF ENTRE DOS PERIODOS ÚNICAMENTE???
 
+**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?** **¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
+**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
+**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
+**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
+**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
+**¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
 **¿HACEMOS TAMBIÉN UN TF-IDF DE BIGRAMS? PODRÍA ARROJAR RESULTADOS INTERESANTES. ¿Y OTROS NGRAMS?**
 
-#### Term frequency using custom "AI" dictionary (continue form here)
+#### AI as an emerging topic using an AI-related lexicon
+
+In this subsection we operationalise AI as a topic through a keyword lexicon built from the works of Liu, Shapira, and Yue (2021) and Ding, Lawson, and Shapira (2025). These works — which fully cover our study period — explore bibliometric search strategies for identifying AI-related publications, providing validated lexicons that are useful for our purposes. We built three sets from these sources: unigrams, bigrams, and trigrams.
+
+##### Building the AI lexicon
+
+We manually excluded a significant number of n-grams from these lexicons, prioritising precision over recall. That is, we accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded terms like "random forest" or "decision tree" because they refer to statistical methods often used in social science and not necessarily related to AI; to keep our lexicon easily manageable, we also excluded terms that are too technical and unlikely to appear in social science journal abstracts; and we excluded ambiguous terms, such as "ai" which Liu et al. (2021, p. 3171) reject for being an abbreviation with up to 164 meanings — and a hit ratio of just 17.8% in their analysis. This approach is more than sufficient to capture broad trends and answer our research questions.
+
+In addition, we included extra unigrams, bigrams, and trigrams to capture named generative AI models and providers absent from both sources, such as GPT-4, Gemini, Claude, LLaMA, and DeepSeek, which Ding et al. deliberately excluded due to noise concerns at large corpus scales but which are unambiguous at our scope of approximately 9,500 abstracts.
+
+```{r}
+# AI unigram lexicon
+ai_lexicon_unigrams <- c(
+  # Liu et al. (2021)
+  "autoencoder",
+  "perceptron",
+  "neurocomputing",
+  # Ding et al. (2025)
+  "chatgpt",
+  "llm",
+  # Custom
+  "deepseek",
+  "openai"
+)
+
+# AI bigram lexicon
+ai_lexicon_bigrams <- c(
+  # Liu et al. (2021)
+  "artificial intelligence",
+  "neural network",
+  "machine learning",
+  "deep learning",
+  "reinforcement learning",
+  "learning algorithm",
+  "backpropagation learning",
+  "backpropagation algorithm",
+  "machine intelligence",
+  "computational intelligence",
+  "neural model",
+  "deep network",
+  # Ding et al. (2025)
+  "generative ai",
+  "language model",
+  "large language model",
+  "pretrained transformer",
+  "ai-generated content",
+  "openai gpt",
+  # Custom
+  "claude sonnet",
+  "claude opus",
+  "claude haiku",
+  "google gemini",
+  "gemini pro",
+  "gemini ultra",
+  "microsoft copilot",
+  "github copilot",
+  "mistral ai",
+  "meta llama",
+  "llama 2",
+  "llama 3",
+  "stable diffusion",
+  "gpt 4o",
+  "gpt 4",
+  "gpt 3",
+  "gpt 2",
+  "gpt 1",
+  "dall e",
+  # Custom
+  "agentic ai"
+)
+
+# AI trigram lexicon
+ai_lexicon_trigrams <- c(
+  # Ding et al. (2025)
+  "large language model",
+  "generative language model",
+  "generative large language",
+  "generative pretrained transformer",
+  "generative artificial intelligence",
+  "artificial intelligence generated",
+  "openai large language",
+  # Custom
+  "openai language model",
+  "ai language model",
+  "ai generated content"
+)
+```
+
+##### Tokenizing abstracts at each n-gram level
+
+Since a unigram, bigram, and trigram lexicon, we need to tokenize the abstracts separately for each, and then match against the corresponding lexicon. After that, we combine all matches in single tibble.
+
+```{r}
+# Source abstracts. We start from articles each time since n-gram tokenization
+# needs the original text
+abstracts_base <- articles |>
+  select(id, publication_year, abstract)
+
+# Unigram matches: tokenize at word level and match against unigram lexicon
+ai_hits_unigrams <- abstracts_base |>
+  unnest_tokens(word, abstract, token = "words") |>
+  filter(word %in% ai_lexicon_unigrams) |>
+  rename(term = word) |>
+  mutate(ngram_level = "unigram")
+
+# Bigram matches: tokenize at bigram level and match against bigram lexicon
+ai_hits_bigrams <- abstracts_base |>
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) |>
+  filter(!is.na(bigram)) |>
+  filter(bigram %in% ai_lexicon_bigrams) |>
+  rename(term = bigram) |>
+  mutate(ngram_level = "bigram")
+
+# Trigram matches — tokenize at trigram level and match against trigram lexicon
+ai_hits_trigrams <- abstracts_base |>
+  unnest_tokens(trigram, abstract, token = "ngrams", n = 3) |>
+  filter(!is.na(trigram)) |>
+  filter(trigram %in% ai_lexicon_trigrams) |>
+  rename(term = trigram) |>
+  mutate(ngram_level = "trigram")
+
+# Combine all matches into a single dataframe
+ai_hits <- bind_rows(ai_hits_unigrams, ai_hits_bigrams, ai_hits_trigrams)
+ai_hits
+```
+
+##### AI terms frequency over time
+
+```{r}
+# Count unique articles containing at least one AI related term per year
+ai_articles_by_year <- ai_hits |>
+  distinct(id, publication_year) |>
+  count(publication_year, name = "articles_with_ai")
+
+# Total number of abstracts per year
+abstracts_by_year <- articles |>
+  filter(!is.na(abstract), publication_year >= 2016, publication_year <= 2025) |>
+  count(publication_year, name = "total_abstracts")
+
+# Compute proportion
+ai_proportion <- ai_articles_by_year |>
+  left_join(abstracts_by_year, by = "publication_year") |>
+  mutate(proportion_ai_articles = articles_with_ai / total_abstracts)
+
+
+
+library(scales) # Needed for percent_format()
+
+# Find the maximum proportion to place the annotation dynamically
+max_prop <- max(ai_proportion$proportion_ai_articles, na.rm = TRUE)
+
+ggplot(ai_proportion, aes(x = publication_year, y = proportion_ai_articles)) +
+  # Use geom_col for a bar plot instead of geom_line
+  geom_col(fill = "#2C3E6B", width = 0.7) +
+  scale_x_continuous(breaks = 2016:2025) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) + 
+  labs(
+    title = "AI-related terminology in social science abstracts",
+    subtitle = "Proportion of articles containing at least one AI term, by year",
+    x = "Publication year",
+    y = "Proportion of articles (%)"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title         = element_text(size = 14, face = "bold", color = "#1a1a2e"),
+    plot.subtitle      = element_text(size = 10, color = "#4a4a6a"),
+    axis.text          = element_text(color = "#4a4a6a"),
+    panel.grid.major.x = element_blank(), # Removes vertical grid lines for cleaner bars
+    panel.grid.minor.x = element_blank()
+  )
+```
+- Cambio muy claro, en 2017 y 2018 prácticamente nada. En 2019 sube al 1%, el año en que se hace público chatgpt pasa hasta el 4%, y tres años después un 9% de los abstracts continen términos relacionados con IA. (Recordemos que estamos empleando un léxico conservador, seguramente hay más menciones y no estamos capturando todo, pero el patrón es evidente). 
+- En relación con nuestra RQ: influencia innegable de la IA.
+
+
+#### Which terms are driving the trend?
+
+We observe a clear trend, let's explore which terms are driving it.
+
+```{r}
+#| fig-width: 6
+#| fig-height: 8
+# Top AI terms per year by absolute article count
+
+ai_hits |>
+  # Keep only unique combinations of article, year, and term
+  distinct(id, publication_year, term) |>
+  # Count the absolute number of articles per term per year
+  count(publication_year, term, name = "article_count") |>
+  group_by(publication_year) |>
+  slice_max(article_count, n = 5, with_ties = FALSE) |>
+  # Assign a rank (1 to 5) to the top terms
+  mutate(rank = row_number()) |> 
+  ungroup() |>
+  # Add 0 value to missing ranks so every year has exactly ranks 1 through 5
+  # and all bars have the same width
+  complete(publication_year, rank = 1:5, fill = list(article_count = 0)) |>
+  # Create invisible unique names for the blank bars using spaces:
+  mutate(
+    term = ifelse(is.na(term), strrep(" ", rank), term),
+    term = reorder_within(term, -rank, publication_year) 
+  ) |>
+  
+  # Plot it:
+  ggplot(aes(x = article_count, y = term, fill = factor(publication_year))) +
+  geom_col(show.legend = FALSE, fill = "#2C3E6B") +
+  facet_wrap(~ publication_year, scales = "free", ncol = 2) +
+  scale_y_reordered() +
+  labs(
+    title = "Top AI-related terms per year",
+    subtitle = "Absolute number of articles containing each term",
+    x = NULL,
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text         = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    axis.text.y        = element_text(size = 9, color = "#4a4a6a"),
+    axis.text.x        = element_text(color = "#4a4a6a"),
+    panel.grid.major.y = element_blank() 
+  )
+```
+- Before 2020 not even 5 AI related words from our lexicon.
+- Artificial intelligence and machine learning the main drivers since they appear in 2020.
+- Worth mentioning: the  appearance of chatgpt from 2023 onwards. Also "generative ai in 2024. May point to an increased (and likely) interest in those topics after the raise of generative llms.
+
 
 *RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ*
 
