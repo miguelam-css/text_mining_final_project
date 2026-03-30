@@ -208,11 +208,11 @@ The six journals in our corpus do not represent a balanced share of articles: HS
 
 The techniques in this section use different tokenization and filtering strategies. We will define all shared elements here ---stopwords and filtered unigram corpus---, and explain which subsections use which.
 
-We work with two filtering tools: 
+We work with two filtering tools:
 
-1. **Standard stopwords**: using `stop_words` from `tidytext`. This will be applied in all techiniques.
+1.  **Standard stopwords**: using `stop_words` from `tidytext`. This will be applied in all techiniques.
 
-2. **Domain-specific stopwords**: a list of words that provide no relevant information in our context. This tool (`domain_stopwords`) is fully applied in unigram analyses (both TF-IDF and LDA), a subset of it (`ngram_stopwrods`) is used in n-gram analyses ---for more details on why, see section 3.1.2---.
+2.  **Domain-specific stopwords**: a list of words that provide no relevant information in our context. This tool (`domain_stopwords`) is fully applied in unigram analyses (both TF-IDF and LDA), a subset of it (`ngram_stopwrods`) is used in n-gram analyses ---for more details on why, see section 3.1.2---.
 
 #### Defining domain-specific stopwords
 
@@ -385,7 +385,7 @@ domain_stopwords <- tibble(
     "t", "u", "v", "w", "x", "y", "z", "oe",
     "ae", "fi", "ff", "ffi", "fl", "ffl", "html", "pdf",
     "xml", "json", "url", "uri", "beta", "alpha", "gamma", "delta",
-    "sigma", "omega", "lambda", "mu", "nu", "rho", "phi", "chi",
+    "sigma", "omega", "lambda", "mu", "nu", "rho", "phi", "chi", "07",
     "eta", "kappa", "tau", "theta", "epsilon", "zeta", "table", "appendix",
     "supplementary", "supplement", "support", "supporting", "information", "available", "request",
     
@@ -427,7 +427,7 @@ domain_stopwords <- tibble(
     # 5. Journal specific and publication boilerplate
     rep("publication_boilerplate", 80),
     # 6. Encoding artefacts and noise
-    rep("encoding_artefact", 87),
+    rep("encoding_artefact", 88),
     # 7. High-frequency function words
     rep("domain_function_word", 147)
   )
@@ -853,7 +853,7 @@ ai_hits_bigrams <- abstracts_base |>
   rename(term = bigram) |>
   mutate(ngram_level = "bigram")
 
-# Trigram matches — tokenize at trigram level and match against trigram lexicon
+# Trigram matches: tokenize at trigram level and match against trigram lexicon
 ai_hits_trigrams <- abstracts_base |>
   unnest_tokens(trigram, abstract, token = "ngrams", n = 3) |>
   filter(!is.na(trigram)) |>
@@ -908,39 +908,8 @@ ggplot(ai_proportion, aes(x = publication_year, y = proportion_ai_articles)) +
   )
 ```
 
--   Cambio muy claro, en 2017 y 2018 prácticamente nada. En 2019 sube al 1%, el año en que se hace público chatgpt pasa hasta el 4%, y tres años después un 9% de los abstracts continen términos relacionados con IA. (Recordemos que estamos empleando un léxico conservador, seguramente hay más menciones y no estamos capturando todo, pero el patrón es evidente).
+-   Cambio muy claro, en 2017 y 2018 prácticamente nada. En 2019 sube al 1%, el año en que se hace público chatgpt pasa hasta el 4%, y tres años después supera el 10% de los abstracts continen términos relacionados con IA. (Recordemos que estamos empleando un léxico conservador, seguramente hay más menciones y no estamos capturando todo, pero el patrón es evidente).
 -   En relación con nuestra RQ: influencia innegable de la IA.
-
-**HE HECHO UN GRÁFICO SOLO PARA "AI" (SIN LAS OTRAS PALABRAS RELACIONADAS)**
-
-```{r}
-# Filter and count for just the term "ai"
-ai_hits |>
-  filter(term == "ai") |> # or filter(str_to_lower(term) == "ai") if you need case-insensitivity
-  distinct(id, publication_year) |>
-  count(publication_year, name = "article_count") |>
-  
-  # Ensure all years from 2016 to the max year are included, filling missing with 0
-  complete(publication_year = 2016:max(publication_year), fill = list(article_count = 0)) |>
-  
-  # Plot it
-  ggplot(aes(x = publication_year, y = article_count)) +
-  geom_line(color = "#2C3E6B", linewidth = 1) +
-  geom_point(color = "#2C3E6B", size = 2) +
-  scale_x_continuous(breaks = function(x) seq(ceiling(min(x)), floor(max(x)), by = 1)) +
-  labs(
-    title = "Trend of the term 'ai' over time",
-    subtitle = "Absolute number of articles containing the term",
-    x = "Publication Year",
-    y = "Number of Articles"
-  ) +
-  theme_minimal(base_family = "serif") +
-  theme(
-    axis.text.y        = element_text(size = 9, color = "#4a4a6a"),
-    axis.text.x        = element_text(color = "#4a4a6a"),
-    panel.grid.minor.x = element_blank()
-  )
-```
 
 ##### Which terms are driving the trend?
 
@@ -996,9 +965,42 @@ ai_hits |>
 -   Artificial intelligence and machine learning the main drivers since they appear in 2020.
 -   Worth mentioning: the appearance of chatgpt from 2023 onwards. Also "generative ai in 2024. May point to an increased (and likely) interest in those topics after the raise of generative llms.
 
+Since "ai" seems to be the main driver for the trend, we will explore the pattern of just this word:
+
+```{r}
+# Filter and count for just the term "ai"
+ai_hits |>
+  filter(term == "ai") |> # or filter(str_to_lower(term) == "ai") if you need case-insensitivity
+  distinct(id, publication_year) |>
+  count(publication_year, name = "article_count") |>
+  
+  # Ensure all years from 2016 to the max year are included, filling missing with 0
+  complete(publication_year = 2016:max(publication_year), fill = list(article_count = 0)) |>
+  
+  # Plot it
+  ggplot(aes(x = publication_year, y = article_count)) +
+  geom_line(color = "#2C3E6B", linewidth = 1) +
+  geom_point(color = "#2C3E6B", size = 2) +
+  scale_x_continuous(breaks = function(x) seq(ceiling(min(x)), floor(max(x)), by = 1)) +
+  labs(
+    title = "Trend of the term 'ai' over time",
+    subtitle = "Absolute number of articles containing the term",
+    x = "Publication Year",
+    y = "Number of Articles"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    axis.text.y        = element_text(size = 9, color = "#4a4a6a"),
+    axis.text.x        = element_text(color = "#4a4a6a"),
+    panel.grid.minor.x = element_blank()
+  )
+```
+
+Cuando miramos únicamente el término "ai" el patrón se vuelve mucho más evidente, el uso de este término explota a partir de public release de chatgpt.
+
 #### 3.2.3 Topic modelling (LDA)
 
-We now move from individual words to latent topics. We use LDA to discover the main topics in our corpus and then examine how the weight of these topics has shifted over time. In order to facilitate a meaninful interpretation, instead of performing LDA for each year, we will divide our period of study into three periods, the main events identified in our previous analyses (the COVID-19 pandemic and the public release of chat GPT) act as natural dividers between our periods: 2016-2019 (pre-pandemic), 2020-2022 (pandmic years), and 2023-2025 (generative LLMs years).
+We now move from individual words to latent topics. We use LDA to discover the main topics in our corpus and then examine how the weight of these topics has shifted over time. In order to facilitate a meaningful interpretation, instead of performing LDA for each year, we will divide our period of study into three periods, the main events identified in our previous analyses (the COVID-19 pandemic and the public release of chat GPT) act as natural dividers between our periods: 2016-2019 (pre-pandemic), 2020-2022 (pandmic years), and 2023-2025 (generative LLMs years).
 
 **TENEMOS QUE TRATAR DE ASIGNAR UN LABEL A CADA TOPIC BASÁNDONOS EN EN LAS PALABRAS CON LA MAYOR PROBABILIDAD DE ESTAR EN ESE TOPIC. ESPECIALMENTE NOS INTERESA ENCONTRAR ALGUNO EN RELACIÓN A NUESTRAS RQS.**
 
@@ -1015,10 +1017,10 @@ abstracts_dtm <- tidy_abstracts |>
 abstracts_dtm
 
 # Manually alculate sparsity manually to see the exact value:
-cat("Precise sparsity   :", 1 - (584162/365098650), "%")
+cat("Precise sparsity   :", 1 - (464617/358239443), "%")
 ```
 
-We get a DTM with 9482 documents and 38566 terms, sparsity close to 100% (99.84%), indicating very varied vocabulary in our abstracts.
+We get a DTM with 9482 documents and 38566 terms, sparsity close to 100% (99.87%), indicating very varied vocabulary in our abstracts.
 
 ##### Fitting the LDA model (k=4)
 
@@ -1028,7 +1030,7 @@ We get a DTM with 9482 documents and 38566 terms, sparsity close to 100% (99.84%
 k <- 4
 
 # Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
 lda_model
 ```
 
@@ -1082,7 +1084,7 @@ top_terms |>
 k <- 5
 
 # Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
 lda_model
 ```
 
@@ -1136,7 +1138,7 @@ top_terms |>
 k <- 6
 
 # Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
 lda_model
 ```
 
@@ -1190,7 +1192,7 @@ top_terms |>
 k <- 7
 
 # Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
 lda_model
 ```
 
@@ -1244,7 +1246,7 @@ top_terms |>
 k <- 8
 
 # Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
 lda_model
 ```
 
@@ -1289,12 +1291,12 @@ top_terms |>
     axis.text.y = element_text(size = 9)
   )
 ```
-
 #### CUANDO HAYAMOS DECIDIDO EL MEJOR K SEGUIMOS CON ESTO:
 
 **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTOCUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO**
 
-**TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR**
+
+
 
 ## Section 4. WRITING STYLE AND THE RISE OF AI \[RQ3\]
 
