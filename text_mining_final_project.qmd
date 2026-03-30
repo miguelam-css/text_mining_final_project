@@ -200,8 +200,7 @@ p_total / p_facets / p_bar +
   )
 ```
 
-The six journals in our corpus do not represent a balanced share of articles: HSSC accounts for more than 60% of the articles, while the other five journals are relatively balanced between them. We also observe a temporal imbalance: with publication greatly increasing after 2022. Both imbalances are driven by the same factor: the great increase of publications in Journals part of the Nature Portfolio, particularly HSSC. This imbalance should be kept in mind when interpreting the results, but we will not exclude any journal from the corpus just to improve balance. We are interested in trends in social science abstracts in leading journals ---not in inter-journal comparison---, this imbalance does not affect our research questions, and removing a journal would make the corpus less representative by arbitrarily excluding thousands of publications in leading journals. 
-
+The six journals in our corpus do not represent a balanced share of articles: HSSC accounts for more than 60% of the articles, while the other five journals are relatively balanced between them. We also observe a temporal imbalance: with publication greatly increasing after 2022. Both imbalances are driven by the same factor: the great increase of publications in Journals part of the Nature Portfolio, particularly HSSC. This imbalance should be kept in mind when interpreting the results, but we will not exclude any journal from the corpus just to improve balance. We are interested in trends in social science abstracts in leading journals ---not in inter-journal comparison---, this imbalance does not affect our research questions, and removing a journal would make the corpus less representative by arbitrarily excluding thousands of publications in leading journals.
 
 ## Section 3. Topic analysis \[RQ1 + RQ2\]
 
@@ -209,8 +208,10 @@ The six journals in our corpus do not represent a balanced share of articles: HS
 
 The techniques in this section use different tokenization and filtering strategies. We will define all shared elements here ---stopwords and filtered unigram corpus---, and explain which subsections use which.
 
-We work with two filtering tools:
+We work with two filtering tools: 
+
 1. **Standard stopwords**: using `stop_words` from `tidytext`. This will be applied in all techiniques.
+
 2. **Domain-specific stopwords**: a list of words that provide no relevant information in our context. This tool (`domain_stopwords`) is fully applied in unigram analyses (both TF-IDF and LDA), a subset of it (`ngram_stopwrods`) is used in n-gram analyses ---for more details on why, see section 3.1.2---.
 
 #### Defining domain-specific stopwords
@@ -447,7 +448,6 @@ ngram_stopwords <- domain_stopwords |>
                          "encoding_artefact"))
 ```
 
-
 In addition, we include a filter for recent years, which appear frequently in abstracts, with no relevant meaning (often pointing to recent events or publication years). For example:
 
 ```{r}
@@ -458,7 +458,7 @@ articles |>
      pull(abstract)
 ```
 
-We do not filter all numbers out, since other numbera could be relevant ---referring to historic events, or other meaningful values---.
+We do not filter all numbers out, since other numbers could be relevant ---referring to historic events, or other meaningful values---.
 
 ```{r}
 # Recent years as noise tokens
@@ -502,7 +502,6 @@ tidy_abstracts <- tidy_abstracts |>
 
 tidy_abstracts
 ```
-
 
 #### Summary and visualizations of the clean corpus \[¿IGUAL ESTO HABRÍA QUE QUITARLO?\] ¿realmente es preprocessing? Además, solo es el clean corpus para algunas técnicas, para otras el clean corpus es diferente.
 
