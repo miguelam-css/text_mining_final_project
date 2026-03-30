@@ -16,7 +16,7 @@ editor: visual
 
 **Está en el google doc, incluirla al final** **Está en el google doc, incluirla al final** **Está en el google doc, incluirla al final** **Está en el google doc, incluirla al final** **Está en el google doc, incluirla al final** **Está en el google doc, incluirla al final** **Está en el google doc, incluirla al final**
 
-## Section 2. Setup, data loading, and preprocessing [SI NO HACEMOS EL PREPROCESSING AQUÍ, QUITARLO DEL TÍTULO]
+## Section 2. Setup, and data loading
 
 ### Packages
 
@@ -67,7 +67,7 @@ We begin by examining the structure of the raw dataset: variable types, missing 
 describe(articles_raw)
 ```
 
-Not all records include abstracts (19.6% of the observations do not include it).Since our entire analysis is based on abstract text, we remove records without abstracts and restrict the corpus to our study period (2016–2025).
+Not all records include abstracts (19.6% of the observations do not include it).Since our entire analysis is based on abstract text, we remove records without abstracts or publication year,and restrict the corpus to our study period (2016–2025). Another relevant column is `publication_year`, we see there are no missing values, so we do not need to filter any observations out.
 
 ```{r}
 # Filter: keep only records with an abstract, within our study period
@@ -79,17 +79,9 @@ articles <- articles_raw |>
 describe(articles)
 ```
 
-Our new data passed from 12589 to 9484 articles. We have 44 columns from which we will later select only the relevant ones for our analysis.
+Removing missing abstracts we went from 12589 to 9484 articles. We have 44 columns from which we will later select only the relevant ones for our analysis.
 
 We explore the distribution of articles by journal and year.
-
-```{r}
-# Articles per journal and year
-articles |>
-  count(source_display_name, publication_year) |>
-  arrange(publication_year) |>
-  pivot_wider(names_from = source_display_name, values_from = n, values_fill = 0)
-```
 
 ```{r}
 # Merge Palgrave Communications into HSSC — same journal, renamed June 2020
@@ -185,7 +177,125 @@ p_facets / p_bar +
   )
 ```
 
-The six journals in our corpus do not have a balanced share of articles: HSSC represents over 60% of the corpus, while there is relative balanced among the other five journals. Another trend to take into account is related to the temporal distribution: while the first four journals show a relatively balanced distribution of articles by year, the bottom two ---the journals in the *Nature portfolio*--- have exponentially increased the amount of publications in recent years. While this is something we must take into account, we will not exclude any journal from the corpus just for the sake of balance, since they are all reputed and influential journals, excluding one (for example HSSC), would affect the representativeness of the corpus. This is a trade off we are willing to accept, even if many articles are published in the same journal, they are still articles being published in top social science journals, and we should take them into account when answering our research questions. **\[REVISAR ESTE PÁRRAFO; ME PARECE REPETITVO\]**
+```{r}
+#| fig-width: 7
+#| fig-height: 5.5
+# Merge Palgrave Communications into HSSC — same journal, renamed June 2020
+# Full names with abbreviations in parentheses for clarity
+articles_merged <- articles |>
+  mutate(source_display_name = if_else(
+    source_display_name == "Palgrave Communications",
+    "Humanities and Social Sciences Communications",
+    source_display_name
+  )) |>
+  mutate(journal_label = case_match(
+    source_display_name,
+    "American Political Science Review"             ~ "American Political Science Review (APSR)",
+    "American Sociological Review"                  ~ "American Sociological Review (ASR)",
+    "European Journal of Political Research"        ~ "European Journal of Political Research (EJPR)",
+    "European Sociological Review"                  ~ "European Sociological Review (ESR)",
+    "Nature Human Behaviour"                        ~ "Nature Human Behaviour (NHB)",
+    "Humanities and Social Sciences Communications" ~ "Humanities and Social Sciences Communications (HSSC)"
+  ))
+
+# Color palette — keys must match journal_label values exactly
+journal_colors <- c(
+  "American Political Science Review (APSR)"             = "#2C3E6B",
+  "American Sociological Review (ASR)"                   = "#C0392B",
+  "European Journal of Political Research (EJPR)"        = "#8E44AD",
+  "European Sociological Review (ESR)"                   = "#E67E22",
+  "Nature Human Behaviour (NHB)"                         = "#27AE60",
+  "Humanities and Social Sciences Communications (HSSC)" = "#2980B9"
+)
+
+# Plot 1: Total abstracts per year (Macro-level overview)
+# Colored in a neutral gray to differentiate from journal-specific data
+p_total <- articles_merged |>
+  count(publication_year) |>
+  ggplot(aes(x = publication_year, y = n)) +
+  geom_col(fill = "#7F8C8D", width = 0.7) +
+  scale_x_continuous(breaks = seq(2016, 2025, by = 3)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  labs(x = NULL, y = "Total abstracts", title = "Total abstracts by year") +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title       = element_text(size = 10, face = "bold", color = "#1a1a2e"),
+    axis.text.x      = element_text(size = 7, color = "#4a4a6a"),
+    axis.text.y      = element_text(size = 7, color = "#4a4a6a"),
+    axis.title       = element_text(size = 9, color = "#4a4a6a"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "#e8e8f0", linewidth = 0.4),
+    plot.background  = element_rect(fill = "white", color = NA)
+  )
+
+# Plot 2: one facet per journal, bars by year
+# Each panel has its own y-axis scale (scales = "free_y") so within-journal
+# trends are visible even for journals with very different volumes
+p_facets <- articles_merged |>
+  count(journal_label, publication_year) |>
+  ggplot(aes(x = publication_year, y = n, fill = journal_label)) +
+  geom_col(width = 0.7) +
+  facet_wrap(~ journal_label, ncol = 2, scales = "free_y") +
+  scale_fill_manual(values = journal_colors, guide = "none") +
+  scale_x_continuous(breaks = seq(2016, 2025, by = 3)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  labs(x = NULL, y = "Number of abstracts") +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text       = element_text(size = 8, face = "bold", color = "#1a1a2e",
+                                    hjust = 0), # hjust = 0 aligns to the left
+    axis.text.x      = element_text(size = 7, color = "#4a4a6a"),
+    axis.text.y      = element_text(size = 7, color = "#4a4a6a"),
+    axis.title       = element_text(size = 9, color = "#4a4a6a"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "#e8e8f0", linewidth = 0.4),
+    plot.background  = element_rect(fill = "white", color = NA)
+  )
+
+# Plot 3: thin stacked horizontal bar showing corpus composition
+# No labels — colors alone carry the journal identity, matched to the facets above
+p_bar <- articles_merged |>
+  count(journal_label) |>
+  mutate(
+    pct = n / sum(n),
+    journal_label = fct_reorder(journal_label, n)
+  ) |>
+  ggplot(aes(x = pct, y = 1, fill = journal_label)) +
+  geom_col(orientation = "y", width = 0.6) +
+  scale_fill_manual(values = journal_colors, guide = "none") +
+  scale_x_continuous(labels = scales::percent, expand = c(0, 0)) +
+  labs(x = "Share of total abstracts", y = NULL) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    axis.text.y      = element_blank(),
+    axis.text.x      = element_text(size = 7, color = "#4a4a6a"),
+    axis.title.x     = element_text(size = 9, color = "#4a4a6a", margin = margin(t = 6)),
+    panel.grid       = element_blank(),
+    plot.background  = element_rect(fill = "white", color = NA)
+  )
+
+# Stack the three plots vertically with patchwork
+# heights = c(3, 10, 1) structures the visual hierarchy: Total trend -> Journal specific -> Proportion breakdown
+p_total / p_facets / p_bar +
+  plot_layout(heights = c(3, 10, 1)) +
+  plot_annotation(
+    title    = "Number of abstracts per year and journal",
+    subtitle = "Palgrave Communications merged with HSSC (same journal, renamed June 2020)",
+    theme    = theme(
+      plot.title      = element_text(size = 14, face = "bold", color = "#1a1a2e",
+                                     family = "serif", margin = margin(b = 4)),
+      plot.subtitle   = element_text(size = 9, color = "#4a4a6a",
+                                     family = "serif", margin = margin(b = 12)),
+      plot.caption    = element_text(size = 7, color = "#7a7a9a",
+                                     family = "serif", hjust = 0,
+                                     margin = margin(t = 10)),
+      plot.background = element_rect(fill = "white", color = NA)
+    )
+  )
+```
+
+The six journals in our corpus do not represent a balanced share of articles: HSSC accounts for more than 60% of the articles, while the other five journals are relatively balanced between them. We also observe a temporal imbalance: with publication greatly increasing after 2022. Both imbalances are driven by the same factor: the great increase of publications in Journals part of the Nature Portfolio, particularly HSSC. This imbalance should be kept in mind when interpreting the results, but we will not exclude any journal from the corpus just to improve balance. We are interested in trends in social science abstracts in leading journals ---not in inter-journal comparison---, this imbalance does not affect our research questions, and removing a journal would make the corpus less representative by arbitrarily excluding publications in leading journals. 
+
 
 ## Section 3. Topic analysis \[RQ1 + RQ2\]
 
@@ -193,10 +303,10 @@ The six journals in our corpus do not have a balanced share of articles: HSSC re
 
 #### Tokenization
 
-We start by keeping the relevant columns: id, publication year, journal, and abstract.
+We start by keeping the relevant columns for this section: id, publication year, journal, and abstract.
 
 ```{r}
-# We tokenize at the word level, keeping key metadata columns as identifiers:
+# Select relevant columns:
 tidy_abstracts_raw <- articles |>
   select(id, publication_year, source_display_name, abstract)
 ```
@@ -504,7 +614,7 @@ articles |>
      pull(abstract)
 ```
 
-We filter these out. Other years and numbers could be relevant ---referring to historic events, or significative values---. 
+We filter these out. Other years and numbers could be relevant ---referring to historic events, or significative values---.
 
 ```{r}
 # Filter out recent years:
@@ -512,7 +622,7 @@ tidy_abstracts <- tidy_abstracts |>
   filter(!word %in% as.character(2015:2025))
 ```
 
-#### Summary and visualizations of the clean corpus [¿IGUAL ESTO HABRÍA QUE QUITARLO?] ¿realmente es preprocessing?
+#### Summary and visualizations of the clean corpus \[¿IGUAL ESTO HABRÍA QUE QUITARLO?\] ¿realmente es preprocessing?
 
 ```{r}
 # Total tokens after preprocessing
@@ -573,9 +683,7 @@ tidy_abstracts |>
 
 The top 25 terms paint a coherent picture of the corpus. The dominance of *policy*, *political*, *economic*, *environmental*, and *education* reflects some recurrent topics in social science journals. The cluster of *health*, *covid*, and *19* points to the influence of the COVID-19 pandemic, one of the main events in our study period. The prominence of *China* and *Chinese* (both in the top 15), and likely reflects China's growing role as a major actor in global affairs, making it a central subject of inquiry across political science, sociology, and economics research during this period. The *education*–*learning*–*students* cluster suggests that educational research is one of the most represented subfields, while words like *digital* and *media*, signal a sustained interest in technology and communication topics throughout the decade.
 
-
-
-### 3.2 Analysis [RQ1 + RQ2]
+### 3.2 Analysis \[RQ1 + RQ2\]
 
 In order to address RQ1 and RQ2, we will use three complementary techniques: TF-IDF to identify distinctive vocabulary by year (and also for the period before and after the public release of ChatGPT); word frequency analysis using a custom set of AI-related words to measure the growth of AI-related terminology by year; and LDA topic modelling.
 
@@ -624,15 +732,7 @@ tfidf_by_year |>
   )
 ```
 
-INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR
-- que aparezca gun y guns
-- el aniversario de la muerte de shakespeare
-- ¿por qué tanto gothic?
-- lo más evidente: la ruptura de covid 19
-- ai a partir de 2023
-Lo suyo sería buscar  lo que significan cosas como: esg, efl, csr, mml, dms, geg, etc. (Y no en google, buscarlo en el contexto de nuestro corpus usando lo de la context window, pero qué perezote). ¿Metemos el filtro que proponía alicia aunque nos estemos cargando "gun", pea", "ai"?
-*- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?*
--> En realidad podemos disfrazarlo escribiendo un parrafillo que mencione un par de anécdotas rollo (vemos el aniversario de shakespeare.. guns... cosas de crisis climática... la influencia de la pandemia... PERO CENTRÁNDONOS EN LO QUE NOS OCUPA: parece claro el interés despertado por la ia a partir del public release de chatgpt... con la palabra ia, chatgpt, digitalization)
+INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR - que aparezca gun y guns - el aniversario de la muerte de shakespeare - ¿por qué tanto gothic? - lo más evidente: la ruptura de covid 19 - ai a partir de 2023 Lo suyo sería buscar lo que significan cosas como: esg, efl, csr, mml, dms, geg, etc. (Y no en google, buscarlo en el contexto de nuestro corpus usando lo de la context window, pero qué perezote). ¿Metemos el filtro que proponía alicia aunque nos estemos cargando "gun", pea", "ai"? *- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?* -\> En realidad podemos disfrazarlo escribiendo un parrafillo que mencione un par de anécdotas rollo (vemos el aniversario de shakespeare.. guns... cosas de crisis climática... la influencia de la pandemia... PERO CENTRÁNDONOS EN LO QUE NOS OCUPA: parece claro el interés despertado por la ia a partir del public release de chatgpt... con la palabra ia, chatgpt, digitalization)
 
 ##### Bigram TF-IDF by year
 
@@ -707,12 +807,8 @@ tfidf_bigrams_by_year |>
     axis.text.y = element_text(size = 8)
   )
 ```
-INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETARINTERPRETAR INTERPRETAR INTERPRETAR (algunas ideas)
-- Algo evidente: la ruptura de "covid 19", que pasa a estar en el top 2 en los últimos cinco años;
-- Algo relacionado con nuestro tema: digitial economy, digital transformation
-- Climate change related: carbon emissions, green innovation, green consumption, crude oil, green finance
-*- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?*
 
+INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETARINTERPRETAR INTERPRETAR INTERPRETAR (algunas ideas) - Algo evidente: la ruptura de "covid 19", que pasa a estar en el top 2 en los últimos cinco años; - Algo relacionado con nuestro tema: digitial economy, digital transformation - Climate change related: carbon emissions, green innovation, green consumption, crude oil, green finance *- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?*
 
 ##### Trigram TF-IDF by year
 
@@ -772,13 +868,7 @@ tfidf_trigrams_by_year |>
   )
 ```
 
-INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR
-- De nuevo: evidente covid 19 pandemic
-- ecological crisis:  ecological civilization construction, regional carbon efficiency, extreme weather impacts, farmers sustainable likelihood, green development behavior...
-- artificial intelligence aparece en  2024 (un valor super bajo)
-- Otros relacionados con nuestra movida (enterprise digital transformation, )
-*- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?*
-- NOTA DEL CLAUDE: Trigrams are sparser than bigrams, so some years may have very few distinctive entries — that itself is informative.
+INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR - De nuevo: evidente covid 19 pandemic - ecological crisis: ecological civilization construction, regional carbon efficiency, extreme weather impacts, farmers sustainable likelihood, green development behavior... - artificial intelligence aparece en 2024 (un valor super bajo) - Otros relacionados con nuestra movida (enterprise digital transformation, ) *- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?* - NOTA DEL CLAUDE: Trigrams are sparser than bigrams, so some years may have very few distinctive entries — that itself is informative.
 
 #### 3.2.2 AI as an emerging topic using an AI-related lexicon
 
@@ -949,9 +1039,9 @@ ggplot(ai_proportion, aes(x = publication_year, y = proportion_ai_articles)) +
     panel.grid.minor.x = element_blank()
   )
 ```
-- Cambio muy claro, en 2017 y 2018 prácticamente nada. En 2019 sube al 1%, el año en que se hace público chatgpt pasa hasta el 4%, y tres años después un 9% de los abstracts continen términos relacionados con IA. (Recordemos que estamos empleando un léxico conservador, seguramente hay más menciones y no estamos capturando todo, pero el patrón es evidente). 
-- En relación con nuestra RQ: influencia innegable de la IA.
 
+-   Cambio muy claro, en 2017 y 2018 prácticamente nada. En 2019 sube al 1%, el año en que se hace público chatgpt pasa hasta el 4%, y tres años después un 9% de los abstracts continen términos relacionados con IA. (Recordemos que estamos empleando un léxico conservador, seguramente hay más menciones y no estamos capturando todo, pero el patrón es evidente).
+-   En relación con nuestra RQ: influencia innegable de la IA.
 
 **HE HECHO UN GRÁFICO SOLO PARA "AI" (SIN LAS OTRAS PALABRAS RELACIONADAS)**
 
@@ -983,8 +1073,6 @@ ai_hits |>
     panel.grid.minor.x = element_blank()
   )
 ```
-
-
 
 ##### Which terms are driving the trend?
 
@@ -1034,11 +1122,11 @@ ai_hits |>
     panel.grid.major.y = element_blank() 
   )
 ```
-- Before 2020 not even 5 AI related words from our lexicon.
-- AI wasn't mentioned in 201
-- Artificial intelligence and machine learning the main drivers since they appear in 2020.
-- Worth mentioning: the  appearance of chatgpt from 2023 onwards. Also "generative ai in 2024. May point to an increased (and likely) interest in those topics after the raise of generative llms.
 
+-   Before 2020 not even 5 AI related words from our lexicon.
+-   AI wasn't mentioned in 201
+-   Artificial intelligence and machine learning the main drivers since they appear in 2020.
+-   Worth mentioning: the appearance of chatgpt from 2023 onwards. Also "generative ai in 2024. May point to an increased (and likely) interest in those topics after the raise of generative llms.
 
 #### 3.2.3 Topic modelling (LDA)
 
@@ -1226,7 +1314,6 @@ top_terms |>
   )
 ```
 
-
 ##### Fitting the LDA model (k=7)
 
 ```{r}
@@ -1337,9 +1424,9 @@ top_terms |>
 
 #### CUANDO HAYAMOS DECIDIDO EL MEJOR K SEGUIMOS CON ESTO:
 
-**CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO****CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO**
+**CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTOCUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO**
 
-**TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** 
+**TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR**
 
 ## Section 4. WRITING STYLE AND THE RISE OF AI \[RQ3\]
 
@@ -1355,13 +1442,12 @@ Ding, L., Lawson, C., & Shapira, P. (2025). Rise of generative artificial intell
 
 Liu, N., Shapira, P., & Yue, X. (2021). Tracking developments in artificial intelligence research: Constructing and applying a new search strategy. *Scientometrics*, 126(4), 3153–3192. https://doi.org/10.1007/s11192-021-03868-4
 
-
 ## Appendix I - Domain specific stopword list prompt
 
 The domain-specific stopword list used in Section 3 was generated with the assistance of a large language model (Claude Sonnet 4.6, Anthropic). The complete prompt is reproduced below.
 
 ::: {style="border: 1px solid #ccc; padding: 1em; border-radius: 4px;"}
-```
+```         
 You are an expert computational linguist and text mining specialist with deep 
 knowledge of social science research and academic writing conventions. You are 
 working on a large-scale corpus analysis project described in the context below.
@@ -1538,7 +1624,7 @@ Rules:
 ## Appendix II - AÑADIR EL PROMPT DE EVA
 
 ::: {style="border: 1px solid #ccc; padding: 1em; border-radius: 4px;"}
-```
+```         
 PONRE EL PROMPT DE EVA AQUÍ
 ```
 :::
