@@ -205,57 +205,21 @@ The six journals in our corpus do not represent a balanced share of articles: HS
 
 ## Section 3. Topic analysis \[RQ1 + RQ2\]
 
-### 3.1 Preprocessing set up
+### 3.1 Preprocessing setup
 
-In this subsection we set up some tools that will be needed when preprocessing throughout the following subsections. More specifically: we establish what the standard and domain-specific stopwords will be. We do not perform tokenization and filtering here because the different techniques used in the following subsections require different kind fo tokenizations and filters.
+The techniques in this section use different tokenization and filtering strategies. We will define all shared elements here ---stopwords and filtered unigram corpus---, and explain which subsections use which.
 
-#### Tokenization
+We work with two filtering tools:
+1. **Standard stopwords**: using `stop_words` from `tidytext`. This will be applied in all techiniques.
+2. **Domain-specific stopwords**: a list of words that provide no relevant information in our context. This tool (`domain_stopwords`) is fully applied in unigram analyses (both TF-IDF and LDA), a subset of it (`ngram_stopwrods`) is used in n-gram analyses ---for more details on why, see section 3.1.2---.
 
-We start by keeping the relevant columns for this section: id, publication year, journal, and abstract.
+#### Defining domain-specific stopwords
 
-```{r}
-# Select relevant columns:
-tidy_abstracts_raw <- articles |>
-  select(id, publication_year, source_display_name, abstract)
-```
-
-Then tokenize at the word level:
+We used *Claude Sonnet 4.6* to create an initial list of domain-specific words without informative value (see full prompt in Appendix I), then manually reviewed it, removing words we considered did have informational value, and adding others we found needed filtering while working on the analysis.
 
 ```{r}
-# Tokenize at the word level. Each row will be one token:
-tidy_abstracts_raw <- tidy_abstracts_raw |>
-  unnest_tokens(
-    output = word,
-    input  = abstract,
-    token  = "words"   # default: lowercase, strips punctuation
-  )
-
-# To check that it worked:
-slice_head(tidy_abstracts_raw, n = 10 )
-```
-
-After tokenizing words, we need to remove all those stopwords that are not useful for analysis, since they have very little informational value.
-
-#### Filtering standard and domain-specific stopwords
-
-We use `stop_words`, a dataframe that includes stopwords from three lexicons (SMART, Snowball, Onix), provided by library `tidy_text` as our standard stopword filter.
-
-```{r}
-# Filter stopwords using tidytext `stop_words`
-tidy_abstracts <- tidy_abstracts_raw |>
-  anti_join(stop_words, by = "word")
-
-tidy_abstracts
-```
-
-Academic abstracts also contain high-frequency words that carry no topical meaning and would pollute our analysis, particularly when exploring absolute frequencies
-
-TF-IDF rankings and LDA topics if left in.
-
-Using Claude Sonnet 4.6 to identify and create a list of domain-specif words without informative value ---see full prompt in Appendix I---. We manually reviewed this list, removing words we thought had informational value and adding some other little informative words (like "palgrave" or "collection").
-
-```{r}
-# Create the custom domain stopwords
+# Domain-specific stopwords, organised by category.
+# The category column allows subsetting for different filtering strategies.
 domain_stopwords <- tibble(
   word = c(
     
@@ -334,7 +298,7 @@ domain_stopwords <- tibble(
     "proxies", "check", "checks", "sensitivity", "validation", "replication", "comparative",
     
     # 3. Abstract structure boilerplate
-    # Organisational scaffolding recurring formulaically in academic abstracts:
+    # Organisational scaffolding often used in academic abstracts:
     # document labels, rhetorical-move markers, literature-positioning words,
     # linking tokens, and non-discriminative evaluative fillers.
     "study", "studies", "paper", "papers", "article", "articles", "research", "work",
@@ -424,9 +388,9 @@ domain_stopwords <- tibble(
     "eta", "kappa", "tau", "theta", "epsilon", "zeta", "table", "appendix",
     "supplementary", "supplement", "support", "supporting", "information", "available", "request",
     
-    # 7. High-frequency functions
+    # 7. High-frequency function words
     # Discourse connectives, hedging adverbs, academic filler adjectives,
-    # numbers-as-words, and filler nouns that standard lists (Snowball, SMART,
+    # numbers-as-words, and filler nouns that standard lists (snowball, SMART,
     # onix) miss but which carry no thematic signal in this corpus.
     "alternatively", "conversely", "meanwhile", "simultaneously", "otherwise", "namely", "predominantly", "chiefly",
     "mostly", "jointly", "collectively", "respectively", "comparatively", "relatively", "apparently", "seemingly",
@@ -447,72 +411,44 @@ domain_stopwords <- tibble(
     "attempt", "attempts", "need", "needs", "opportunity", "opportunities", "gap", "gaps",
     "concern", "concerns", "issues", "debate", "debates", "discussions", "attention", "lack",
     "absence", "presence", "existence"
-    
-    # 8. Other
-    # Other words we found out needed to be filter out while working on the
-    # project.
-    
-    
-    
   ),
+  
+  # Definining a category column  allows us to easily subset later
   category = c(
-    
     # 1. Academic boilerplate verbs
-    # Verbs used generically across all abstracts regardless of topic.
-    # Includes base forms, 3rd-person singular, past/passive, and gerund inflections.
     rep("boilerplate_verb", 310),
-    
     # 2. Generic methodological terms
-    # Words describing research designs, data types, statistical procedures,
-    # and analytical approaches ubiquitous across all social science.
     rep("methodological_term", 215),
-    
     # 3. Abstract structure boilerplate
-    # Organisational scaffolding recurring formulaically in academic abstracts:
-    # document labels, rhetorical-move markers, literature-positioning words,
-    # linking tokens, and non-discriminative evaluative fillers.
     rep("abstract_boilerplate", 176),
-    
     # 4. Generic social science concepts
-    # Terms so broadly used in social science that they provide no discriminative
-    # topical signal: generic agents, process/mechanism words, structural terms,
-    # effect/outcome nouns, generic descriptors, and temporal/spatial terms.
     rep("generic_social_science", 209),
-    
     # 5. Journal specific and publication boilerplate
-    # Words introduced by journal formatting, editorial conventions, copyright
-    # notices, metadata fragments, and abstract-template boilerplate specific
-    # to these six journals.
     rep("publication_boilerplate", 80),
-    
     # 6. Encoding artefacts and noise
-    # Tokens from PDF/HTML extraction, encoding issues, OCR, or tokenisation:
-    # Latin abbreviations, single characters, URL fragments, Greek letter tokens,
-    # ligature remnants, and other non-linguistic noise.
     rep("encoding_artefact", 87),
-    
-    # 7. High-frequency functions
-    # Discourse connectives, hedging adverbs, academic filler adjectives,
-    # numbers-as-words, and filler nouns that standard lists (Snowball, SMART,
-    # onix) miss but which carry no thematic signal in this corpus.
-    rep("domain_function_word", 147),
-    
-    # 8. Other
-    # Other words we found out needed to be filter out while working on the
-    # project.
-    rep("other", 0)
+    # 7. High-frequency function words
+    rep("domain_function_word", 147)
   )
 )
-
-# Filter out domain specific stopwords:
-tidy_abstracts <- tidy_abstracts |>
-  anti_join(domain_stopwords, by = "word")
-
-# To check that it worked:
-tidy_abstracts
 ```
 
-There are still some words we do not wish to include in the analysis: publication years or years of recent events are often mentioned in abstracts. For example:
+#### N-gram stopwords (subset for bigram/trigram pipelines)
+
+For bigram and trigram analyses, we apply just a subset of `domain_stopwords`. Single words like "social" or "people" do not provide relevant information in our current context, but form meaningful n-grams ("social media" or "Roma people"), we should thus keep them. But we do filter terms that just produce noise: publication metadata, abstract specific words, or journal self-references.
+
+```{r}
+# Subset of domain stopwords need for n-gram filtering. Since we defined
+# categories, we can easily choose the relevant subset
+ngram_stopwords <- domain_stopwords |>
+  filter(category %in% c("boilerplate_verb",
+                         "abstract_boilerplate",
+                         "publication_boilerplate",
+                         "encoding_artefact"))
+```
+
+
+In addition, we include a filter for recent years, which appear frequently in abstracts, with no relevant meaning (often pointing to recent events or publication years). For example:
 
 ```{r}
 # Print an abstract with a recent year:
@@ -522,15 +458,53 @@ articles |>
      pull(abstract)
 ```
 
-We filter these out. Other years and numbers could be relevant ---referring to historic events, or significative values---.
+We do not filter all numbers out, since other numbera could be relevant ---referring to historic events, or other meaningful values---.
 
 ```{r}
-# Filter out recent years:
-tidy_abstracts <- tidy_abstracts |>
-  filter(!word %in% as.character(2015:2025))
+# Recent years as noise tokens
+year_noise <- tibble(word = as.character(2015:2025),
+                     category = "year_noise")
+ngram_stopwords <- bind_rows(ngram_stopwords, year_noise)
 ```
 
-#### Summary and visualizations of the clean corpus \[¿IGUAL ESTO HABRÍA QUE QUITARLO?\] ¿realmente es preprocessing?
+#### Select relevant columns
+
+We select the relevant columns for this section: id, publication year, journal, and abstract.
+
+```{r}
+# Select relevant columns:
+tidy_abstracts_raw <- articles |>
+  select(id, publication_year, source_display_name, abstract)
+```
+
+#### Filtered unigram corpus (shared by unigram TF-IDF and LDA)
+
+Since both the unigram TF-IDF (section 3.2.1) and the LDA (section 3.2.3) use the same tokenization and filtering, we perform it here, to avoid repetitions later.
+
+We start by tokenizing at the word level:
+
+```{r}
+# Tokenize at word level, keeping metadata columns
+tidy_abstracts <- articles |>
+  unnest_tokens(word, abstract, token = "words")
+```
+
+Then filter standard stopwords, the full set of domain-specific stopwords, and recent years.
+
+```{r}
+tidy_abstracts <- tidy_abstracts |> 
+  # Standard stopwords
+  anti_join(stop_words, by = "word") |>
+  # Full domain stopwords
+  anti_join(domain_stopwords, by = "word") |>
+  # Recent years
+  filter(!word %in% as.character(2015:2025))
+
+tidy_abstracts
+```
+
+
+#### Summary and visualizations of the clean corpus \[¿IGUAL ESTO HABRÍA QUE QUITARLO?\] ¿realmente es preprocessing? Además, solo es el clean corpus para algunas técnicas, para otras el clean corpus es diferente.
 
 ```{r}
 # Total tokens after preprocessing
@@ -644,22 +618,9 @@ INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRE
 
 ##### Bigram TF-IDF by year
 
-For bigrams we tokenize from the raw abstracts, we separate bigrams into their component words, filter standard stopwords from each position, and reunite them before computing TF-IDF. We do not filter by the full domain-specific stopwords here: words like "social" or "people" do not have informative value by themselves, but can be very meaningful in bigrams like "social media" or "Roma people". We do filter out abstract struture terms and metadata noise.
+For bigrams we tokenize from the raw abstracts, we separate bigrams into their component words, filter standard stopwords from each position, and reunite them before computing TF-IDF. As discussed above, we do not filter by the full domain-specific stopwords list here, we use the subset with just abstract structure terms and metadata noise.
 
 ```{r}
-# We subset abstract category from our domain-specific stopwords tibble,
-# we will need this to get substantive results in TF-IDF and not noise
-# when using bigrams. We also exclude recent years, since those add noise.
-ngram_stopwords <- domain_stopwords |>
-  filter(category %in% c("abstract_boilerplate",
-                         "boilerplate_verb",
-                         "publication_boilerplate",
-                         "encoding_artefact"))
-year_noise <- tibble(word = as.character(2015:2025),
-                     category = "year_noise")
-ngram_stopwords <- bind_rows(ngram_stopwords, year_noise)
-
-
 # Tokenize into bigrams from raw abstracts
 bigrams_by_year <- articles |>
   select(id, publication_year, abstract) |>
