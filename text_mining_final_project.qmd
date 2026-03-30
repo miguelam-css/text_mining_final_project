@@ -44,6 +44,7 @@ library(RColorBrewer)
 library(wordcloud)
 library(explore)
 library(patchwork)
+library(scales)
 ```
 
 ### Loading the data
@@ -188,7 +189,7 @@ The six journals in our corpus do not have a balanced share of articles: HSSC re
 
 ## Section 3. Topic analysis \[RQ1 + RQ2\]
 
-### Preprocessing
+### 3.1 Preprocessing
 
 #### Tokenization
 
@@ -574,11 +575,11 @@ The top 25 terms paint a coherent picture of the corpus. The dominance of *polic
 
 
 
-### Analysis [RQ1 + RQ2]
+### 3.2 Analysis [RQ1 + RQ2]
 
 In order to address RQ1 and RQ2, we will use three complementary techniques: TF-IDF to identify distinctive vocabulary by year (and also for the period before and after the public release of ChatGPT); word frequency analysis using a custom set of AI-related words to measure the growth of AI-related terminology by year; and LDA topic modelling.
 
-#### Distinctive vocabulary by year (TF-IDF)
+#### 3.2.1 Distinctive vocabulary by year (TF-IDF)
 
 We use TF-IDF to identify the most distinctive terms of each year, treating each year as a single document. We apply this at three levels: unigram, bigram, and trigram level.
 
@@ -779,13 +780,13 @@ INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRE
 *- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?*
 - NOTA DEL CLAUDE: Trigrams are sparser than bigrams, so some years may have very few distinctive entries — that itself is informative.
 
-#### AI as an emerging topic using an AI-related lexicon
+#### 3.2.2 AI as an emerging topic using an AI-related lexicon
 
 In this subsection we operationalise AI as a topic through a keyword lexicon built from the works of Liu, Shapira, and Yue (2021) and Ding, Lawson, and Shapira (2025). These works ---which fully cover our study period--- explore bibliometric search strategies for identifying AI-related publications, the lexicons they build well thought out and validated by their research, and can prove useful for our purposes. We built three lexicons from these sources: a unigrams, a bigrams, and a trigram lexicon.
 
 ##### Building the AI lexicon
 
-We manually excluded a significant number of n-grams from these lexicons, prioritising precision over recall. That is, we accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded terms like "random forest" or "decision tree" because they refer to statistical methods often used in social science and not necessarily related to AI; to keep our lexicon easily manageable, we also excluded terms that are too technical and unlikely to appear in social science journal abstracts; and we excluded ambiguous terms, such as "ai" which Liu et al. (2021, p. 3171) reject for being an abbreviation with up to 164 meanings ---and a hit ratio of just 17.8%---. 
+We manually excluded a significant number of n-grams from these lexicons, prioritising precision over recall. That is, we accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded terms like "random forest" or "decision tree" because they refer to statistical methods often used in social science and not necessarily related to AI; to keep our lexicon easily manageable, we also excluded terms that are too technical and unlikely to appear in social science journal abstracts; and we excluded ambiguous terms ---while Liu et al. (2021, p. 3171) exclude "AI" for being an abbreviation with up to 164 meanings, we will keep it. The authors report it being a problem because it stand for terms present in science and medicine, like "Adequate Intake, Adaptive Iteration, Aridity Index, Artificial Insemination, Active Ingredient, Avian Influenza, Aromatase Inhibitor and Associative Ionization", given the nature of our corpus, restricted to social science journals, this is not a problem for us---.
 
 In addition, we included extra unigrams, bigrams, and trigrams to capture named generative AI models and providers absent from both sources, such as GPT-4, Gemini, Claude, or LLama ---while the names by themselves could lead to ambiguity (the zodiac sign, Claude Lévi-Strauss, the animal, etc.), including the version in bigrams solves this ambiguity---.
 
@@ -802,6 +803,7 @@ ai_lexicon_unigrams <- c(
   "chatgpt",
   "llm",
   # Custom
+  "ai",
   "deepseek",
   "openai"
 )
@@ -924,10 +926,6 @@ ai_proportion <- ai_articles_by_year |>
   left_join(abstracts_by_year, by = "publication_year") |>
   mutate(proportion_ai_articles = articles_with_ai / total_abstracts)
 
-
-
-library(scales) # Needed for percent_format()
-
 # Find the maximum proportion to place the annotation dynamically
 max_prop <- max(ai_proportion$proportion_ai_articles, na.rm = TRUE)
 
@@ -955,7 +953,40 @@ ggplot(ai_proportion, aes(x = publication_year, y = proportion_ai_articles)) +
 - En relación con nuestra RQ: influencia innegable de la IA.
 
 
-#### Which terms are driving the trend?
+**HE HECHO UN GRÁFICO SOLO PARA "AI" (SIN LAS OTRAS PALABRAS RELACIONADAS)**
+
+```{r}
+# Filter and count for just the term "ai"
+ai_hits |>
+  filter(term == "ai") |> # or filter(str_to_lower(term) == "ai") if you need case-insensitivity
+  distinct(id, publication_year) |>
+  count(publication_year, name = "article_count") |>
+  
+  # Ensure all years from 2016 to the max year are included, filling missing with 0
+  complete(publication_year = 2016:max(publication_year), fill = list(article_count = 0)) |>
+  
+  # Plot it
+  ggplot(aes(x = publication_year, y = article_count)) +
+  geom_line(color = "#2C3E6B", linewidth = 1) +
+  geom_point(color = "#2C3E6B", size = 2) +
+  scale_x_continuous(breaks = function(x) seq(ceiling(min(x)), floor(max(x)), by = 1)) +
+  labs(
+    title = "Trend of the term 'ai' over time",
+    subtitle = "Absolute number of articles containing the term",
+    x = "Publication Year",
+    y = "Number of Articles"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    axis.text.y        = element_text(size = 9, color = "#4a4a6a"),
+    axis.text.x        = element_text(color = "#4a4a6a"),
+    panel.grid.minor.x = element_blank()
+  )
+```
+
+
+
+##### Which terms are driving the trend?
 
 We observe a clear trend, let's explore which terms are driving it.
 
@@ -977,7 +1008,7 @@ ai_hits |>
   ungroup() |>
   # Add 0 value to missing ranks so every year has exactly ranks 1 through 5
   # and all bars have the same width
-  complete(publication_year, rank = 1:5, fill = list(article_count = 0)) |>
+  complete(publication_year = 2016:max(publication_year), rank = 1:5, fill = list(article_count = 0)) |>
   # Create invisible unique names for the blank bars using spaces
   mutate(
     term = ifelse(is.na(term), strrep(" ", rank), term),
@@ -1004,12 +1035,311 @@ ai_hits |>
   )
 ```
 - Before 2020 not even 5 AI related words from our lexicon.
+- AI wasn't mentioned in 201
 - Artificial intelligence and machine learning the main drivers since they appear in 2020.
 - Worth mentioning: the  appearance of chatgpt from 2023 onwards. Also "generative ai in 2024. May point to an increased (and likely) interest in those topics after the raise of generative llms.
 
 
-*RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ**RETOMO DESDE AQUÍ*
+#### 3.2.3 Topic modelling (LDA)
 
+We now move from individual words to latent topics. We use LDA to discover the main topics in our corpus and then examine how the weight of these topics has shifted over time. In order to facilitate a meaninful interpretation, instead of performing LDA for each year, we will divide our period of study into three periods, the main events identified in our previous analyses (the COVID-19 pandemic and the public release of chat GPT) act as natural dividers between our periods: 2016-2019 (pre-pandemic), 2020-2022 (pandmic years), and 2023-2025 (generative LLMs years).
+
+**TENEMOS QUE TRATAR DE ASIGNAR UN LABEL A CADA TOPIC BASÁNDONOS EN EN LAS PALABRAS CON LA MAYOR PROBABILIDAD DE ESTAR EN ESE TOPIC. ESPECIALMENTE NOS INTERESA ENCONTRAR ALGUNO EN RELACIÓN A NUESTRAS RQS.**
+
+##### Preparing the Document-Term Matrix
+
+```{r}
+# We create the Document-Term Matrix (DTM) required by LDA.
+# We cast our tidy data (already filtered by standard and domain stopwords)
+# to DTM format using the article id as the document identifier.
+abstracts_dtm <- tidy_abstracts |>
+  count(id, word) |>
+  cast_dtm(id, word, n)
+
+abstracts_dtm
+
+# Manually alculate sparsity manually to see the exact value:
+cat("Precise sparsity   :", 1 - (584162/365098650), "%")
+```
+
+We get a DTM with 9482 documents and 38566 terms, sparsity close to 100% (99.84%), indicating very varied vocabulary in our abstracts.
+
+##### Fitting the LDA model (k=4)
+
+```{r}
+# Set the number of topics here: (doing it here allows an easier workflow
+# finding the best k).
+k <- 4
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model
+```
+
+##### Word–topic probabilities (β): what is each topic about?
+
+```{r}
+# Extract per-topic-per-word probabilities (beta)
+topics_beta <- tidy(lda_model, matrix = "beta")
+topics_beta
+```
+
+```{r}
+# Top 10 highest-probability words per topic
+top_terms <- topics_beta |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+top_terms
+```
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Visualize top terms per topic
+top_terms |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+
+##### Fitting the LDA model (k=5)
+
+```{r}
+# Set the number of topics here: (doing it here allows an easier workflow
+# finding the best k).
+k <- 5
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model
+```
+
+##### Word–topic probabilities (β): what is each topic about?
+
+```{r}
+# Extract per-topic-per-word probabilities (beta)
+topics_beta <- tidy(lda_model, matrix = "beta")
+topics_beta
+```
+
+```{r}
+# Top 10 highest-probability words per topic
+top_terms <- topics_beta |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+top_terms
+```
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Visualize top terms per topic
+top_terms |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+
+##### Fitting the LDA model (k=6)
+
+```{r}
+# Set the number of topics here: (doing it here allows an easier workflow
+# finding the best k).
+k <- 6
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model
+```
+
+##### Word–topic probabilities (β): what is each topic about?
+
+```{r}
+# Extract per-topic-per-word probabilities (beta)
+topics_beta <- tidy(lda_model, matrix = "beta")
+topics_beta
+```
+
+```{r}
+# Top 10 highest-probability words per topic
+top_terms <- topics_beta |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+top_terms
+```
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Visualize top terms per topic
+top_terms |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+
+
+##### Fitting the LDA model (k=7)
+
+```{r}
+# Set the number of topics here: (doing it here allows an easier workflow
+# finding the best k).
+k <- 7
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model
+```
+
+##### Word–topic probabilities (β): what is each topic about?
+
+```{r}
+# Extract per-topic-per-word probabilities (beta)
+topics_beta <- tidy(lda_model, matrix = "beta")
+topics_beta
+```
+
+```{r}
+# Top 10 highest-probability words per topic
+top_terms <- topics_beta |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+top_terms
+```
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Visualize top terms per topic
+top_terms |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+
+##### Fitting the LDA model (k=8)
+
+```{r}
+# Set the number of topics here: (doing it here allows an easier workflow
+# finding the best k).
+k <- 8
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 1234))
+lda_model
+```
+
+##### Word–topic probabilities (β): what is each topic about?
+
+```{r}
+# Extract per-topic-per-word probabilities (beta)
+topics_beta <- tidy(lda_model, matrix = "beta")
+topics_beta
+```
+
+```{r}
+# Top 10 highest-probability words per topic
+top_terms <- topics_beta |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+top_terms
+```
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Visualize top terms per topic
+top_terms |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+
+#### CUANDO HAYAMOS DECIDIDO EL MEJOR K SEGUIMOS CON ESTO:
+
+**CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO****CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO**
+
+**TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** **TENGO LO QUE SIGUE EN UN DOCUMENTO A PARTE PARA NO CONFUNDIR** 
 
 ## Section 4. WRITING STYLE AND THE RISE OF AI \[RQ3\]
 
