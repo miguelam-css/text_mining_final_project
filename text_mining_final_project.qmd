@@ -26,6 +26,11 @@ We begin by loading all R packages required throughout this project.
 #| message: false
 #| warning: false
 
+
+#PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION 
+
+
+
 # REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS # REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS
 
 library(tidyverse)
@@ -51,23 +56,23 @@ library(scales)
 
 Our corpus was downloaded from [OpenAlex](https://openalex.org/). We created a custom R script (`openalex_download.R`, included in this project folder, along with documentation) to bulk-download article data from our target journals.
 
-Having run the script, we load the `.RData` file, containing all data structures exactly as they were returned by the OpenAlex API.
-
 ```{r}
-# Load the RData file. This creates the object `articles_raw` in the environment
+# Having run the script, we load the `.RData` file, containing all data
+# structures exactly as they were returned by the OpenAlex API. This creates
+# the object `articles_raw` in the environment
 load("data/articles.RData")
 ```
 
 ### Initial Inspection
 
-We begin by examining the structure of the raw dataset: variable types, missing values, and basic summary statistics.
+We begin by examining the structure of the raw dataset.
 
 ```{r}
 # Overview of all variables: types, missing values, and distributions
 describe(articles_raw)
 ```
 
-Not all records include abstracts (19.6% of the observations do not include it).Since our entire analysis is based on abstract text, we remove records without abstracts or publication year,and restrict the corpus to our study period (2016–2025). Another relevant column is `publication_year`, we see there are no missing values, so we do not need to filter any observations out.
+Not all records include abstracts (19.6% NAs). Since our entire analysis is based on abstract text, we remove records without abstracts or publication year, and restrict the corpus to our study period (2016–2025). Another relevant column is `publication_year`, there are no missing values, so we do not need to filter any observations out.
 
 ```{r}
 # Filter: keep only records with an abstract, within our study period
@@ -79,9 +84,7 @@ articles <- articles_raw |>
 describe(articles)
 ```
 
-Removing missing abstracts we went from 12589 to 9484 articles. We have 44 columns from which we will later select only the relevant ones for our analysis.
-
-We explore the distribution of articles by journal and year.
+Removing missing abstracts we went from 12589 to 9484 articles. We explore the distribution of articles by journal and year.
 
 ```{r}
 #| fig-width: 7
@@ -200,7 +203,7 @@ p_total / p_facets / p_bar +
   )
 ```
 
-The six journals in our corpus do not represent a balanced share of articles: HSSC accounts for more than 60% of the articles, while the other five journals are relatively balanced between them. We also observe a temporal imbalance: with publication greatly increasing after 2022. Both imbalances are driven by the same factor: the great increase of publications in Journals part of the Nature Portfolio, particularly HSSC. This imbalance should be kept in mind when interpreting the results, but we will not exclude any journal from the corpus just to improve balance. We are interested in trends in social science abstracts in leading journals ---not in inter-journal comparison---, this imbalance does not affect our research questions, and removing a journal would make the corpus less representative by arbitrarily excluding thousands of publications in leading journals.
+The six journals in our corpus do not represent a balanced share of articles: HSSC accounts for more than 60% of the articles, while the other five journals are relatively balanced between them. We also observe a temporal imbalance: with publication greatly increasing after 2022. Both imbalances are driven by the same factor: the great increase of publications in Journals part of the Nature Portfolio, particularly HSSC. This imbalance should be kept in mind when interpreting the results, but we will not exclude any journal from the corpus just to improve balance. We are interested in trends in social science abstracts in leading journals ---not in inter-journal comparison---, this imbalance does not affect our research questions, and removing a journal would make the corpus less representative by arbitrarily excluding thousands of publications in leading journals. *[IGUAL SE PUEDE RESUMIR SI LO NECESITAMOS]* *[IGUAL SE PUEDE RESUMIR SI LO NECESITAMOS]* *[IGUAL SE PUEDE RESUMIR SI LO NECESITAMOS]**[IGUAL SE PUEDE RESUMIR SI LO NECESITAMOS]* *[IGUAL SE PUEDE RESUMIR SI LO NECESITAMOS]* *[IGUAL SE PUEDE RESUMIR SI LO NECESITAMOS]* *[IGUAL SE PUEDE RESUMIR SI LO NECESITAMOS]*
 
 ## Section 3. Topic analysis \[RQ1 + RQ2\]
 
@@ -688,7 +691,7 @@ In this subsection we operationalise AI as a topic through a keyword lexicon bui
 
 ##### Building the AI lexicon
 
-We manually excluded a significant number of n-grams from these lexicons, prioritising precision over recall. That is, we accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded terms like "random forest" or "decision tree" because they refer to statistical methods often used in social science and not necessarily related to AI; to keep our lexicon easily manageable, we also excluded terms that are too technical and unlikely to appear in social science journal abstracts; and we excluded ambiguous terms ---while Liu et al. (2021, p. 3171) exclude "AI" for being an abbreviation with up to 164 meanings, we will keep it. The authors report it being a problem because it stands for terms present in science and medicine, like "Adequate Intake, Adaptive Iteration, Aridity Index, Artificial Insemination, Active Ingredient, Avian Influenza, Aromatase Inhibitor and Associative Ionization", given the nature of our corpus, restricted to social science journals, this is not a problem for us---.
+*IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ**IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ**IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ**IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* *IGUAL PODEMOS RESUMIR AQUÍ* We manually excluded a significant number of n-grams from these lexicons, prioritising precision over recall. That is, we accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded terms like "random forest" or "decision tree" because they refer to statistical methods often used in social science and not necessarily related to AI; to keep our lexicon easily manageable, we also excluded terms that are too technical and unlikely to appear in social science journal abstracts; and we excluded ambiguous terms ---while Liu et al. (2021, p. 3171) exclude "AI" for being an abbreviation with up to 164 meanings, we will keep it. The authors report it being a problem because it stands for terms present in science and medicine, like "Adequate Intake, Adaptive Iteration, Aridity Index, Artificial Insemination, Active Ingredient, Avian Influenza, Aromatase Inhibitor and Associative Ionization", given the nature of our corpus, restricted to social science journals, this is not a problem for us---.
 
 In addition, we included extra unigrams, bigrams, and trigrams to capture named generative AI models and providers absent from both sources, such as GPT-4, Gemini, Claude, or LLama ---while the names by themselves could lead to ambiguity (the zodiac sign, Claude Lévi-Strauss, the animal, etc.), including the version in bigrams solves this ambiguity---.
 
@@ -1082,7 +1085,7 @@ top_terms7 |>
   )
 ```
 
-At k = 7 the topics reach a pretty clear configuration: economic sustainability (topic 1), politics and elections (2), cultural discourse and identity (3), health and pandemic (4), media and mental health (5), AI and education (6), and gender inequality (7). AI is grouped with education and learning, suggesting that AI is primarly discussed in this context.
+At k = 7 the topics reach a pretty clear configuration: economic sustainability (topic 1), politics and elections (2), cultural discourse and identity (3), health and pandemic (4), media and mental health (5), AI and education (6), and gender inequality (7). AI is grouped with education and learning, suggesting that AI is primarly discussed in this context (and not in a topic by itself).
 
 ##### LDA model with k=8
 
@@ -1198,7 +1201,7 @@ ggplot(topics_by_year7,
 ```
 
 
-We observe a clear pattern: most topics follow a relatively stable increasing trend throughout the decade, while others gradually decline. However, inflection points appear in relation to the main events identified in the previous subsections (the pandemic in 2020 and the rise of generative AI). Notably, while the AI-related topic (topic 6) does not seem to spike precisely at 2022, a general pattern shift is observable across most topics after that year, suggesting the rise of generative AI had an effect, at least as a catalyzer for existing trends. To check the robustness of the pattern, we visualize the same graph on all the models we have performed.
+We observe a clear pattern: topics follow a relatively stable trend throughout the decade. However, inflection points appear in relation to the main events identified in the previous subsections (the pandemic in 2020 and, particularly, the rise of generative AI). While the topic including AI (topic 6) does not seem to shift at 2022, a general pattern shift is observable across most topics after that year, suggesting the rise of generative AI had an effect, at least as a catalyst for existing trends. To check the robustness of the pattern, we visualize the same graph on all the models we have fitted.
 
 
 ```{r}
@@ -1256,22 +1259,24 @@ The shift coinciding with the rise of generative AI is consistent across all val
 
 ### 3.3 Summary of results (Igual en unas conclusiones junto todo lo demás al final del trabajo)
 
-Regarding RQ1, topics addressed by social scientists do not suddenly change from one year to the next, but do show evolution over time. This relatively slow change is to be expected given the ... los científicos sociales necesitan tiempo para producir... especialización que no se consigue d eun día para otro... en fin los tiempos de la ciencia. Having said that, find that some events greatly influence what social scientist pay attention to. In particular, our analyses highlight the influence of two events:
+Regarding RQ1, topics addressed by social scientists do not suddenly change from one year to the next, but do show evolution over time. This relatively slow change is to be expected given the ... los científicos sociales necesitan tiempo para producir... especialización que no se consigue d eun día para otro... en fin los tiempos de la ciencia. Having said that, we find that some events greatly influence what social scientist pay attention to. In particular, our analyses highlight the influence of two events:
 
 First, the COVID-19 pandemic reclaimed the attention of social scientists. It dominates TF-IDF rankings at every n-gram level from 2020 onwards, and defines a topic by itself when topics stabilise at k=7 in the LDA.
 
-Secondly ---and connecting with RQ2---, there is no doubt that AI has received greatly increased attention in recent year, particularly after the rise of generative AI. We observe this pattern in the TF-IDF anlysis, with AI and related terms appearing from 2023 onwards, and in the AI lexicon frequency analysis ---a conservative estimation showed that the proportion of abstracts containing at least one AI-related term went from almost 0% before 2019 to over 10% in 2025. When performing LDA we did not find a topic exclusively for AI; at k = 7 AI appears as an important term within a a topic focused in education. However, when analyzing the evolution of topics over time, we observe big shifts coinciding with the rise of generative AI; this suggests that, even if AI has not become a subject of research by itself ---which makes sense, given that we are talking about leading social science journals, AI is more likely being studied in relation with other topics---, the rise of generative AI seems to have influenced ... other topics.
+Secondly ---and connecting with RQ2---, there is no doubt that AI has received greatly increased attention in recent years, particularly after the rise of generative AI. We observe this pattern in the TF-IDF analysis, with AI and related terms appearing from 2023 onwards, and in the AI lexicon frequency analysis ---a conservative estimation showed that the proportion of abstracts containing at least one AI-related term went from almost 0% before 2019 to over 10% in 2025. When performing LDA we did not find a topic exclusively for AI; at k = 7 AI appears as an important term within a a topic focused in education. However, when analyzing the evolution of topics over time, we observe big shifts coinciding with the rise of generative AI; this suggests that, even if AI has not become a subject of research by itself ---which makes sense, given that we are talking about leading social science journals, AI is more likely being studied in relation with other topics---, the rise of generative AI seems to have influenced ...... other topics.
 
 Limitations:
 - Unbalanced corpus across time (although this reflects a genuine phenomena in top social science journals).
-- An abstract dataset sometimes proved too small (for example, in tf-idf section a single abstact could make some terms break into the top 8). Further research: using full articles (or adding more journals).
-- Cannot establish causality.
+- An abstract dataset may miss trends. Further research: using full articles.
+- We only looked at 6 leading journals (include more in analysis)
+- Cannot establish causality (lo que proprocionamos es puramente descriptivo).
 - QUÉ más?
-
 
 ## Section 4. WRITING STYLE AND THE RISE OF AI \[RQ3\]
 
-As we have seen until now, papers on AI have risen exponentially sincet t
+As we have seen until now, papers on AI have risen exponentially since ChatGPT’s lauch in 2022. At the same time, the use of AI itself to, at least, help scientists in their research has exploded. 30 % of scientists use AI to write their manuscripts, according to a 2023 survey of Nature (Phillaman, 2024). That figure is likely to have increased a lot since there are many AI providers (Claude, Gemini, Mistral, Perplexity…) and its use has democratized a lot.
+
+**ESTA GRÁFICA NO PUEDE ESTAR EN NÚMERO ABSOLUTOS, TENEMOS UN IMBALANCE IMPORTANTE DE ABSTRACTS POR AÑO (MUCHOS EN LOS ÚLTIMOS AÑOS Y MUY POCOS DESPUÉS); POR OTRO LADO, ESTA GRÁFICA YA ESTABA ARRIBA (AUNQUE COMO BAR PLOT), ¿IGUAL ES REDUNDANTE PONERLA?**
 
 ```{r number of articles by year}
 articles |>
@@ -1288,6 +1293,10 @@ articles |>
   )
 ```
 
+When writing text, it appears that chatbots have a specific “tone”, a way of speaking, which is previously designed (for a study of how a chatbot’s “voice” is designed, see Derner et al., 2026) This communication style varies from chatbot to chatbot, being that will systematically use some words or grammatical forms more than others (Rudnika and Mukerjee, 2025). From the beginning of the chatbot era linguists have pointed out that there are certain words that ChatGPT loves to use. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak, since it’s estimated that more than half of today’s text in the internet is AI generated (). Some studies have already tested that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We’ll look into our corpus to see if there is an increase of LLM-related words.
+
+**NOAH TODOS CREEMOS QUE DEBERÍAMOS BORRAR ESTE PLOT DE DEBAJO, SALVO QUE SEA NECESARIO POR ALGO QUE DIGAS EN EL TEXTO**
+
 ```{r}
 tidy_abstracts |>
   count(word, sort = TRUE) |>
@@ -1301,6 +1310,10 @@ tidy_abstracts |>
     y = "Count"
   )
 ```
+
+We’ll use the words that Kousha and Thelwall used in their paper, which are “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These are terms that have the support of other researchers in the area as well. To them, we’ll add “core” which is a word that according to journalists in the Washington Post has been pushed by the newer versions of ChatGPT (Merrill et al, 2025).
+
+Other 4 control terms will be added so that we can compare them to the AI words. This words will be taken out of the most frequently used words in our corpus. Of them, we finally decided on “research”, “analysis”, “policy” and “support”. I also controlled for the fact that there are more papers after 2023 in our corpus by dividing the word frequency to the total papers of that year.
 
 ```{r}
 
@@ -1324,6 +1337,8 @@ llm_words <- tibble(word = c(
 
 control_words <- tibble(word = c("research", "findings", "policy", "support"))
 ```
+
+**ESTE CHUNK NO NOS FUNCIONA**
 
 ```{r}
 pattern_1 <- paste(llm_words$word, collapse = "|")
@@ -1381,9 +1396,9 @@ p_control <- plot_data |>
 p_control | p_llm
 ```
 
-Add CONTROL TERMS
+As we can see, our top 10 most frequent AI-words have a distribution that goes mostly up exponentially after 2023, while our control words either were going up even before AI chatbots or have different patterns, such as "support"."Underscore", "score", "pivotal" and "foster" become more frequent after the lauch of ChatGPT. "Core" was at its lowest just before ChatGPT came out, started being used more and then started to be used again.
 
-What about delve?
+The word “delve", which was considered one of the words that revealed the most if a text was written by AI since the bot pushed it constantly, also follows the same trend, but with a twist. After the developers noticed the excessive use of the word in ChatGPT, much more than of actual human writings, they tweaked the model so that it appears less. This is also shown in our corpus, which strongly suggests that AI may be used systematically for abstracts, since not only do AI-words appear, but also AI developer decisions.
 
 ```{r}
 papers_per_year <- tidy_abstracts_raw |>
@@ -1406,18 +1421,26 @@ tidy_abstracts_raw |>
   )
 ```
 
-How many papers have these words after 2022?
+There are 1445 out of 5843 of total papers published after 2022 have used our AI-words in the corpus. This is 24.73 % of the published articles after the AI boom.
 
 ```{r}
-tidy_abstracts_raw |>
+articles_with_words <- tidy_abstracts_raw |>
   filter(word %in% llm_words$word, publication_year > 2022) |>
   distinct(id) |>
   left_join(
     articles |> select(id, title, publication_year, source_display_name, doi),
     by = "id"
   ) |>
-  arrange(publication_year, title)
+  count()
+articles_with_words
+
+after_ai_papers <- 
+  articles |> filter(publication_year > 2022) |> count()
+
+articles_with_words/after_ai_papers * 100
 ```
+
+This doesn’t prove that a given abstract has been written by AI. This can’t be even proven really, neither if we used an AI detector, because they aren't always reliable. Nevertheless, We’ll pass an AI detector to a sample of 10 of the flagged abstracts to see if it was written by AI, using the API of Sapling, an AI detector.
 
 ```{r}
 library(httr2)
@@ -1455,6 +1478,7 @@ sapling_results <- sample_abstracts |>
 sapling_results
 ```
 
+As we can see, 7/10 have a 0.99 ai_score, which means that they most probably were at least partially written with AI help. Again, this doesn't prove AI wrote it, but it tells us how big of an impact has had in abstract writing, even in high ranked indexed journals.
 
 ## Section 5. SENTIMENT TOWARDS AI IN SOCIAL SCIENCE ABSTRACTS \[RQ4\]
 
@@ -2755,9 +2779,7 @@ target_word_counts |>
 
 
 
-## Section 6. IF WE CAN \[RQ5\]
-
-## Section 7. Conclussions and limitations
+## Section 6. Conclussions and limitations
 
 ## Section 8. References
 
