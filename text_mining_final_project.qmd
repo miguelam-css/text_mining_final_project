@@ -503,66 +503,6 @@ tidy_abstracts <- tidy_abstracts |>
 tidy_abstracts
 ```
 
-#### Summary and visualizations of the clean corpus \[¿IGUAL ESTO HABRÍA QUE QUITARLO?\] ¿realmente es preprocessing? Además, solo es el clean corpus para algunas técnicas, para otras el clean corpus es diferente.
-
-```{r}
-# Total tokens after preprocessing
-nrow(tidy_abstracts)
-
-# Unique vocabulary size
-n_distinct(tidy_abstracts$word)
-
-# Tokens per journal
-tidy_abstracts |>
-  count(source_display_name, name = "n_tokens")
-
-# Top 20 most frequent words overall
-tidy_abstracts |>
-  count(word, sort = TRUE) |>
-  slice_head(n = 20)
-```
-
-```{r}
-# Visualize top words
-tidy_abstracts |>
-  count(word, sort = TRUE) |>
-  slice_head(n = 25) |>
-  mutate(word = reorder(word, n)) |>
-  ggplot(aes(n, word)) +
-  geom_col(fill = "#2C3E6B", width = 0.7) +
-  geom_text(aes(label = scales::comma(n)), 
-            hjust = -0.15, size = 3, color = "#2C3E6B", family = "serif") +
-  scale_x_continuous(
-    expand = expansion(mult = c(0, 0.15)),
-    labels = scales::comma
-  ) +
-  labs(
-    title = "Most frequent terms after preprocessing",
-    subtitle = "Top 25 tokens across all abstracts (2016–2025)",
-    x = "Token frequency",
-    y = NULL
-  ) +
-  theme_minimal(base_family = "serif") +
-  theme(
-    plot.title       = element_text(size = 14, face = "bold", color = "#1a1a2e",
-                                    margin = margin(b = 4)),
-    plot.subtitle    = element_text(size = 10, color = "#4a4a6a",
-                                    margin = margin(b = 12)),
-    plot.caption     = element_text(size = 7, color = "#7a7a9a", hjust = 0,
-                                    margin = margin(t = 10)),
-    axis.text.y      = element_text(size = 10, color = "#1a1a2e"),
-    axis.text.x      = element_text(size = 8,  color = "#4a4a6a"),
-    axis.title.x     = element_text(size = 9,  color = "#4a4a6a",
-                                    margin = margin(t = 8)),
-    panel.grid.major.y = element_blank(),
-    panel.grid.major.x = element_line(color = "#e8e8f0", linewidth = 0.4),
-    panel.grid.minor   = element_blank(),
-    plot.background    = element_rect(fill = "white", color = NA),
-    plot.margin        = margin(20, 25, 15, 15)
-  )
-```
-
-The top 25 terms paint a coherent picture of the corpus. The dominance of *policy*, *political*, *economic*, *environmental*, and *education* reflects some recurrent topics in social science journals. The cluster of *health*, *covid*, and *19* points to the influence of the COVID-19 pandemic, one of the main events in our study period. The prominence of *China* and *Chinese* (both in the top 15), and likely reflects China's growing role as a major actor in global affairs, making it a central subject of inquiry across political science, sociology, and economics research during this period. The *education*–*learning*–*students* cluster suggests that educational research is one of the most represented subfields, while words like *digital* and *media*, signal a sustained interest in technology and communication topics throughout the decade.
 
 ### 3.2 Analysis \[RQ1 + RQ2\]
 
@@ -613,7 +553,8 @@ tfidf_by_year |>
   )
 ```
 
-INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR - que aparezca gun y guns - el aniversario de la muerte de shakespeare - ¿por qué tanto gothic? - lo más evidente: la ruptura de covid 19 - ai a partir de 2023 Lo suyo sería buscar lo que significan cosas como: esg, efl, csr, mml, dms, geg, etc. (Y no en google, buscarlo en el contexto de nuestro corpus usando lo de la context window, pero qué perezote). ¿Metemos el filtro que proponía alicia aunque nos estemos cargando "gun", pea", "ai"? *- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?* -\> En realidad podemos disfrazarlo escribiendo un parrafillo que mencione un par de anécdotas rollo (vemos el aniversario de shakespeare.. guns... cosas de crisis climática... la influencia de la pandemia... PERO CENTRÁNDONOS EN LO QUE NOS OCUPA: parece claro el interés despertado por la ia a partir del public release de chatgpt... con la palabra ia, chatgpt, digitalization)
+Focusing on our research questions, TF-IDF reveals two main findings. First, terms related to the COVID-19 pandemic got some of the highest scores from 2020 onwards, reflecting the influence the pandemic had in social science research. Secondly, and in relation with RQ2, "AI" enters the top 8 in 2023 (coinciding with the rise of generative AI models), and has the highest value in 2025, overtaking "covid". Outside of these, TF-IDF values are notably low, and several high-ranking terms are driven by single abstracts repeating a term, or the publishing of a thematic collection, particularly in the first few years, where we have less articles ---see, for instance, the first two context windows in appendix III---. This is an expected limitation given the relatively small size of our corpus.
+
 
 ##### Bigram TF-IDF by year
 
@@ -676,9 +617,11 @@ tfidf_bigrams_by_year |>
   )
 ```
 
-INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETARINTERPRETAR INTERPRETAR INTERPRETAR (algunas ideas) - Algo evidente: la ruptura de "covid 19", que pasa a estar en el top 2 en los últimos cinco años; - Algo relacionado con nuestro tema: digitial economy, digital transformation - Climate change related: carbon emissions, green innovation, green consumption, crude oil, green finance *- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?*
+The bigram TF-IDF provides more easily interpretable results, and confirms our main observations from the unigram TF-IDF results. COVID-19 pandemic related-terms show the highest values. Beyond the pandemic, affective polarization enters the top 8 values in 2019, probably due to the rise of far right parties in western democracies. From 2023 onwards climate and sustainability words (particularly "carbon emissions") break into the top 8, likely indicating renewed attention to the climate crisis after the pandemic years. Regarding our RQ2, no terms directly related to AI appear, but we see indirectly related terms such as digital economy and digital transformation from 2023 to 2025.
 
 ##### Trigram TF-IDF by year
+
+We perform TF-IDF on trigrams using the same workflow as with bigrams.
 
 ```{r}
 # Same workflow for trigrams: tokenize, separate, filter, reunite
@@ -690,10 +633,10 @@ trigrams_by_year <- articles |>
   filter(
     !word1 %in% stop_words$word,
     !word2 %in% stop_words$word,
-    !word3 %in% stop_words$word,      # <--- Check 1: Standard list
+    !word3 %in% stop_words$word,
     !word1 %in% ngram_stopwords$word,
     !word2 %in% ngram_stopwords$word,
-    !word3 %in% ngram_stopwords$word   # <--- Check 2: Your custom list
+    !word3 %in% ngram_stopwords$word
   ) |>
   unite(trigram, word1, word2, word3, sep = " ") |>
   count(publication_year, trigram, sort = TRUE)
@@ -736,7 +679,8 @@ tfidf_trigrams_by_year |>
   )
 ```
 
-INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR INTERPRETAR - De nuevo: evidente covid 19 pandemic - ecological crisis: ecological civilization construction, regional carbon efficiency, extreme weather impacts, farmers sustainable likelihood, green development behavior... - artificial intelligence aparece en 2024 (un valor super bajo) - Otros relacionados con nuestra movida (enterprise digital transformation, ) *- ¿Tendríamos que decir algo sobre los valores? ¿Son muy bajos? ¿El hecho de que sean muy bajos tiene consecuencias? ¿Hace que el significado sea poco robusto?* - NOTA DEL CLAUDE: Trigrams are sparser than bigrams, so some years may have very few distinctive entries — that itself is informative.
+Trigram TF-IDF confirms the pattern in the previous results. The COVID-19 pandemic appears as the most distinctive topic after 2020 (we see new terms, like "sars cov 2" in 2022). Climate-related terms are still among the most distinctive in the years after the pandemic, suggesting a renewed attention to the topic. Focusing on RQ2, "artificial intelligence ai" enters the top 8 in 2024 and reaches the top 4 in 2025.
+
 
 #### 3.2.2 AI as an emerging topic using an AI-related lexicon
 
@@ -830,7 +774,7 @@ ai_lexicon_trigrams <- c(
 
 ##### Tokenizing abstracts at each n-gram level
 
-Since a unigram, bigram, and trigram lexicon, we need to tokenize the abstracts separately for each, and then match against the corresponding lexicon. After that, we combine all matches in single tibble.
+Since we have a unigram, bigram, and trigram AI lexicon, we need to tokenize the abstracts separately for each, and then match against the corresponding lexicon.
 
 ```{r}
 # Source abstracts. We start from articles each time since n-gram tokenization
@@ -908,46 +852,50 @@ ggplot(ai_proportion, aes(x = publication_year, y = proportion_ai_articles)) +
   )
 ```
 
--   Cambio muy claro, en 2017 y 2018 prácticamente nada. En 2019 sube al 1%, el año en que se hace público chatgpt pasa hasta el 4%, y tres años después supera el 10% de los abstracts continen términos relacionados con IA. (Recordemos que estamos empleando un léxico conservador, seguramente hay más menciones y no estamos capturando todo, pero el patrón es evidente).
--   En relación con nuestra RQ: influencia innegable de la IA.
+The presence of AI-related terms was insignificant before 2019, but it quickly grew, reaching 4% in 2022 ---the year of ChatGPT's public release---, and surpassing 10% in 2025. Since our lexicon prioritizes precision over recall, these are probably underestimates. But the trend is clear: attention to AI has greatly increased following the rise of generative AI tools.
 
-##### Which terms are driving the trend?
-
-We observe a clear trend, let's explore which terms are driving it.
+Let's explore which terms are driving the trend.
 
 ```{r}
 #| fig-width: 6
 #| fig-height: 8
-
-# Top AI terms per year by absolute article count
+# Top AI terms per year by proportion of articles
 ai_hits |>
   # Keep only unique combinations of article, year, and term
   distinct(id, publication_year, term) |>
-  # Count the absolute number of articles per term per year
+  # Count the number of articles per term per year
   count(publication_year, term, name = "article_count") |>
+  # Join total abstracts per year to compute proportion
+  left_join(abstracts_by_year, by = "publication_year") |>
+  mutate(proportion = article_count / total_abstracts) |>
   # Group by publication year and get most frequent terms
   group_by(publication_year) |>
-  slice_max(article_count, n = 5, with_ties = FALSE) |>
+  slice_max(proportion, n = 5, with_ties = FALSE) |>
   # Assign a rank (1 to 5) to the top terms
-  mutate(rank = row_number()) |> 
+  mutate(rank = row_number()) |>
   ungroup() |>
   # Add 0 value to missing ranks so every year has exactly ranks 1 through 5
   # and all bars have the same width
-  complete(publication_year = 2016:max(publication_year), rank = 1:5, fill = list(article_count = 0)) |>
+  complete(publication_year = 2016:max(publication_year), rank = 1:5, fill = list(proportion = 0)) |>
   # Create invisible unique names for the blank bars using spaces
   mutate(
     term = ifelse(is.na(term), strrep(" ", rank), term),
-    term = reorder_within(term, -rank, publication_year) 
+    term = reorder_within(term, -rank, publication_year)
   ) |>
   
   # Plot it
-  ggplot(aes(x = article_count, y = term, fill = factor(publication_year))) +
+  ggplot(aes(x = proportion, y = term, fill = factor(publication_year))) +
   geom_col(show.legend = FALSE, fill = "#2C3E6B") +
   facet_wrap(~ publication_year, scales = "free", ncol = 2) +
+  scale_x_continuous(
+    labels = percent_format(accuracy = 0.1),
+    expand = expansion(mult = c(0, 0.1)),
+    n.breaks = 3
+  ) +
   scale_y_reordered() +
   labs(
     title = "Top AI-related terms per year",
-    subtitle = "Absolute number of articles containing each term",
+    subtitle = "Proportion of articles containing each term",
     x = NULL,
     y = NULL
   ) +
@@ -956,37 +904,34 @@ ai_hits |>
     strip.text         = element_text(face = "bold", size = 10, color = "#1a1a2e"),
     axis.text.y        = element_text(size = 9, color = "#4a4a6a"),
     axis.text.x        = element_text(color = "#4a4a6a"),
-    panel.grid.major.y = element_blank() 
+    panel.grid.major.y = element_blank()
   )
 ```
 
--   Before 2020 not even 5 AI related words from our lexicon.
--   AI wasn't mentioned in 201
--   Artificial intelligence and machine learning the main drivers since they appear in 2020.
--   Worth mentioning: the appearance of chatgpt from 2023 onwards. Also "generative ai in 2024. May point to an increased (and likely) interest in those topics after the raise of generative llms.
-
-Since "ai" seems to be the main driver for the trend, we will explore the pattern of just this word:
+Before 2020 fewer than five abstracts match any lexicon term; from 2020 onwards, *artificial intelligence* and its abbreviation are the main drivers; from 2023, *chatgpt* and *generative ai* appear at the same time as mentions to AI greatly increase, suggesting the rise of generative AI influenced academic interestests in the social sciences. Since the term *"ai"* is the main driver, we explore it by itself:
 
 ```{r}
 # Filter and count for just the term "ai"
 ai_hits |>
-  filter(term == "ai") |> # or filter(str_to_lower(term) == "ai") if you need case-insensitivity
+  filter(term == "ai") |>
   distinct(id, publication_year) |>
   count(publication_year, name = "article_count") |>
-  
-  # Ensure all years from 2016 to the max year are included, filling missing with 0
   complete(publication_year = 2016:max(publication_year), fill = list(article_count = 0)) |>
+  # Join total abstracts per year to compute proportion
+  left_join(abstracts_by_year, by = "publication_year") |>
+  mutate(proportion = article_count / total_abstracts) |>
   
   # Plot it
-  ggplot(aes(x = publication_year, y = article_count)) +
+  ggplot(aes(x = publication_year, y = proportion)) +
   geom_line(color = "#2C3E6B", linewidth = 1) +
   geom_point(color = "#2C3E6B", size = 2) +
   scale_x_continuous(breaks = function(x) seq(ceiling(min(x)), floor(max(x)), by = 1)) +
+  scale_y_continuous(labels = percent_format(accuracy = 0.1)) +
   labs(
     title = "Trend of the term 'ai' over time",
-    subtitle = "Absolute number of articles containing the term",
+    subtitle = "Proportion of articles containing the term",
     x = "Publication Year",
-    y = "Number of Articles"
+    y = "Proportion of articles (%)"
   ) +
   theme_minimal(base_family = "serif") +
   theme(
@@ -996,13 +941,11 @@ ai_hits |>
   )
 ```
 
-Cuando miramos únicamente el término "ai" el patrón se vuelve mucho más evidente, el uso de este término explota a partir de public release de chatgpt.
+When examining the term ai in isolation, the pattern becomes even clearer: its usage explodes from 2023 onwards, coinciding with the rise of generative AI.
 
 #### 3.2.3 Topic modelling (LDA)
 
-We now move from individual words to latent topics. We use LDA to discover the main topics in our corpus and then examine how the weight of these topics has shifted over time. In order to facilitate a meaningful interpretation, instead of performing LDA for each year, we will divide our period of study into three periods, the main events identified in our previous analyses (the COVID-19 pandemic and the public release of chat GPT) act as natural dividers between our periods: 2016-2019 (pre-pandemic), 2020-2022 (pandmic years), and 2023-2025 (generative LLMs years).
-
-**TENEMOS QUE TRATAR DE ASIGNAR UN LABEL A CADA TOPIC BASÁNDONOS EN EN LAS PALABRAS CON LA MAYOR PROBABILIDAD DE ESTAR EN ESE TOPIC. ESPECIALMENTE NOS INTERESA ENCONTRAR ALGUNO EN RELACIÓN A NUESTRAS RQS.**
+We now move from individual words to latent topics. We use LDA to discover the main topics in our corpus and then examine how the weight of these topics has shifted year by year across our full study period (2016–2025).
 
 ##### Preparing the Document-Term Matrix
 
@@ -1022,50 +965,34 @@ cat("Precise sparsity   :", 1 - (464617/358239443), "%")
 
 We get a DTM with 9482 documents and 38566 terms, sparsity close to 100% (99.87%), indicating very varied vocabulary in our abstracts.
 
-##### Fitting the LDA model (k=4)
-
-```{r}
-# Set the number of topics here: (doing it here allows an easier workflow
-# finding the best k).
-k <- 4
-
-# Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
-lda_model
-```
-
-##### Word–topic probabilities (β): what is each topic about?
-
-```{r}
-# Extract per-topic-per-word probabilities (beta)
-topics_beta <- tidy(lda_model, matrix = "beta")
-topics_beta
-```
-
-```{r}
-# Top 10 highest-probability words per topic
-top_terms <- topics_beta |>
-  group_by(topic) |>
-  slice_max(beta, n = 10) |>
-  ungroup() |>
-  arrange(topic, desc(beta))
-
-top_terms
-```
+##### LDA model with k=5
 
 ```{r}
 #| fig-width: 9
 #| fig-height: 8
 
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model5 <- LDA(abstracts_dtm, k = 5, control = list(seed = 123))
+
+# Extract per-topic-per-word probabilities (beta)
+topics_beta5 <- tidy(lda_model5, matrix = "beta")
+
+# Top 10 highest-probability words per topic
+top_terms5 <- topics_beta5 |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
 # Visualize top terms per topic
-top_terms |>
+top_terms5 |>
   mutate(term = reorder_within(term, beta, topic)) |>
   ggplot(aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered() +
   labs(
-    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
+    title = "Top 10 terms per topic (LDA, k = 5)",
     x = expression(beta),
     y = NULL
   ) +
@@ -1076,50 +1003,75 @@ top_terms |>
   )
 ```
 
-##### Fitting the LDA model (k=5)
+We see some patterns, but topics are broad: topic 1 groups economic and sustainability terms, topic 2 politics and elections, topic 3 gender and family, and topic 4 is about COVID-19 and health. Topic 5 mixes education, AI, media, and language. In all topics, but specially 5, it seems like distinct topics are being mixed, we thus tried a higher k.
 
-```{r}
-# Set the number of topics here: (doing it here allows an easier workflow
-# finding the best k).
-k <- 5
-
-# Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
-lda_model
-```
-
-##### Word–topic probabilities (β): what is each topic about?
-
-```{r}
-# Extract per-topic-per-word probabilities (beta)
-topics_beta <- tidy(lda_model, matrix = "beta")
-topics_beta
-```
-
-```{r}
-# Top 10 highest-probability words per topic
-top_terms <- topics_beta |>
-  group_by(topic) |>
-  slice_max(beta, n = 10) |>
-  ungroup() |>
-  arrange(topic, desc(beta))
-
-top_terms
-```
+##### LDA model with k=6
 
 ```{r}
 #| fig-width: 9
 #| fig-height: 8
 
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model6 <- LDA(abstracts_dtm, k = 6, control = list(seed = 123))
+
+# Extract per-topic-per-word probabilities (beta)
+topics_beta6 <- tidy(lda_model6, matrix = "beta")
+
+# Top 10 highest-probability words per topic
+top_terms6 <- topics_beta6 |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
 # Visualize top terms per topic
-top_terms |>
+top_terms6 |>
   mutate(term = reorder_within(term, beta, topic)) |>
   ggplot(aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered() +
   labs(
-    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
+    title = "Top 10 terms per topic (LDA, k = 6)",
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+A new media and mental health topic appears, improving interpretability. However, the remaining topics still show significant overlaps, particularly around education and AI, so we try a higher k.
+
+##### LDA model with k=7
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model7 <- LDA(abstracts_dtm, k = 7, control = list(seed = 123))
+
+# Extract per-topic-per-word probabilities (beta)
+topics_beta7 <- tidy(lda_model7, matrix = "beta")
+
+# Top 10 highest-probability words per topic
+top_terms7 <- topics_beta7 |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+# Visualize top terms per topic
+top_terms7 |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = "Top 10 terms per topic (LDA, k = 7)",
     x = expression(beta),
     y = NULL
   ) +
@@ -1130,50 +1082,36 @@ top_terms |>
   )
 ```
 
-##### Fitting the LDA model (k=6)
+At k = 7 the topics reach a pretty clear configuration: economic sustainability (topic 1), politics and elections (2), cultural discourse and identity (3), health and pandemic (4), media and mental health (5), AI and education (6), and gender inequality (7). AI is grouped with education and learning, suggesting that AI is primarly discussed in this context.
 
-```{r}
-# Set the number of topics here: (doing it here allows an easier workflow
-# finding the best k).
-k <- 6
-
-# Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
-lda_model
-```
-
-##### Word–topic probabilities (β): what is each topic about?
-
-```{r}
-# Extract per-topic-per-word probabilities (beta)
-topics_beta <- tidy(lda_model, matrix = "beta")
-topics_beta
-```
-
-```{r}
-# Top 10 highest-probability words per topic
-top_terms <- topics_beta |>
-  group_by(topic) |>
-  slice_max(beta, n = 10) |>
-  ungroup() |>
-  arrange(topic, desc(beta))
-
-top_terms
-```
+##### LDA model with k=8
 
 ```{r}
 #| fig-width: 9
 #| fig-height: 8
 
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model8 <- LDA(abstracts_dtm, k = 8, control = list(seed = 123))
+
+# Extract per-topic-per-word probabilities (beta)
+topics_beta8 <- tidy(lda_model8, matrix = "beta")
+
+# Top 10 highest-probability words per topic
+top_terms8 <- topics_beta8 |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
 # Visualize top terms per topic
-top_terms |>
+top_terms8 |>
   mutate(term = reorder_within(term, beta, topic)) |>
   ggplot(aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered() +
   labs(
-    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
+    title = "Top 10 terms per topic (LDA, k = 8)",
     x = expression(beta),
     y = NULL
   ) +
@@ -1184,118 +1122,156 @@ top_terms |>
   )
 ```
 
-##### Fitting the LDA model (k=7)
+Interpretability decreases, with a new topic combining climate, policy, risk, and legal terms. We thus choose k = 7 to analyze the evolution of topics over time.
+
+##### How do topics evolve year by year? 
 
 ```{r}
-# Set the number of topics here: (doing it here allows an easier workflow
-# finding the best k).
-k <- 7
+#| fig-width: 10
+#| fig-height: 5
 
-# Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
-lda_model
-```
+# Extract per-document-per-topic probabilities (gamma)
+topics_gamma7 <- tidy(lda_model7, matrix = "gamma")
 
-##### Word–topic probabilities (β): what is each topic about?
+# Join gamma with article metadata and average by year
+topics_by_year7 <- topics_gamma7 |>
+  left_join(
+    articles |>
+      select(id, publication_year) |>
+      mutate(id = as.character(id)),
+    by = c("document" = "id")
+  ) |>
+  group_by(topic, publication_year) |>
+  summarise(mean_gamma = mean(gamma), .groups = "drop")
 
-```{r}
-# Extract per-topic-per-word probabilities (beta)
-topics_beta <- tidy(lda_model, matrix = "beta")
-topics_beta
-```
-
-```{r}
-# Top 10 highest-probability words per topic
-top_terms <- topics_beta |>
+# First point of each topic for the label layer (all except topic 1)
+first_points <- topics_by_year7 |>
   group_by(topic) |>
-  slice_max(beta, n = 10) |>
-  ungroup() |>
-  arrange(topic, desc(beta))
+  slice_min(publication_year, n = 1) |>
+  filter(topic != 1)
 
-top_terms
-```
+# Last point of topic 1 for the label layer
+last_point_t1 <- topics_by_year7 |>
+  filter(topic == 1) |>
+  slice_max(publication_year, n = 1)
 
-```{r}
-#| fig-width: 9
-#| fig-height: 8
-
-# Visualize top terms per topic
-top_terms |>
-  mutate(term = reorder_within(term, beta, topic)) |>
-  ggplot(aes(beta, term, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  scale_y_reordered() +
+# Plot: topic prevalence by year (line plot)
+ggplot(topics_by_year7,
+       aes(x = publication_year, y = mean_gamma, color = factor(topic))) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  # Larger point at first year for topics 2-7
+  geom_point(data = first_points, size = 7) +
+  # Topic number inside the first point (topics 2-7)
+  geom_text(data = first_points, aes(label = topic),
+            color = "white", size = 3, fontface = "bold", family = "serif") +
+  # Larger point at last year for topic 1
+  geom_point(data = last_point_t1, size = 7) +
+  # Topic number inside the last point (topic 1)
+  geom_text(data = last_point_t1, aes(label = topic),
+            color = "white", size = 3, fontface = "bold", family = "serif") +
+  # Reference lines at key events
+  geom_vline(xintercept = 2019.5, linetype = "dashed",
+             color = "grey50", linewidth = 0.4) +
+  geom_vline(xintercept = 2022.5, linetype = "dashed",
+             color = "grey50", linewidth = 0.4) +
+  annotate("text", x = 2017.5, y = Inf, label = "Pre-pandemic",
+           vjust = 1.5, size = 3, color = "grey40", family = "serif") +
+  annotate("text", x = 2021,   y = Inf, label = "Pandemic",
+           vjust = 1.5, size = 3, color = "grey40", family = "serif") +
+  annotate("text", x = 2024,   y = Inf, label = "Rise of generative AI",
+           vjust = 1.5, size = 3, color = "grey40", family = "serif") +
+  scale_x_continuous(breaks = 2016:2025) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   labs(
-    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
-    x = expression(beta),
-    y = NULL
+    title    = "Topic prevalence over time (LDA, k = 7)",
+    subtitle = "Average γ per topic per year — dashed lines mark key inflection points",
+    x = "Publication year",
+    y = "Average topic proportion (γ)"
   ) +
   theme_minimal(base_family = "serif") +
   theme(
-    strip.text  = element_text(face = "bold"),
-    axis.text.y = element_text(size = 9)
+    plot.title      = element_text(size = 14, face = "bold"),
+    plot.subtitle   = element_text(size = 10, color = "#4a4a6a"),
+    legend.position = "none"
   )
 ```
 
-##### Fitting the LDA model (k=8)
+
+We observe a clear pattern: most topics follow a relatively stable increasing trend throughout the decade, while others gradually decline. However, inflection points appear in relation to the main events identified in the previous subsections (the pandemic in 2020 and the rise of generative AI). Notably, while the AI-related topic (topic 6) does not seem to spike precisely at 2022, a general pattern shift is observable across most topics after that year, suggesting the rise of generative AI had an effect, at least as a catalyzer for existing trends. To check the robustness of the pattern, we visualize the same graph on all the models we have performed.
+
 
 ```{r}
-# Set the number of topics here: (doing it here allows an easier workflow
-# finding the best k).
-k <- 8
+# Named list to identify models in the plot
+model_list <- list(
+  "k = 5" = lda_model5,
+  "k = 6" = lda_model6,
+  "k = 7" = lda_model7,
+  "k = 8" = lda_model8
+)
 
-# Fit the LDA model. We set a seed for reproducibility.
-lda_model <- LDA(abstracts_dtm, k = k, control = list(seed = 123))
-lda_model
-```
+# Extract gamma for all models and bind them into one dataframe
+# .id = "k_val" creates a column with the names from the list above
+all_gamma <- map_dfr(model_list, ~tidy(.x, matrix = "gamma"), .id = "k_val")
 
-##### Word–topic probabilities (β): what is each topic about?
+# Join with metadata and average by year and k_val
+all_topics_by_year <- all_gamma |>
+  left_join(
+    articles |>
+      select(id, publication_year) |>
+      mutate(id = as.character(id)),
+    by = c("document" = "id")
+  ) |>
+  group_by(k_val, topic, publication_year) |>
+  summarise(mean_gamma = mean(gamma), .groups = "drop")
 
-```{r}
-# Extract per-topic-per-word probabilities (beta)
-topics_beta <- tidy(lda_model, matrix = "beta")
-topics_beta
-```
-
-```{r}
-# Top 10 highest-probability words per topic
-top_terms <- topics_beta |>
-  group_by(topic) |>
-  slice_max(beta, n = 10) |>
-  ungroup() |>
-  arrange(topic, desc(beta))
-
-top_terms
-```
-
-```{r}
-#| fig-width: 9
-#| fig-height: 8
-
-# Visualize top terms per topic
-top_terms |>
-  mutate(term = reorder_within(term, beta, topic)) |>
-  ggplot(aes(beta, term, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  scale_y_reordered() +
+# Create the faceted plot
+ggplot(all_topics_by_year, 
+       aes(x = publication_year, y = mean_gamma, color = factor(topic))) +
+  geom_line(linewidth = 0.8, alpha = 0.8) +
+  geom_point(size = 1.2) +
+  # Add reference lines (Annotations removed for clarity in facets)
+  geom_vline(xintercept = c(2019.5, 2022.5), linetype = "dashed", 
+             color = "grey70", linewidth = 0.3) +
+  # Faceting: 2 columns, 2 rows. free_y is critical for comparing trends.
+  facet_wrap(~ k_val, ncol = 2, scales = "free_y") + 
+  scale_x_continuous(breaks = seq(2016, 2024, by = 2)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
   labs(
-    title = paste0("Top 10 terms per topic (LDA, k = ", k, ")"),
-    x = expression(beta),
-    y = NULL
+    title = "Topic Prevalence Stability across different values of k",
+    x = "Publication Year",
+    y = "Mean Topic Proportion (γ)",
+    color = "Topic #"
   ) +
   theme_minimal(base_family = "serif") +
   theme(
-    strip.text  = element_text(face = "bold"),
-    axis.text.y = element_text(size = 9)
+    legend.position = "bottom",
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold"),
+    panel.spacing = unit(1.5, "lines")
   )
 ```
-#### CUANDO HAYAMOS DECIDIDO EL MEJOR K SEGUIMOS CON ESTO:
 
-**CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO** **CUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTOCUANDO HAYAMOS ELEGIDO K SEGUIMOS CON ESTO**
+The shift after 2022 is consistent across all values of k, the finding appears to be robust.
+
+### 3.3 Summary of results (Igual en unas conclusiones junto todo lo demás al final del trabajo)
+
+Regarding RQ1, topics addressed by social scientists do not suddenly change from one year to the next, but do show evolution over time. This relatively slow change is to be expected given the ... los científicos sociales necesitan tiempo para producir... especialización que no se consigue d eun día para otro... en fin los tiempos de la ciencia. Having said that, find that some events greatly influence what social scientist pay attention to. In particular, our analyses highlight the influence of two events:
+
+First, the COVID-19 pandemic reclaimed the attention of scocial scientists. It dominates TF-IDF rankings at every n-gram level from 2020 onwards, and defines a topic by itself when topics stabilise at k=7 in the LDA.
+
+Secondly ---and connecting with RQ2---, there is no doubt that AI has received greatly increased attention in recent year, particularly after the rise of generative AI. We observe this pattern in the TF-IDF anlysis, with AI and related terms appearing from 2023 onwards, and in the AI lexicon frequency analyis ---a conservative estimation showed that the proportion of abstracts containing at least one AI-related term went from almost 0% before 2019 to over 10% in 2025. When performing LDA we did not find a topic exclusively for AI; at k = 7 AI appears as an important term within a a topic focused in education. However, when analyzing the evolution of topics over time, we observe big shifts coinciding with the rise of generative AI; this suggests that, even if AI by itself has not become a subject of reasearch by itself ---which makes sense, given that we are talking about leading social science journals, AI is more likely being studied in relation with other topics---, the rise of generative AI seems to have influenced ... other topics.
+
+Limitations:
+- Unbalanced corpus across time (although this reflects a genuine phenomena in top social science journals).
+- An abstract dataset sometimes proved too small (for example, in tf-idf section a single abstact could make some terms break into the top 8). Further reasearch: using full articles (or adding more journals).
+- Cannot establish causality.
+- QUÉ más?
 
 
+```{r}
+
+```
 
 
 ## Section 4. WRITING STYLE AND THE RISE OF AI \[RQ3\]
@@ -1639,3 +1615,191 @@ No prose before or after the code block.
 </output_format>
 ```
 :::
+
+## Appendix III - Unigram TF-IDF context windows
+
+Some of the terms in the TF-IDF results were unclear: they were abbreviations or unexpected terms with no immediately evident interpretation. In order to understand them better, we explored their context windows using the `kwic` function from the `quanteda` package. We include them here for transparency and to allow the reader to verify our interpretations.
+
+```{r}
+# Create the corpus, linking text to our ID column
+abstracts_corpus <- corpus(articles,
+                           text_field = "abstract",
+                           docid_field = "id")
+```
+
+
+```{r}
+# Year 2016
+# kwic = 400th
+# We specify `quanteda::tokens` because there are conflicts with other libraries
+kwic(quanteda::tokens(abstracts_corpus), "400th", window = 8)
+# kwic = geg
+kwic(quanteda::tokens(abstracts_corpus), "geg", window = 8)
+# kwic = mlg
+kwic(quanteda::tokens(abstracts_corpus), "mlg", window = 8)
+
+# Year 2017
+# kwic = gothic
+kwic(quanteda::tokens(abstracts_corpus), "gothic", window = 8)
+# kwic = fia
+kwic(quanteda::tokens(abstracts_corpus), "fia", window = 8)
+
+# Year 2018
+# kwic = graffiti
+kwic(quanteda::tokens(abstracts_corpus), "graffiti", window = 8)
+# kwic = revok
+kwic(quanteda::tokens(abstracts_corpus), "revok", window = 8)
+# kwic = tves
+kwic(quanteda::tokens(abstracts_corpus), "tves", window = 8)
+# kwic = gamh
+kwic(quanteda::tokens(abstracts_corpus), "gamh", window = 8)
+# kwic = nua
+kwic(quanteda::tokens(abstracts_corpus), "nua", window = 8)
+
+# Year 2019
+# kwic = gun
+kwic(quanteda::tokens(abstracts_corpus), "gun", window = 8)
+# kwic = guns
+kwic(quanteda::tokens(abstracts_corpus), "guns", window = 8)
+# kwic = lgds
+kwic(quanteda::tokens(abstracts_corpus), "lgds", window = 8)
+# kwic = ccs
+kwic(quanteda::tokens(abstracts_corpus), "ccs", window = 8)
+
+# Year 2020
+# kwic = pea
+kwic(quanteda::tokens(abstracts_corpus), "pea", window = 6)
+# kwic = mta
+kwic(quanteda::tokens(abstracts_corpus), "mta", window = 6)
+# kwic = silcrete
+kwic(quanteda::tokens(abstracts_corpus), "silcrete", window = 8)
+
+# Year 2021
+# kwic = coconut
+kwic(quanteda::tokens(abstracts_corpus), "coconut", window = 8)
+# kwic = hcws
+kwic(quanteda::tokens(abstracts_corpus), "hcws", window = 6)
+# kwic = wc
+kwic(quanteda::tokens(abstracts_corpus), "wc", window = 6)
+
+# Year 2023
+# kwic = csr
+kwic(quanteda::tokens(abstracts_corpus), "csr", window = 6)
+# kwic = dms
+kwic(quanteda::tokens(abstracts_corpus), "dms", window = 6)
+# kwic = smmes
+kwic(quanteda::tokens(abstracts_corpus), "smmes", window = 6)
+
+# Year 2024-2025
+# kwic = esg
+kwic(quanteda::tokens(abstracts_corpus), "esg", window = 6)
+# kwic = efl
+kwic(quanteda::tokens(abstracts_corpus), "efl", window = 6)
+# kwic = fintech
+kwic(quanteda::tokens(abstracts_corpus), "fintech", window = 6)
+```
+
+## Appendix IV - Bigram TF-IDF context windows
+
+Some of the terms in the TF-IDF results were unclear: they were abbreviations or unexpected terms with no immediately evident interpretation. In order to understand them better, we explored their context windows using the `kwic` function from the `quanteda` package. We include them here for transparency and to allow the reader to verify our interpretations.
+
+```{r}
+# Year 2016
+# kwic = european sociological (this is metadata that we cannot filter without
+# potentially losing relevant information, since the bigram is composed by
+# two terms that could be meaninful in other combinations)
+kwic(quanteda::tokens(abstracts_corpus), phrase("european sociological"), window = 8)
+
+# Year 2017
+# kwic = social pact
+kwic(quanteda::tokens(abstracts_corpus), phrase("social pact"), window = 8)
+# kwic = veto player
+kwic(quanteda::tokens(abstracts_corpus), phrase("veto player"), window = 8)
+
+# Year 2018
+# kwic = mind upload
+kwic(quanteda::tokens(abstracts_corpus), phrase("mind upload"), window = 8)
+# kwic = fairy tale
+kwic(quanteda::tokens(abstracts_corpus), phrase("fairy tale"), window = 8)
+
+# Year 2020
+# kwic = science diplomacy
+kwic(quanteda::tokens(abstracts_corpus), phrase("science diplomacy"), window = 8)
+# kwic = grass pea
+kwic(quanteda::tokens(abstracts_corpus), phrase("grass pea"), window = 8)
+# kwic = gun culture
+kwic(quanteda::tokens(abstracts_corpus), phrase("gun culture"), window = 8)
+# kwic = agile sd
+kwic(quanteda::tokens(abstracts_corpus), phrase("agile sd"), window = 8)
+# kwic = uhi tools
+kwic(quanteda::tokens(abstracts_corpus), phrase("uhi tools"), window = 8)
+# kwic = sa mta
+kwic(quanteda::tokens(abstracts_corpus), phrase("sa mta"), window = 8)
+
+# Year 2021
+# kwic = frontline hcws
+kwic(quanteda::tokens(abstracts_corpus), phrase("frontline hcws"), window = 8)
+
+# Year 2023
+# kwic = burden reduction
+kwic(quanteda::tokens(abstracts_corpus), phrase("burden reduction"), window = 8)
+
+# Year 2025
+kwic(quanteda::tokens(abstracts_corpus), phrase("carbon emissions"), window = 8)
+```
+
+
+## Appendix V - Trigram TF-IDF context windows
+
+Some of the terms in the TF-IDF results were unclear: they were abbreviations or unexpected terms with no immediately evident interpretation. In order to understand them better, we explored their context windows using the `kwic` function from the `quanteda` package. We include them here for transparency and to allow the reader to verify our interpretations.
+
+```{r}
+# Year 2016
+# kwic = balance lifestyle mental
+kwic(quanteda::tokens(abstracts_corpus), phrase("balance lifestyle mental"), window = 8)
+
+# Year 2017
+# kwic = veto player theory
+kwic(quanteda::tokens(abstracts_corpus), phrase("veto player theory"), window = 8)
+
+# Year 2018
+# kwic = search query data
+kwic(quanteda::tokens(abstracts_corpus), phrase("search query data"), window = 8)
+# kwic = axial age concept
+kwic(quanteda::tokens(abstracts_corpus), phrase("axial age concept"), window = 8)
+
+# Year 2019
+# kwic = eclipse prediction scheme
+kwic(quanteda::tokens(abstracts_corpus), phrase("eclipse prediction scheme"), window = 8)
+# kwic = zika conspiracy theories
+kwic(quanteda::tokens(abstracts_corpus), phrase("zika conspiracy theories"), window = 8)
+
+# Year 2020
+# kwic = grass pea production
+kwic(quanteda::tokens(abstracts_corpus), phrase("grass pea production"), window = 8)
+# kwic = agile sd implementation
+kwic(quanteda::tokens(abstracts_corpus), phrase("agile sd implementation"), window = 8)
+# kwic = probability ratio index
+kwic(quanteda::tokens(abstracts_corpus), phrase("probability ratio index"), window = 8)
+
+# Year 2021
+# kwic = dravidian tooth word
+kwic(quanteda::tokens(abstracts_corpus), phrase("dravidian tooth word"), window = 8)
+# kwic = proto dravidian tooth
+kwic(quanteda::tokens(abstracts_corpus), phrase("proto dravidian tooth"), window = 8)
+# kwic = av pilot projects
+kwic(quanteda::tokens(abstracts_corpus), phrase("av pilot projects"), window = 8)
+# kwic = short run sustainability
+kwic(quanteda::tokens(abstracts_corpus), phrase("short run sustainability"), window = 8)
+
+# Year 2022
+# kwic = golf simulation industry
+kwic(quanteda::tokens(abstracts_corpus), phrase("golf simulation industry"), window = 8)
+# kwic = significantly lower sle
+kwic(quanteda::tokens(abstracts_corpus), phrase("significantly lower sle"), window = 8)
+
+# Year 2024
+# kwic = squares structural equation
+kwic(quanteda::tokens(abstracts_corpus), phrase("squares structural equation"), window = 8)
+```
+
