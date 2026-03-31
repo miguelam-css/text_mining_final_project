@@ -210,7 +210,7 @@ The techniques in this section use different tokenization and filtering strategi
 
 We work with two filtering tools:
 
-1.  **Standard stopwords**: using `stop_words` from `tidytext`. This will be applied in all techiniques.
+1.  **Standard stopwords**: using `stop_words` from `tidytext`. This will be applied in all techinques.
 
 2.  **Domain-specific stopwords**: a list of words that provide no relevant information in our context. This tool (`domain_stopwords`) is fully applied in unigram analyses (both TF-IDF and LDA), a subset of it (`ngram_stopwrods`) is used in n-gram analyses ---for more details on why, see section 3.1.2---.
 
@@ -414,7 +414,7 @@ domain_stopwords <- tibble(
     "absence", "presence", "existence"
   ),
   
-  # Definining a category column  allows us to easily subset later
+  # Defining a category column  allows us to easily subset later
   category = c(
     # 1. Academic boilerplate verbs
     rep("boilerplate_verb", 310),
@@ -479,7 +479,7 @@ tidy_abstracts_raw <- articles |>
 
 #### Filtered unigram corpus (shared by unigram TF-IDF and LDA)
 
-Since both the unigram TF-IDF (section 3.2.1) and the LDA (section 3.2.3) use the same tokenization and filtering, we perform it here, to avoid repetitions later.
+Since both the unigram TF-IDF (section 3.2.1) and the LDA (section 3.2.3) use the same tokenization and filtering, we perform it here, to avoid repetitions.
 
 We start by tokenizing at the word level:
 
@@ -684,11 +684,11 @@ Trigram TF-IDF confirms the pattern in the previous results. The COVID-19 pandem
 
 #### 3.2.2 AI as an emerging topic using an AI-related lexicon
 
-In this subsection we operationalise AI as a topic through a keyword lexicon built from the works of Liu, Shapira, and Yue (2021) and Ding, Lawson, and Shapira (2025). These works ---which fully cover our study period--- explore bibliometric search strategies for identifying AI-related publications, the lexicons they build well thought out and validated by their research, and can prove useful for our purposes. We built three lexicons from these sources: a unigrams, a bigrams, and a trigram lexicon.
+In this subsection we operationalise AI as a topic through a keyword lexicon built from the works of Liu, Shapira, and Yue (2021) and Ding, Lawson, and Shapira (2025). These works ---which fully cover our study period--- explore bibliometric search strategies for identifying AI-related publications, the lexicons they build are well thought out and validated by their research, and can prove useful for our purposes. We built three lexicons from these sources: a unigram, a bigram, and a trigram lexicon.
 
 ##### Building the AI lexicon
 
-We manually excluded a significant number of n-grams from these lexicons, prioritising precision over recall. That is, we accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded terms like "random forest" or "decision tree" because they refer to statistical methods often used in social science and not necessarily related to AI; to keep our lexicon easily manageable, we also excluded terms that are too technical and unlikely to appear in social science journal abstracts; and we excluded ambiguous terms ---while Liu et al. (2021, p. 3171) exclude "AI" for being an abbreviation with up to 164 meanings, we will keep it. The authors report it being a problem because it stand for terms present in science and medicine, like "Adequate Intake, Adaptive Iteration, Aridity Index, Artificial Insemination, Active Ingredient, Avian Influenza, Aromatase Inhibitor and Associative Ionization", given the nature of our corpus, restricted to social science journals, this is not a problem for us---.
+We manually excluded a significant number of n-grams from these lexicons, prioritising precision over recall. That is, we accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded terms like "random forest" or "decision tree" because they refer to statistical methods often used in social science and not necessarily related to AI; to keep our lexicon easily manageable, we also excluded terms that are too technical and unlikely to appear in social science journal abstracts; and we excluded ambiguous terms ---while Liu et al. (2021, p. 3171) exclude "AI" for being an abbreviation with up to 164 meanings, we will keep it. The authors report it being a problem because it stands for terms present in science and medicine, like "Adequate Intake, Adaptive Iteration, Aridity Index, Artificial Insemination, Active Ingredient, Avian Influenza, Aromatase Inhibitor and Associative Ionization", given the nature of our corpus, restricted to social science journals, this is not a problem for us---.
 
 In addition, we included extra unigrams, bigrams, and trigrams to capture named generative AI models and providers absent from both sources, such as GPT-4, Gemini, Claude, or LLama ---while the names by themselves could lead to ambiguity (the zodiac sign, Claude Lévi-Strauss, the animal, etc.), including the version in bigrams solves this ambiguity---.
 
@@ -908,7 +908,7 @@ ai_hits |>
   )
 ```
 
-Before 2020 fewer than five abstracts match any lexicon term; from 2020 onwards, *artificial intelligence* and its abbreviation are the main drivers; from 2023, *chatgpt* and *generative ai* appear at the same time as mentions to AI greatly increase, suggesting the rise of generative AI influenced academic interestests in the social sciences. Since the term *"ai"* is the main driver, we explore it by itself:
+Before 2020 fewer than five abstracts match any lexicon term; from 2020 onwards, *artificial intelligence* and its abbreviation are the main drivers; from 2023, *chatgpt* and *generative ai* appear at the same time as mentions to AI greatly increase, suggesting the rise of generative AI influenced academic interests in the social sciences. Since the term *"ai"* is the main driver, we explore it by itself:
 
 ```{r}
 # Filter and count for just the term "ai"
@@ -959,7 +959,7 @@ abstracts_dtm <- tidy_abstracts |>
 
 abstracts_dtm
 
-# Manually alculate sparsity manually to see the exact value:
+# Manually calculate sparsity to see the exact value:
 cat("Precise sparsity   :", 1 - (464617/358239443), "%")
 ```
 
@@ -1003,7 +1003,7 @@ top_terms5 |>
   )
 ```
 
-We see some patterns, but topics are broad: topic 1 groups economic and sustainability terms, topic 2 politics and elections, topic 3 gender and family, and topic 4 is about COVID-19 and health. Topic 5 mixes education, AI, media, and language. In all topics, but specially 5, it seems like distinct topics are being mixed, we thus tried a higher k.
+We see some patterns, but topics are broad: topic 1 groups economic and sustainability terms, topic 2 politics and elections, topic 3 gender and family, and topic 4 is about COVID-19 and health. Topic 5 mixes education, AI, media, and language. In all topics, but especially 5, it seems like distinct topics are being mixed, we thus tried a higher k.
 
 ##### LDA model with k=6
 
@@ -1252,31 +1252,1508 @@ ggplot(all_topics_by_year,
   )
 ```
 
-The shift after 2022 is consistent across all values of k, the finding appears to be robust.
+The shift coinciding with the rise of generative AI is consistent across all values of k.
 
 ### 3.3 Summary of results (Igual en unas conclusiones junto todo lo demás al final del trabajo)
 
 Regarding RQ1, topics addressed by social scientists do not suddenly change from one year to the next, but do show evolution over time. This relatively slow change is to be expected given the ... los científicos sociales necesitan tiempo para producir... especialización que no se consigue d eun día para otro... en fin los tiempos de la ciencia. Having said that, find that some events greatly influence what social scientist pay attention to. In particular, our analyses highlight the influence of two events:
 
-First, the COVID-19 pandemic reclaimed the attention of scocial scientists. It dominates TF-IDF rankings at every n-gram level from 2020 onwards, and defines a topic by itself when topics stabilise at k=7 in the LDA.
+First, the COVID-19 pandemic reclaimed the attention of social scientists. It dominates TF-IDF rankings at every n-gram level from 2020 onwards, and defines a topic by itself when topics stabilise at k=7 in the LDA.
 
-Secondly ---and connecting with RQ2---, there is no doubt that AI has received greatly increased attention in recent year, particularly after the rise of generative AI. We observe this pattern in the TF-IDF anlysis, with AI and related terms appearing from 2023 onwards, and in the AI lexicon frequency analyis ---a conservative estimation showed that the proportion of abstracts containing at least one AI-related term went from almost 0% before 2019 to over 10% in 2025. When performing LDA we did not find a topic exclusively for AI; at k = 7 AI appears as an important term within a a topic focused in education. However, when analyzing the evolution of topics over time, we observe big shifts coinciding with the rise of generative AI; this suggests that, even if AI by itself has not become a subject of reasearch by itself ---which makes sense, given that we are talking about leading social science journals, AI is more likely being studied in relation with other topics---, the rise of generative AI seems to have influenced ... other topics.
+Secondly ---and connecting with RQ2---, there is no doubt that AI has received greatly increased attention in recent year, particularly after the rise of generative AI. We observe this pattern in the TF-IDF anlysis, with AI and related terms appearing from 2023 onwards, and in the AI lexicon frequency analysis ---a conservative estimation showed that the proportion of abstracts containing at least one AI-related term went from almost 0% before 2019 to over 10% in 2025. When performing LDA we did not find a topic exclusively for AI; at k = 7 AI appears as an important term within a a topic focused in education. However, when analyzing the evolution of topics over time, we observe big shifts coinciding with the rise of generative AI; this suggests that, even if AI has not become a subject of research by itself ---which makes sense, given that we are talking about leading social science journals, AI is more likely being studied in relation with other topics---, the rise of generative AI seems to have influenced ... other topics.
 
 Limitations:
 - Unbalanced corpus across time (although this reflects a genuine phenomena in top social science journals).
-- An abstract dataset sometimes proved too small (for example, in tf-idf section a single abstact could make some terms break into the top 8). Further reasearch: using full articles (or adding more journals).
+- An abstract dataset sometimes proved too small (for example, in tf-idf section a single abstact could make some terms break into the top 8). Further research: using full articles (or adding more journals).
 - Cannot establish causality.
 - QUÉ más?
 
 
+## Section 4. WRITING STYLE AND THE RISE OF AI \[RQ3\]
+
+As we have seen until now, papers on AI have risen exponentially sincet t
+
+```{r number of articles by year}
+articles |>
+  filter(!is.na(abstract)) |>
+  count(publication_year) |>
+  ggplot(aes(x = publication_year, y = n)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = 2016:2025) +
+  labs(
+    title = "Number of Abstracts by Year",
+    x = "Publication Year",
+    y = "Number of Abstracts"
+  )
+```
+
+```{r}
+tidy_abstracts |>
+  count(word, sort = TRUE) |>
+  slice_max(n, n = 20) |>
+  ggplot(aes(x = reorder(word, n), y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top 20 Most Frequent Words in the Corpus",
+    x = "Word",
+    y = "Count"
+  )
+```
+
 ```{r}
 
+#Based in Kousha & Thelwall, 2025
+llm_words <- tibble(word = c(
+  "underscore", "underscores", "underscored", "underscoring",
+  "delve", "delves", "delved", "delving",
+  "showcase", "showcases", "showcased", "showcasing",
+  "unveil", "unveils", "unveiled", "unveiling",
+  "intricate", "intricates", "intricated", "intricating",
+  "meticulous", "meticulously",
+  "pivotal",
+  "heighten", "heightens", "heightened", "heightening",
+  "nuance", "nuances", "nuanced",
+  "bolster", "bolsters", "bolstered", "bolstering",
+  "foster", "fosters", "fostered", "fostering",
+  "interplay", "interplays", "interplayed", "interplaying",
+# Added to account for 2025 findings
+  "core"
+))
+
+control_words <- tibble(word = c("research", "findings", "policy", "support"))
+```
+
+```{r}
+pattern_1 <- paste(llm_words$word, collapse = "|")
+
+llm_words_freq <- tidy_abstracts_raw |>
+  filter(str_detect(word, regex(pattern_1, ignore_case = TRUE))) |> 
+  count(word, sort = TRUE)
+
+ggplot(llm_words_freq |> 
+         filter(!word %in% c("analysis", "findings", "policy", "support", "policymakers")) |>
+         head(20), aes(x = reorder(word, n), y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Frequency of AI signature Words in Abstracts",
+    x = "Word",
+    y = "Count"
+  )
+```
+
+```{r}
+library(patchwork)
+
+top10_words_clean <- llm_words_freq |>
+  filter(!word %in% control_words$word) |>
+  slice_max(n, n = 10) |>
+  pull(word)
+
+papers_per_year <- tidy_abstracts_raw |>
+  distinct(id, publication_year) |>
+  count(publication_year, name = "total_papers")
+
+plot_data <- tidy_abstracts_raw |>
+  filter(word %in% c(top10_words_clean, control_words$word)) |>
+  count(word, publication_year) |>
+  left_join(papers_per_year, by = "publication_year") |>
+  mutate(pct = n / total_papers * 100)
+
+p_llm <- plot_data |>
+  filter(word %in% top10_words_clean) |>
+  ggplot(aes(x = publication_year, y = pct)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ word, scales = "free_y", ncol = 2) +
+  labs(title = "Top 10 LLM Words", x = "Year", y = "% of Papers")
+
+p_control <- plot_data |>
+  filter(word %in% control_words$word) |>
+  ggplot(aes(x = publication_year, y = pct)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ word, scales = "free_y", ncol = 1) +
+  labs(title = "Control Words", x = "Year", y = "% of Papers")
+
+p_control | p_llm
+```
+
+Add CONTROL TERMS
+
+What about delve?
+
+```{r}
+papers_per_year <- tidy_abstracts_raw |>
+  distinct(id, publication_year) |>
+  count(publication_year, name = "total_papers")
+
+tidy_abstracts_raw |>
+  filter(word == "delve") |>
+  count(publication_year) |>
+  left_join(papers_per_year, by = "publication_year") |>
+  mutate(pct = n / total_papers * 100) |>
+  ggplot(aes(x = publication_year, y = pct)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  labs(
+    title = 'Distribution of "delve" by Year',
+    x = "Year",
+    y = "% of Papers"
+  )
+```
+
+How many papers have these words after 2022?
+
+```{r}
+tidy_abstracts_raw |>
+  filter(word %in% llm_words$word, publication_year > 2022) |>
+  distinct(id) |>
+  left_join(
+    articles |> select(id, title, publication_year, source_display_name, doi),
+    by = "id"
+  ) |>
+  arrange(publication_year, title)
+```
+
+```{r}
+library(httr2)
+
+# Store your key: Sys.setenv(SAPLING_KEY = "your_key_here")
+api_key <- "HAPVZA5R2TKPBA5IX02QKCH2P799UI9Q"
+
+# Sample 10 abstracts from papers after 2022 containing top 10 words
+set.seed(4823)
+sample_ids <- tidy_abstracts_raw |>
+  filter(word %in% llm_words$word, publication_year > 2022) |>
+  distinct(id) |>
+  slice_sample(n = 10) |>
+  pull(id)
+
+sample_abstracts <- articles |>
+  filter(id %in% sample_ids) |>
+  select(id, title, abstract)
+
+# Send each abstract to the Sapling AI detection API
+sapling_results <- sample_abstracts |>
+  rowwise() |>
+  mutate(
+    response = list(
+      request("https://api.sapling.ai/api/v1/aidetect") |>
+        req_body_json(list(key = api_key, text = abstract)) |>
+        req_perform() |>
+        resp_body_json()
+    ),
+    ai_score = response$score
+  ) |>
+  ungroup() |>
+  select(id, title, ai_score)
+
+sapling_results
 ```
 
 
-## Section 4. WRITING STYLE AND THE RISE OF AI \[RQ3\]
-
 ## Section 5. SENTIMENT TOWARDS AI IN SOCIAL SCIENCE ABSTRACTS \[RQ4\]
+
+Our fourth research question —How has sentiment towards AI in social science literature changed over the last decade?— looks at how attitudes towards AI have changed during the period studied.
+
+The **limitations** in answering this research question are significant: by selecting the subcorpus of analysis as the abstracts that contain terms related to artificial intelligence, we cannot guarantee that the sentiment is generated by evaluations directed specifically at AI itself, but rather that it may be influenced by words that frame the research context. Therefore, this first analysis is far from answering the research question in depth as we have formulated it, and would rather capture the general evaluative tone of abstracts that contain mentions of AI-related terms.
+
+For this reason, the **analysis has been designed sequentially to approach the object of study**. First, a sentiment analysis is conducted on the full abstracts that mention terms related to AI. In the second step, only sentences containing explicit AI terms are considered to calculate the general sentiment of each abstract. In the third analysis, we select only those sentences containing bigrams/trigrams/fourgrams that address AI and its effects or consequences, thus making AI the focus of interest in that sentence and not just a simple mention. This is how we attempt to capture the sentiment these abstracts express regarding artificial intelligence.
+
+In addition, we acknowledge the limitation of analyzing sentiment in abstracts of scientific texts, which are characterized by the neutrality of the vocabulary used. This is reflected in the exclusion of some abstracts and sentences (across all three levels of analysis) because none of their words appear in the sentiment lexicons used, Bing and AFFIN.
+
+### 5.0 Set-up for sentiment analysis
+
+Before analyzing the sentiment, we need to define de abstracts that would be part of the subcorpus of analysis. In this case the object of the sentiment is the "artificial intelligence", therefore, we just select the abstracts that have explicit mentions to IA and related terms and n-grams, using the ai_hits created above.
+
+```{r}
+# Creating the sentiment analysis subcorpus, selecting only the abstracts that contain the n-grams in ai_hits 
+ai_abstracts <- ai_hits |>
+  distinct(id) |>
+  inner_join(abstracts_base, by = "id")
+ai_abstracts
+```
+
+As mentioned, abstracts with no matches in the sentiment lexicons are excluded from the sentiment computing step. These texts probably have a more neutral and technical language, although their omission may capture limitations of lexicon-based sentiment analysis rather than the real absence of evaluative words about IA. In both cases of Bing and AFINN the number of abstracts excluded are 2 (529 total AI-related abstracts and 527 abstracts that contain at least one word in both lexicons).
+
+```{r, warning = FALSE}
+# Total of AI-related abstracts
+ai_abstracts |> 
+  summarise(n_ai_abstracts = n_distinct(id))
+
+# Abstracts that have at least one word in the lexicon Bing 
+ai_abstracts |>
+  unnest_tokens(word, abstract) |>
+  inner_join(get_sentiments("bing"), by = "word") |>
+  summarise(n_scored_abstracts = n_distinct(id))
+
+# Abstracts that have at least one word in the lexicon Bing AFINN
+ai_abstracts |>
+  unnest_tokens(word, abstract) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  summarise(n_scored_abstracts = n_distinct(id))
+```
+
+Here, we can observe that both lexicons are negatively biased, this is, that they contain more terms that are categorized as negative (or negative values). This could influence sentiment results, making them more likely to lean to a negative direction; therefore, the results are influenced by the choice of lexicon. For this reason, all of the analysis are performed using both lexicons, which serves as a robustness check.
+
+```{r}
+# Calculating the number of times that a sentiment or a value appears in each lexicon > negatively biased
+get_sentiments("bing") %>% 
+  count(sentiment)
+
+get_sentiments("afinn") %>% 
+  count(value)
+```
+
+### 5.1. General sentiment in AI-related abstracts over time
+
+This is the first layer of approximation to the analysis, that aims to estimate the general evaluative tone or sentiment in abstracts that mention AI and related terms as well as its evolution over time.
+
+The methodological choice was to calculate a sentiment score per abstract and, after that, obtain the annual value as the average sentiment score of the articles published in a specific year. This ensures that abstracts remain the unit of analysis counting only once. In this connection, we decided to use net_sentiment_norm for Bing and afinn_mean for AFINN because in both cases the aim is to get a sentiment measure that can be compared across abstracts and does not depend on how many words/sentiment words each abstract contains.
+
+```{r, warning=FALSE}
+# In this chunk we create two tibbles, one per lexicon, that contain the id, the publication year and the sentiment variables related to each lexicon.
+
+# In the Bing one, we compute the number of positive and negative words, the net sentiment (positive - negative) and the total sentiment words (positive + negative). With this last two values we obtain the variable of interest net_sentiment_norm (net sentiment / total sentiment words). In the AFINN tibble we computed the afinn mean, afinn sum and the number of sentiment words. 
+
+# Bing
+bing_abstract_sentiment <- ai_abstracts |>
+  unnest_tokens(word, abstract) |>
+  inner_join(get_sentiments("bing"), by = "word") |>
+  count(id, publication_year, sentiment) |>
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |>
+  mutate(
+    net_sentiment = positive - negative,
+    total_sentiment_words = positive + negative,
+    net_sentiment_norm = if_else(
+      total_sentiment_words > 0,
+      (positive - negative) / total_sentiment_words,
+      NA_real_))
+
+bing_abstract_sentiment
+
+# AFINN
+afinn_abstract_sentiment <- ai_abstracts |>
+  unnest_tokens(word, abstract) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  group_by(id, publication_year) |>
+  summarise(
+    afinn_sum = sum(value, na.rm = TRUE),
+    afinn_mean = mean(value, na.rm = TRUE),
+    n_sentiment_words = n(),
+    .groups = "drop")
+
+afinn_abstract_sentiment
+```
+
+```{r}
+# Combining both lexicons into one single tibble 
+bing_scores <- bing_abstract_sentiment |>
+  transmute(
+    id,
+    publication_year,
+    lexicon = "Bing",
+    sentiment_score = net_sentiment_norm)
+
+afinn_scores <- afinn_abstract_sentiment |>
+  transmute(
+    id,
+    publication_year,
+    lexicon = "AFINN",
+    sentiment_score = afinn_mean)
+
+sentiment_scores <- bind_rows(bing_scores, afinn_scores)
+
+# Calculating the annual average sentiment by lexicon 
+sentiment_yearly <- sentiment_scores |>
+  group_by(lexicon, publication_year) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+sentiment_yearly
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the evolution of the annual average sentiment score: line chart 
+ggplot(sentiment_yearly, aes(x = publication_year, y = mean_sentiment, color = lexicon)) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 2) +
+  scale_x_continuous(
+    breaks = 2016:2025,
+    labels = 2016:2025
+  ) +
+  scale_color_manual(values = c("Bing" = "#2C3E6B", "AFINN" = "#8E44AD")) +
+  labs(
+    title = "Sentiment in AI-related abstracts over time",
+    subtitle = "Yearly mean sentiment per abstract using Bing and AFINN lexicons",
+    x = NULL,
+    y = "Mean sentiment score",
+    color = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "top",
+    legend.text          = element_text(size = 9, color = "#4a4a6a"),
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank())
+
+# Plotting the comparison before-after the rise of AI of the annual avergae sentiment score: boxplot 
+
+period_scores <- sentiment_scores |>
+  mutate(
+    period = if_else(
+      publication_year < 2023,
+      "Before rise of AI",
+      "After rise of AI"))
+
+period_summary <- period_scores |>
+  group_by(lexicon, period) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    median_sentiment = median(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+
+ggplot(
+  period_scores,
+  aes(x = period, y = sentiment_score, fill = period)) +
+  geom_boxplot(alpha = 0.85, width = 0.6, outlier.alpha = 0.2) +
+  scale_fill_manual(values = c(
+    "Before rise of AI" = "steelblue",
+    "After rise of AI"  = "#2C3E6B"
+  )) +
+  facet_wrap(~ lexicon, ncol = 2, scales = "free_y") +
+  labs(
+    title = "Sentiment in AI-related abstracts before and after generative AI",
+    x = NULL,
+    y = "Sentiment score") +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "none",
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    strip.text           = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank()
+  )
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the number of positive, negative, and neutral AI-related abstracts by year 
+
+# Bing
+bing_year_polarity <- bing_abstract_sentiment |>
+  mutate(
+    polarity = case_when(
+      net_sentiment_norm > 0 ~ "Positive",
+      net_sentiment_norm < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "Bing")
+
+# AFINN
+afinn_year_polarity <- afinn_abstract_sentiment |>
+  mutate(
+    polarity = case_when(
+      afinn_mean > 0 ~ "Positive",
+      afinn_mean < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "AFINN")
+
+# Combine both lexicons
+year_polarity <- bind_rows(
+  bing_year_polarity,
+  afinn_year_polarity)
+
+ggplot(
+  year_polarity,
+  aes(x = factor(publication_year), y = n, fill = polarity)) +
+  geom_col(position = "dodge", width = 0.7) +
+  scale_fill_manual(values = c(
+    "Positive" = "#27AE60",
+    "Negative" = "#C0392B",
+    "Neutral"  = "#2C3E6B"
+  )) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  coord_flip() +
+  facet_wrap(~ lexicon, ncol = 2, scales = "free_y") +
+  labs(
+    title = "Number of positive, negative, and neutral AI-related abstracts by year",
+    x = NULL,
+    y = "Number of abstracts",
+    fill = "Overall sentiment"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    strip.text           = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    legend.position      = "bottom",
+    legend.text          = element_text(size = 9, color = "#4a4a6a"),
+    panel.grid.minor     = element_blank(),
+    panel.grid.major.y   = element_blank())
+```
+
+Firstly, the annual average sentiment scores show that the abstracts containing AI-related terms tend to have a general moderate positive tone across years. This pattern is observed in both lexicons, especially in AFINN that estimates higher positive values than Bing. In both lexicons the sentiment is neutral in 2017, rises in 2018 and declines in 2019. After 2020 Bing follows a softer pattern, declining until 2022 and then recovering from 2023 and AFINN stays clearly more positive and stable across years, with small fluctuations. Comparing the tendencies before and after the rise of AI in 2023 we can observe that the central tendency becomes somewhat more positive after 2023. The last graph shows the absolute number of positive and negative abstracts over time, and tells us that this difference becomes even more visible in the recent years, when the number of AI-related abstracts increases.
+
+### 5.2 General sentiment in AI-related abstracts over time: using sentences mentioning AI
+
+With full abstracts the sentiment score may be driven by any part of the text, even when AI is not the topic being evaluated but mentioned briefly. In order to reduce this noise, we also analysed the sentiment at the sentence level, selecting only the sentences that explicitly mention at least one AI-related term from the unigram, bigram, or trigram lexicons. To ensure comparability with the previous abstract-level results, we computed the sentence-level sentiment (with the net_sentiment_norm and the afinn_mean) and then average it back to the abstract level. As before, each abstract contributes a single observation to the annual aggregate
+
+```{r}
+# Creating the subcorpus of sentences that explicitly mention AI-related terms 
+# Base sentences from AI-related abstracts
+sentences_base <- ai_abstracts |>
+  unnest_tokens(sentence, abstract, token = "sentences", drop = FALSE) |>
+  group_by(id) |>
+  mutate(sentence_id = row_number()) |>
+  ungroup() |>
+  select(id, publication_year, sentence_id, sentence, abstract)
+
+# Unigram in sentences
+sentence_hits_unigrams <- sentences_base |>
+  unnest_tokens(word, sentence, token = "words") |>
+  filter(word %in% ai_lexicon_unigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Bigram in sentences
+sentence_hits_bigrams <- sentences_base |>
+  unnest_tokens(bigram, sentence, token = "ngrams", n = 2) |>
+  filter(!is.na(bigram)) |>
+  filter(bigram %in% ai_lexicon_bigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Trigram in sentences
+sentence_hits_trigrams <- sentences_base |>
+  unnest_tokens(trigram, sentence, token = "ngrams", n = 3) |>
+  filter(!is.na(trigram)) |>
+  filter(trigram %in% ai_lexicon_trigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Combining all sentence-level AI n-grams 
+sentence_ai_hits <- bind_rows(
+  sentence_hits_unigrams,
+  sentence_hits_bigrams,
+  sentence_hits_trigrams) |>
+  distinct(id, publication_year, sentence_id)
+
+# Keeping the sentences that explicitly mention AI-related terms
+ai_sentences <- sentences_base |>
+  semi_join(sentence_ai_hits, by = c("id", "publication_year", "sentence_id"))
+
+ai_sentences
+```
+
+Following the previous logic, sentences with no matches in the sentiment lexicons are excluded from the sentiment computing step. The total number of sentences with AI terms are 1544, while in Bing the analysis is carried out using 1210 sentences and in AFINN using 1023.
+
+```{r, warning=FALSE}
+# We create a sentence-level id 
+ai_sentences_ids <- ai_sentences |>
+  mutate(sentence_uid = paste(id, sentence_id, sep = "_"))
+
+# Total sentences that mention AI-related terms 
+ai_sentences_ids |>
+  summarise(n_ai_sentences = n_distinct(sentence_uid))
+
+# Sentences that have at least one word in the lexicon Bing 
+ai_sentences_ids |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("bing"), by = "word") |>
+  summarise(n_scored_sentences = n_distinct(sentence_uid))
+
+# Sentences that have at least one word in the lexicon AFINN  
+ai_sentences_ids |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  summarise(n_scored_sentences = n_distinct(sentence_uid))
+```
+
+```{r}
+# In this chunk we create two tibbles, one per lexicon, that contain the id of the abstract and sentence, the publication year and the sentiment variables related to each lexicon.
+
+# Bing 
+bing_sentence_sentiment <- ai_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("bing"), by = "word") |>
+  count(id, publication_year, sentence_id, sentiment) |>
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |>
+  mutate(
+    net_sentiment = positive - negative,
+    total_sentiment_words = positive + negative,
+    net_sentiment_norm = if_else(
+      total_sentiment_words > 0,
+      (positive - negative) / total_sentiment_words,
+      NA_real_))
+bing_sentence_sentiment
+
+# AFINN
+afinn_sentence_sentiment <- ai_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  group_by(id, publication_year, sentence_id) |>
+  summarise(
+    afinn_sum = sum(value, na.rm = TRUE),
+    afinn_mean = mean(value, na.rm = TRUE),
+    n_sentiment_words = n(),
+    .groups = "drop")
+afinn_sentence_sentiment
+```
+
+```{r}
+# Aggregating sentence-level sentiment to abstract level
+
+# BING: average sentence sentiment within each abstract
+bing_sentence_to_abstract <- bing_sentence_sentiment |>
+  group_by(id, publication_year) |>
+  summarise(
+    sentiment_score = mean(net_sentiment_norm, na.rm = TRUE),
+    n_ai_sentences = n(),
+    .groups = "drop") |>
+  mutate(lexicon = "Bing")
+
+# AFINN: average sentence sentiment within each abstract
+afinn_sentence_to_abstract <- afinn_sentence_sentiment |>
+  group_by(id, publication_year) |>
+  summarise(
+    sentiment_score = mean(afinn_mean, na.rm = TRUE),
+    n_ai_sentences = n(),
+    .groups = "drop") |>
+  mutate(lexicon = "AFINN")
+
+# Combine both lexicons into one single tibble 
+sentence_abstract_scores <- bind_rows(
+  bing_sentence_to_abstract,
+  afinn_sentence_to_abstract)
+
+# Calculating the annual average sentiment by lexicon 
+sentence_abstract_yearly <- sentence_abstract_scores |>
+  group_by(lexicon, publication_year) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the evolution of the annual average sentiment score (using sentences): line chart 
+ggplot(sentence_abstract_yearly, aes(x = publication_year, y = mean_sentiment, color = lexicon)) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 2) +
+  scale_x_continuous(
+    breaks = 2016:2025,
+    labels = 2016:2025
+  ) +
+  scale_color_manual(values = c("Bing" = "#2C3E6B", "AFINN" = "#8E44AD")) +
+  labs(
+    title = "Sentiment in AI-related abstracts over time",
+    subtitle = "Yearly mean sentiment per abstract based on AI-mentioning sentences only",
+    x = NULL,
+    y = "Mean sentiment score",
+    color = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "top",
+    legend.text          = element_text(size = 9, color = "#4a4a6a"),
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank())
+
+# Plotting the comparison before-after the rise of AI of the annual avergae sentiment score (using sentences): boxplot 
+
+sentence_period_scores <- sentence_abstract_scores |>
+  mutate(
+    period = if_else(
+      publication_year < 2023,
+      "Before rise of AI",
+      "After rise of AI"))
+
+sentence_period <- sentence_period_scores |>
+  group_by(lexicon, period) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    median_sentiment = median(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+
+ggplot(
+  sentence_period_scores,
+  aes(x = period, y = sentiment_score, fill = period)
+) +
+  geom_boxplot(alpha = 0.85, width = 0.6, outlier.alpha = 0.2) +
+  scale_fill_manual(values = c(
+    "Before rise of AI" = "steelblue",
+    "After rise of AI"  = "#2C3E6B"
+  )) +
+  facet_wrap(~ lexicon, ncol = 2, scales = "free_y") +
+  labs(
+    title = "Sentiment in AI-related abstracts before and after generative AI",
+    subtitle = "Based on AI-mentioning sentences only",
+    x = NULL,
+    y = "Sentiment score"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "none",
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    strip.text           = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank()
+  )
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the number of positive, negative, and neutral AI-related abstracts by year (using sentences)
+
+# Bing
+bing_sentence_year_polarity <- bing_sentence_to_abstract |>
+  mutate(
+    polarity = case_when(
+      sentiment_score > 0 ~ "Positive",
+      sentiment_score < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "Bing")
+
+# AFINN
+afinn_sentence_year_polarity <- afinn_sentence_to_abstract |>
+  mutate(
+    polarity = case_when(
+      sentiment_score > 0 ~ "Positive",
+      sentiment_score < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "AFINN")
+
+# Combine both lexicons
+sentence_year_polarity <- bind_rows(
+  bing_sentence_year_polarity,
+  afinn_sentence_year_polarity)
+
+ggplot(
+  sentence_year_polarity,
+  aes(x = factor(publication_year), y = n, fill = polarity)) +
+  geom_col(position = "dodge", width = 0.7) +
+  scale_fill_manual(values = c(
+    "Positive" = "#27AE60",
+    "Negative" = "#C0392B",
+    "Neutral"  = "#2C3E6B"
+  )) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  coord_flip() +
+  facet_wrap(~ lexicon, ncol = 2, scales = "free_y") +
+  labs(
+    title = "Number of positive, negative, and neutral AI-related abstracts by year",
+    subtitle = "Based on AI-mentioning sentences only",
+    x = NULL,
+    y = "Number of abstracts",
+    fill = "Overall sentiment"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    strip.text           = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    legend.position      = "bottom",
+    legend.text          = element_text(size = 9, color = "#4a4a6a"),
+    panel.grid.minor     = element_blank(),
+    panel.grid.major.y   = element_blank()
+  )
+```
+
+### 5.3. Towards a more target-specific measure of sentiment around AI
+
+The final stage of the analysis moves towards a more target-specific measure of sentiment around AI, trying to identify sentences in which AI is explicitly linked to consequences, risks, benefits, implications, or evaluations. To do this, the code builds a new lexicon by combining AI N-grams with effect and outcome terms: we defined separate vectors for AI-side components and effect-side components, and these were combined into bigrams, trigrams, and fourgrams. After that, the same sentiment analysis procedure is applied: scoring target-specific sentences with Bing and AFINN, aggregating them back to the abstract level, calculating yearly means, comparing positive and negative counts, and examining before/after differences around 2023.
+
+```{r}
+# Building the AI-related N-grams lexicon 
+# AI SIDE COMPONENT VECTORS
+
+# 1-word AI terms (drawn from ai_lexicon_unigrams)
+ai_side_1w <- c(
+  # neural architecture terms
+  "autoencoder", "perceptron", "neurocomputing",
+  # specific AI systems and acronyms
+  "chatgpt", "llm",
+  # vendors and umbrella terms
+  "deepseek", "openai", "ai"
+)
+
+# 2-word AI terms (drawn from ai_lexicon_bigrams)
+ai_side_2w <- c(
+  # core ML / DL paradigms
+  "artificial intelligence", "machine learning", "deep learning",
+  "reinforcement learning", "machine intelligence", "computational intelligence",
+  # network and model architectures
+  "neural network", "neural model", "deep network",
+  "learning algorithm", "backpropagation learning", "backpropagation algorithm",
+  "pretrained transformer",
+  # generative and language model terms
+  "generative ai", "language model", "agentic ai",
+  # AI-generated content
+  "ai-generated content",
+  # specific systems and vendors
+  "openai gpt",
+  "claude sonnet", "claude opus", "claude haiku",
+  "google gemini", "gemini pro", "gemini ultra",
+  "microsoft copilot", "github copilot",
+  "mistral ai", "meta llama", "llama 2", "llama 3",
+  "stable diffusion",
+  "gpt 1", "gpt 2", "gpt 3", "gpt 4", "gpt 5",
+  "dall e"
+)
+
+# 3-word AI terms (drawn from ai_lexicon_trigrams)
+ai_side_3w <- c(
+  # large / generative language model formulations
+  "large language model", "generative language model",
+  "generative large language", "generative pretrained transformer",
+  # generative AI formulations
+  "generative artificial intelligence", "artificial intelligence generated",
+  # OpenAI-specific phrases
+  "openai large language", "openai language model",
+  # AI + language model phrases
+  "ai language model", "ai generated content"
+)
+
+# EFFECT / OUTCOME SIDE COMPONENT VECTORS
+
+# 1-word effect and outcome terms
+effect_side_1w <- c(
+  # direct outcome terms (neutral)
+  "effects", "impacts", "consequences", "implications", "outcomes",
+  "influence", "affect", "repercussions", "ramifications", "externalities",
+  "spillovers", "footprint",
+
+  # valence terms — NEGATIVE (~37)
+  "risks", "harms", "dangers", "threats", "hazards", "misuse", "abuse",
+  "drawbacks", "disadvantages", "limitations", "failures", "errors",
+  "vulnerabilities", "pitfalls", "toxicity", "hallucinations", "unreliability",
+  "inaccuracy", "overreliance", "dependence", "dependency", "addiction",
+  "misalignment", "deception", "manipulation", "exploitation", "disruption",
+  "fragility", "brittleness", "opacity", "obfuscation", "misinformation",
+  "disinformation", "propaganda", "plagiarism", "cheating", "displacement",
+
+  # valence terms — POSITIVE (~37)
+  "benefits", "opportunities", "advantages", "gains", "improvements",
+  "efficiency", "productivity", "innovation", "augmentation", "empowerment",
+  "democratization", "accessibility", "scalability", "sustainability",
+  "breakthroughs", "capabilities", "accuracy", "reliability", "performance",
+  "personalization", "optimization", "collaboration", "assistance",
+  "enhancement", "acceleration", "advancement", "progress", "discovery",
+  "creation", "support", "convenience", "precision", "explainability",
+  "interpretability", "quality", "usefulness", "enablement",
+
+  # neutral evaluative terms
+  "challenges", "tradeoffs", "tensions", "paradoxes", "dilemmas",
+  "uncertainties", "ambiguities",
+
+  # societal and structural dimensions (neutral descriptors)
+  "ethical", "social", "economic", "labor", "employment", "unemployment",
+  "inequality", "bias", "fairness", "privacy", "security", "trust",
+  "accountability", "transparency", "justice", "discrimination", "welfare",
+  "autonomy", "dignity", "democracy", "sovereignty", "marginalization",
+  "exclusion", "inclusion", "diversity", "racism", "sexism", "alienation",
+  "dehumanization", "commodification", "precarity", "polarization",
+  "radicalization", "deskilling", "upskilling", "reskilling", "cohesion",
+  "fragmentation", "concentration", "monopolization",
+
+  # environmental dimensions
+  "emissions", "carbon", "consumption",
+
+  # health dimensions
+  "wellbeing", "health", "safety", "diagnosis", "treatment", "triage",
+
+  # education dimensions
+  "literacy", "education", "creativity", "learning",
+
+  # governance terms
+  "regulation", "policy", "governance", "legislation", "oversight",
+  "compliance", "liability", "audit", "certification", "standards",
+  "enforcement", "prohibition", "moratorium", "ban", "restriction",
+  "responsibility", "stewardship",
+
+  # human response terms
+  "adoption", "acceptance", "resistance", "perception", "attitudes",
+  "concerns", "fears", "anxiety", "skepticism", "awareness", "distrust",
+  "mistrust", "optimism", "pessimism", "enthusiasm", "reliance",
+  "reluctance", "readiness", "preparedness",
+
+  # domain-specific effect nouns
+  "automation", "surveillance", "deepfakes", "decision-making"
+)
+
+# 2-word effect phrases (for fourgram Pattern B: [AI 2w] + [effect 2w])
+effect_side_2w <- c(
+  # labour and economic effects — NEGATIVE
+  "job displacement", "job loss", "labor disruption", "wage inequality",
+  "income inequality", "wage stagnation", "skill displacement", "skill gap",
+  "workforce disruption", "technological unemployment", "economic disruption",
+  "market concentration", "power concentration",
+
+  # labour and economic effects — POSITIVE
+  "job creation", "economic growth", "productivity gains", "wage growth",
+  "skill development", "workforce augmentation", "workforce transformation",
+  "economic efficiency", "creative destruction", "market competition",
+  "value creation",
+
+  # societal and structural effects — NEGATIVE
+  "social inequality", "social fragmentation", "digital divide",
+  "political polarization", "information disorder", "democratic erosion",
+  "civil rights violations",
+
+  # societal and structural effects — POSITIVE
+  "social cohesion", "social welfare", "human rights", "civil liberties",
+  "democratic participation", "civic engagement", "social mobility",
+  "community empowerment",
+
+  # ethical and governance effects — NEGATIVE
+  "ethical violations", "ethical concerns", "ethical challenges",
+  "ethical dilemmas", "moral hazard", "regulatory failure", "governance gap",
+
+  # ethical and governance effects — POSITIVE
+  "ethical guidelines", "ethical frameworks", "policy innovation",
+  "regulatory framework", "governance framework", "human oversight",
+  "responsible innovation", "responsible development",
+
+  # safety, trust, and reliability — NEGATIVE
+  "privacy concerns", "security risks", "data breaches", "system failures",
+  "algorithmic bias", "algorithmic discrimination", "automated discrimination",
+  "predictive policing", "privacy erosion",
+
+  # safety, trust, and reliability — POSITIVE
+  "public trust", "data privacy", "data security", "information security",
+  "system reliability", "algorithmic fairness", "algorithmic accountability",
+  "algorithmic transparency",
+
+  # health and wellbeing — NEGATIVE
+  "mental health risks", "patient harm", "clinical errors",
+  "psychological distress", "cognitive overload",
+
+  # health and wellbeing — POSITIVE
+  "mental health", "public health", "health outcomes", "patient safety",
+  "clinical decision", "early detection", "disease prevention",
+  "drug discovery", "personalized medicine",
+
+  # information and media — NEGATIVE
+  "fake news", "misinformation spread", "disinformation campaign",
+  "information manipulation", "academic dishonesty",
+
+  # information and media — POSITIVE
+  "content moderation", "fact checking", "information access",
+  "knowledge dissemination", "scientific communication",
+
+  # environmental — NEGATIVE
+  "energy consumption", "carbon footprint", "resource consumption",
+  "environmental degradation",
+
+  # environmental — POSITIVE
+  "energy efficiency", "climate solutions", "resource efficiency",
+  "environmental monitoring",
+
+  # decision and justice — NEGATIVE
+  "criminal justice bias", "unfair treatment", "rights violations",
+  "mass surveillance", "social control",
+
+  # decision and justice — POSITIVE
+  "decision making", "criminal justice", "human dignity",
+  "fundamental rights", "equal treatment", "evidence-based decision",
+
+  # existential and systemic — NEGATIVE
+  "existential risk", "catastrophic risk", "systemic risk",
+  "long-term risk", "unintended consequences",
+
+  # existential and systemic — POSITIVE
+  "long-term benefits", "systemic improvements", "transformative potential",
+  "future opportunities",
+
+  # adoption and use — NEGATIVE
+  "misuse potential", "unsafe deployment", "irresponsible use",
+
+  # adoption and use — POSITIVE
+  "responsible use", "safe use", "ethical deployment",
+  "beneficial application"
+)
+
+# 2-word effect-leading prefixes (for trigram Pattern B & fourgram Pattern A)
+effect_side_2w_pre <- c(
+  # outcome-of constructions (neutral)
+  "effects of", "impact of", "impacts of", "consequences of",
+  "implications of", "outcomes of", "influence of", "repercussions of",
+  "ramifications of", "externalities of",
+
+  # valence-of constructions — NEGATIVE
+  "risks of", "harms of", "dangers of", "threats of", "hazards of",
+  "misuse of", "abuse of", "limitations of", "failures of", "pitfalls of",
+  "disruption by", "disruption from", "downsides of", "costs of",
+
+  # valence-of constructions — POSITIVE
+  "benefits of", "opportunities of", "advantages of", "potential of",
+  "promise of", "gains from", "strengths of", "value of",
+  "utility of", "contributions of", "advances in", "progress in",
+
+  # neutral evaluative constructions
+  "challenges of", "tradeoffs of", "concerns about", "debates about",
+  "discourse on",
+
+  # governance and responsibility (neutral)
+  "governance of", "regulation of", "oversight of", "ethics of",
+  "accountability for", "responsibility for", "liability for",
+  "standards for", "audit of",
+
+  # adoption and use (neutral)
+  "adoption of", "use of", "deployment of", "integration of",
+  "reliance on", "dependence on",
+
+  # trust and perception — NEGATIVE
+  "distrust of", "mistrust of", "fears about", "anxiety about",
+  "skepticism about", "resistance to",
+
+  # trust and perception — POSITIVE
+  "trust in", "optimism about", "enthusiasm about",
+  "attitudes toward", "attitudes towards", "perceptions of", "acceptance of",
+  "awareness of",
+
+  # threat constructions — NEGATIVE
+  "threats to", "dangers to", "harm from", "damage from", "risks to",
+
+  # opportunity constructions — POSITIVE
+  "hope for", "support for", "case for",
+
+  # role constructions (neutral)
+  "role of", "power of"
+)
+
+# 3-word effect-leading prefixes (for fourgram Pattern C: [effect prefix 3w] + [AI 1w])
+effect_side_3w_pre <- c(
+  # ethical / social / economic implications of — NEGATIVE
+  "ethical implications of", "social implications of",
+  "economic implications of", "societal implications of",
+  "political implications of", "legal implications of",
+  "ethical challenges of", "social challenges of", "economic challenges of",
+  "ethical concerns about", "social concerns about", "safety concerns about",
+
+  # ethical / social / economic implications of — POSITIVE
+  "ethical opportunities of", "social benefits of",
+  "economic benefits of", "societal benefits of",
+  "transformative potential of", "positive implications of",
+  "innovative potential of",
+
+  # impact on domain constructions — NEGATIVE
+  "impact on inequality", "impact on privacy", "impact on surveillance",
+  "impact on misinformation",
+
+  # impact on domain constructions — POSITIVE
+  "impact on society", "impact on democracy", "impact on employment",
+  "impact on healthcare", "impact on education", "impact on labor",
+  "impact on security", "impact on creativity", "impact on wellbeing",
+  "impact on journalism", "impact on science", "impact on research",
+  "impact on productivity",
+
+  # social / economic / societal impact of — NEGATIVE
+  "negative impact of", "harmful effects of", "adverse impact of",
+
+  # social / economic / societal impact of — POSITIVE
+  "social impact of", "economic impact of", "societal impact of",
+  "environmental impact of", "positive impact of", "beneficial impact of",
+
+  # public and societal framing — NEGATIVE
+  "societal risks of", "societal harms of",
+
+  # public and societal framing — POSITIVE
+  "public perception of", "societal effects of", "societal benefits of",
+  "societal contributions of",
+
+  # risk / benefit framing (inherently balanced pairs)
+  "risks and benefits", "benefits and risks", "risks and opportunities",
+  "threats and opportunities", "costs and benefits",
+  "risks associated with", "effects associated with",
+  "impact associated with", "challenges associated with",
+  "opportunities associated with", "concerns associated with",
+  "harms associated with", "benefits associated with",
+  "dangers associated with", "implications associated with",
+
+  # potential framing — NEGATIVE
+  "potential risks of", "potential harms of", "potential dangers of",
+
+  # potential framing — POSITIVE
+  "potential benefits of", "potential impact of", "potential effects of",
+  "potential implications of", "potential value of",
+
+  # responsible / ethical use framing — NEGATIVE
+  "misuse and abuse", "unsafe deployment of",
+
+  # responsible / ethical use framing — POSITIVE
+  "responsible use of", "ethical use of", "safe use of",
+  "responsible deployment of", "beneficial use of",
+
+  # governance and policy framing (neutral)
+  "governance and regulation", "policy implications of",
+  "regulation and governance", "ethical governance of",
+  "regulatory challenges of", "policy challenges of",
+
+  # bias / fairness / privacy framing (neutral)
+  "bias and fairness", "bias and discrimination",
+  "privacy and security", "privacy and surveillance",
+  "fairness and accountability", "transparency and accountability",
+  "trust and accountability", "safety and security",
+
+  # threat and opportunity framing — NEGATIVE
+  "threats posed by", "risks posed by", "dangers posed by",
+  "harms caused by", "disruption caused by",
+
+  # threat and opportunity framing — POSITIVE
+  "opportunities presented by", "benefits offered by",
+  "value created by", "progress enabled by",
+
+  # labour and displacement framing — NEGATIVE
+  "labor market disruption", "displacement caused by",
+
+  # labour and displacement framing — POSITIVE
+  "labor market effects", "labor market impact", "labor market consequences",
+  "automation driven by", "growth driven by",
+
+  # temporal framing — NEGATIVE
+  "long-term risks of", "short-term risks of",
+
+  # temporal framing — POSITIVE
+  "long-term effects of", "short-term effects of",
+  "long-term impact of", "short-term impact of",
+  "long-term benefits of", "long-term implications of",
+
+  # unintended / adverse vs. intended / positive framing
+  "unintended consequences of", "adverse effects of",
+  "negative consequences of", "negative effects of",
+  "positive effects of", "positive impact of",
+  "intended benefits of",
+
+  # public debate and discourse framing (neutral)
+  "public debate on", "public discourse on",
+  "debate about the", "concerns regarding the",
+  "questions about the"
+)
+
+# COMBINATION STEPS
+
+# ~1,800 bigrams
+# [AI 1w] + [effect 1w]  AND  [effect 1w] + [AI 1w]
+ai_sentiment_bigrams <- unique(trimws(c(
+  as.vector(outer(ai_side_1w,     effect_side_1w, paste)),
+  as.vector(outer(effect_side_1w, ai_side_1w,     paste))
+)))
+
+# ~5,400 trigrams
+# Pattern A: [AI 2w]            + [effect 1w]
+# Pattern B: [effect prefix 2w] + [AI 1w]
+trigrams_a <- as.vector(outer(ai_side_2w,         effect_side_1w, paste))
+trigrams_b <- as.vector(outer(effect_side_2w_pre, ai_side_1w,     paste))
+ai_sentiment_trigrams <- unique(trimws(c(trigrams_a, trigrams_b)))
+
+# ~10,200 fourgrams
+# Pattern A: [effect prefix 2w] + [AI 2w]    — e.g. "risks of machine learning"
+# Pattern B: [AI 2w]            + [effect 2w] — e.g. "machine learning job displacement"
+# Pattern C: [effect prefix 3w] + [AI 1w]    — e.g. "ethical implications of ai"
+# Pattern D: [AI 3w]            + [effect 1w] — e.g. "large language model risks"
+fourgrams_a <- as.vector(outer(effect_side_2w_pre, ai_side_2w,    paste))
+fourgrams_b <- as.vector(outer(ai_side_2w,         effect_side_2w, paste))
+fourgrams_c <- as.vector(outer(effect_side_3w_pre, ai_side_1w,    paste))
+fourgrams_d <- as.vector(outer(ai_side_3w,         effect_side_1w, paste))
+ai_sentiment_fourgrams <- unique(trimws(c(fourgrams_a, fourgrams_b, fourgrams_c, fourgrams_d)))
+```
+
+```{r}
+# Creating the subcorpus of sentences that explicitly talk about AI  
+# Base sentences from AI-related abstracts
+target_sentences_base <- ai_abstracts |>
+  unnest_tokens(sentence, abstract, token = "sentences", drop = FALSE) |>
+  group_by(id) |>
+  mutate(sentence_id = row_number()) |>
+  ungroup() |>
+  select(id, publication_year, sentence_id, sentence, abstract)
+
+# Bigram hits in sentences
+target_hits_bigrams <- target_sentences_base |>
+  unnest_tokens(bigram, sentence, token = "ngrams", n = 2) |>
+  filter(!is.na(bigram)) |>
+  filter(bigram %in% ai_sentiment_bigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Trigram hits in sentences
+target_hits_trigrams <- target_sentences_base |>
+  unnest_tokens(trigram, sentence, token = "ngrams", n = 3) |>
+  filter(!is.na(trigram)) |>
+  filter(trigram %in% ai_sentiment_trigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Fourgram hits in sentences
+target_hits_fourgrams <- target_sentences_base |>
+  unnest_tokens(fourgram, sentence, token = "ngrams", n = 4) |>
+  filter(!is.na(fourgram)) |>
+  filter(fourgram %in% ai_sentiment_fourgrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Combining all target-specific hits
+target_sentence_hits <- bind_rows(
+  target_hits_bigrams,
+  target_hits_trigrams,
+  target_hits_fourgrams
+) |>
+  distinct(id, publication_year, sentence_id)
+
+# Keeping only target-specific sentences
+ai_target_sentences <- target_sentences_base |>
+  semi_join(target_sentence_hits, by = c("id", "publication_year", "sentence_id"))
+
+ai_target_sentences
+```
+
+This target-specific filtering step reduces drastically the number of selected sentences to 266. The Bing analysis is carried out using 212 sentences and in AFINN using 190, which may limit the generalization of the results.
+
+```{r}
+# We create a sentence-level id 
+ai_target_sentences_ids <- ai_target_sentences |>
+  mutate(sentence_uid = paste(id, sentence_id, sep = "_"))
+
+# Total sentences that are target-specific
+ai_target_sentences_ids |>
+  summarise(n_ai_target_sentences = n_distinct(sentence_uid))
+
+# Target-specific sentences that have at least one word in the lexicon Bing 
+ai_target_sentences_ids |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("bing"), by = "word") |>
+  summarise(n_bing_scored_sentences = n_distinct(sentence_uid))
+
+# Target-specific sentences that have at least one word in the lexicon AFINN 
+ai_target_sentences_ids |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  summarise(n_afinn_scored_sentences = n_distinct(sentence_uid))
+```
+
+```{r}
+# In this chunk we create two tibbles, one per lexicon, that contain the id of the abstract and sentence, the publication year and the sentiment variables related to each lexicon.
+
+# Bing sentiment by target-specific sentence
+bing_target_sentence_sentiment <- ai_target_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("bing"), by = "word") |>
+  count(id, publication_year, sentence_id, sentiment) |>
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |>
+  mutate(
+    net_sentiment = positive - negative,
+    total_sentiment_words = positive + negative,
+    net_sentiment_norm = if_else(
+      total_sentiment_words > 0,
+      (positive - negative) / total_sentiment_words,
+      NA_real_))
+
+bing_target_sentence_sentiment
+
+# AFINN sentiment by target-specific sentence
+afinn_target_sentence_sentiment <- ai_target_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  group_by(id, publication_year, sentence_id) |>
+  summarise(
+    afinn_sum = sum(value, na.rm = TRUE),
+    afinn_mean = mean(value, na.rm = TRUE),
+    n_sentiment_words = n(),
+    .groups = "drop")
+
+afinn_target_sentence_sentiment
+```
+
+```{r}
+# Target-specific sentence-level sentiment aggregated back to abstract level
+
+# BING: average target-specific sentence sentiment within each abstract
+bing_target_sentence_to_abstract <- bing_target_sentence_sentiment |>
+  group_by(id, publication_year) |>
+  summarise(
+    sentiment_score = mean(net_sentiment_norm, na.rm = TRUE),
+    n_target_sentences = n(),
+    .groups = "drop"
+  ) |>
+  mutate(lexicon = "Bing")
+
+# AFINN: average target-specific sentence sentiment within each abstract
+afinn_target_sentence_to_abstract <- afinn_target_sentence_sentiment |>
+  group_by(id, publication_year) |>
+  summarise(
+    sentiment_score = mean(afinn_mean, na.rm = TRUE),
+    n_target_sentences = n(),
+    .groups = "drop"
+  ) |>
+  mutate(lexicon = "AFINN")
+
+# Combining both lexicons
+target_sentence_abstract_scores <- bind_rows(
+  bing_target_sentence_to_abstract,
+  afinn_target_sentence_to_abstract)
+
+# Calculating the annual average sentiment by lexicon 
+target_sentence_abstract_yearly <- target_sentence_abstract_scores |>
+  group_by(lexicon, publication_year) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+```
+
+```{r}
+# Plotting the evolution of the annual average sentiment score (using target-specific sentences): line chart 
+#| fig-width: 7
+#| fig-height: 5
+
+ggplot(
+  target_sentence_abstract_yearly,
+  aes(x = publication_year, y = mean_sentiment, color = lexicon)
+) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 2) +
+  scale_x_continuous(
+    breaks = 2016:2025,
+    labels = 2016:2025
+  ) +
+  scale_color_manual(values = c("Bing" = "#2C3E6B", "AFINN" = "#8E44AD")) +
+  labs(
+    title = "Target-specific sentiment in AI-related abstracts over time",
+    subtitle = "Yearly mean sentiment per abstract based on target-specific AI-effect sentences",
+    x = NULL,
+    y = "Mean sentiment score",
+    color = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "top",
+    legend.text          = element_text(size = 9, color = "#4a4a6a"),
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank()
+  )
+
+# Plotting the comparison before-after the rise of AI of the annual avergae sentiment score (using target-specific sentences): boxplot 
+
+target_sentence_period_scores <- target_sentence_abstract_scores |>
+  mutate(
+    period = if_else(
+      publication_year < 2023,
+      "Before rise of AI",
+      "After rise of AI"))
+
+target_sentence_period <- target_sentence_period_scores |>
+  group_by(lexicon, period) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    median_sentiment = median(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop"
+  )
+
+ggplot(
+  target_sentence_period_scores,
+  aes(x = period, y = sentiment_score, fill = period)
+) +
+  geom_boxplot(alpha = 0.85, width = 0.6, outlier.alpha = 0.2) +
+  scale_fill_manual(values = c(
+    "Before rise of AI" = "steelblue",
+    "After rise of AI"  = "#2C3E6B"
+  )) +
+  facet_wrap(~ lexicon, ncol = 2, scales = "free_y") +
+  labs(
+    title = "Sentiment in AI-related abstracts before and after generative AI",
+    subtitle = "Based on target-specific AI-effect sentences only",
+    x = NULL,
+    y = "Sentiment score"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "none",
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    strip.text           = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank()
+  )
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the number of positive, negative, and neutral AI-related abstracts by year (using target-specific sentences)
+
+# Bing
+bing_target_sentence_year_polarity <- bing_target_sentence_to_abstract |>
+  mutate(
+    polarity = case_when(
+      sentiment_score > 0 ~ "Positive",
+      sentiment_score < 0 ~ "Negative",
+      TRUE ~ "Neutral"
+    )
+  ) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "Bing")
+
+# AFINN
+afinn_target_sentence_year_polarity <- afinn_target_sentence_to_abstract |>
+  mutate(
+    polarity = case_when(
+      sentiment_score > 0 ~ "Positive",
+      sentiment_score < 0 ~ "Negative",
+      TRUE ~ "Neutral"
+    )
+  ) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "AFINN")
+
+# Combine both lexicons
+target_sentence_year_polarity <- bind_rows(
+  bing_target_sentence_year_polarity,
+  afinn_target_sentence_year_polarity
+)
+
+ggplot(
+  target_sentence_year_polarity,
+  aes(x = factor(publication_year), y = n, fill = polarity)
+) +
+  geom_col(position = "dodge", width = 0.7) +
+  scale_fill_manual(values = c(
+    "Positive" = "#27AE60",
+    "Negative" = "#C0392B",
+    "Neutral"  = "#2C3E6B"
+  )) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  coord_flip() +
+  facet_wrap(~ lexicon, ncol = 2, scales = "free_y") +
+  labs(
+    title = "Number of positive, negative, and neutral AI-related abstracts by year",
+    subtitle = "Based on target-specific AI-effect sentences only",
+    x = NULL,
+    y = "Number of abstracts",
+    fill = "Overall sentiment"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    strip.text           = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    legend.position      = "bottom",
+    legend.text          = element_text(size = 9, color = "#4a4a6a"),
+    panel.grid.minor     = element_blank(),
+    panel.grid.major.y   = element_blank()
+  )
+```
+
+### 5.4 Which words drive the sentiment in target-specific AI-effect sentences?
+
+Finally, we explore which words drive the sentiment in these target-specific AI-effect sentences of scientific papers' abstracts. We count the frequency of positive and negative words by lexicon within the selected sentences and we can observe agian the pattern that, in both lexicons, positive words contribute more to the overall sentiment than negative ones. On the positive side, words such as trust, ethical and intelligence and verbs like support, enhance and promote appear very often. On the negative side, words like bias, risks, distrust, critical, issues or negative are the most common in both lexicons. This set of terms provide insights into how artificial intelligence is conceptualized in scientific papers and their abstracts, the social risks and methodological limitations it creates, as well as its beneficial role.
+
+```{r}
+# We create a data frame with word, sentiment, and number of mentions to see which words are more common
+
+# Bing 
+bing_target_word_counts <- ai_target_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("bing"), by = "word") |>
+  count(word, sentiment, sort = TRUE)
+bing_target_word_counts
+
+# AFINN 
+afinn_target_word_counts <- ai_target_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  mutate(
+    sentiment = case_when(
+      value > 0 ~ "Positive",
+      value < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  filter(sentiment != "Neutral") |>
+  count(word, sentiment, sort = TRUE)
+afinn_target_word_counts
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the top contributing words by sentiment by lexicon 
+
+target_word_counts <- bind_rows(
+  bing_target_word_counts |>
+    mutate(
+      lexicon = "Bing",
+      sentiment = case_when(
+        sentiment == "positive" ~ "Positive",
+        sentiment == "negative" ~ "Negative",
+        TRUE ~ sentiment)),
+  afinn_target_word_counts |>
+    mutate(lexicon = "AFINN"))
+
+target_word_counts |>
+  group_by(lexicon, sentiment) |>
+  slice_max(n, n = 15, with_ties = FALSE) |>
+  ungroup() |>
+  mutate(panel = paste(lexicon, sentiment, sep = " - ")) |>
+  ggplot(aes(x = n, y = reorder(word, n), fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ panel, scales = "free_y") +
+  scale_fill_manual(values = c(
+    "Positive" = "#27AE60",
+    "Negative" = "#C0392B")) +
+  labs(
+    title = "Words driving sentiment in target-specific AI-effect sentences",
+    subtitle = "Top 15 positive and negative words matched by each lexicon",
+    x = "Contribution to sentiment",
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title       = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle    = element_text(color = "#4a4a6a"),
+    strip.text       = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    axis.text.x      = element_text(color = "#4a4a6a"),
+    axis.text.y      = element_text(size = 8, color = "#4a4a6a"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank()
+  )
+```
+
+
 
 ## Section 6. IF WE CAN \[RQ5\]
 
