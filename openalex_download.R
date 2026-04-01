@@ -29,10 +29,10 @@ data_folder <- file.path(
 )
 
 # output_csv: Name of the CSV output file (human-readable flat export).
-output_csv <- "prueba.csv"
+output_csv <- "articles.csv"
 
 # output_rdata: Name of the RData output file (lossless R-native archive).
-output_rdata <- "prueba.RData"
+output_rdata <- "articles.RData"
 
 # ── CREDENTIALS ─────────────────────────────────────────────────────────────
 # email: Your email address, sent to OpenAlex as a polite-pool identifier.
@@ -55,7 +55,11 @@ api_key <- "W9s9d2CkVTBpNUoPkY2ogW"
 journals <- list(
   list(openalex_id = NULL, issn = "2397-3374", name = NULL),  # Nature Human Behaviour (2017–present)
   list(openalex_id = NULL, issn = "2662-9992", name = NULL),  # Humanities & Social Sciences Communications (2020–present)
-  list(openalex_id = NULL, issn = "2055-1045", name = NULL)   # Palgrave Communications (2014–2020, ceased)
+  list(openalex_id = NULL, issn = "2055-1045", name = NULL),  # Palgrave Communications (2014–2020, ceased)
+  list(openalex_id = NULL, issn = "1939-8271", name = NULL),  # American Sociological Review (electronic)
+  list(openalex_id = NULL, issn = "1537-5943", name = NULL),  # American Political Science Review (electronic)
+  list(openalex_id = NULL, issn = "1468-2672", name = NULL),  # European Sociological Review (electronic)
+  list(openalex_id = NULL, issn = "1475-6765", name = NULL)   # European Journal of Political Research (electronic)
   # Example 1: Using an OpenAlex Source ID directly (fastest, no resolution needed)
   # list(openalex_id = "S137773608", issn = NULL,        name = NULL),
 
@@ -70,10 +74,10 @@ journals <- list(
 
 # ── DATE RANGE ──────────────────────────────────────────────────────────────
 # date_from: Start of the download period ("YYYY-MM-DD"). NULL = no start filter.
-date_from <- "2026-01-01"
+date_from <- "2016-01-01"
 
 # date_to: End of the download period ("YYYY-MM-DD"). NULL = no end filter.
-date_to <- "2026-01-15"
+date_to <- "2026-03-28"
 
 # ── ADDITIONAL FILTERS ──────────────────────────────────────────────────────
 # A named list of extra OpenAlex API filter parameters.
@@ -88,7 +92,7 @@ extra_filters <- list(
 # dry_run: If TRUE, resolve journals, query matching IDs, report counts,
 #          then stop without downloading anything. Useful to validate filters
 #          and estimate download size before a long run.
-dry_run <- FALSE
+dry_run <- TRUE
 
 # rdata_write_interval: Rewrite the .RData file every N successfully completed
 #                       batches. Higher = fewer writes & faster; lower = more
