@@ -8,23 +8,33 @@ author:
   - Noah Fürup
 date: today
 abstract: |
-  Aquí metemos un abstract generado 100% con chatgpt para generar risas y
-  felicidad. Aquí metemos un abstract generado 100% con chatgpt para generar
-  risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt para
-  generar risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt
-  para generar risas y felicidad. Aquí metemos un abstract generado 100% con
-  Aquí metemos un abstract generado 100% con chatgpt para generar risas y
-  felicidad. Aquí metemos un abstract generado 100% con chatgpt para generar
-  risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt para
-  generar risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt
-  para generar risas y felicidad. Aquí metemos un abstract generado 100% con
-  chatgpt para generar risas y felicidad. Porque somos unos guasones.
-  Aquí metemos un abstract generado 100% con chatgpt para generar risas y
-  felicidad. Aquí metemos un abstract generado 100% con chatgpt para generar
-  risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt para
-  generar risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt
-  para generar risas y felicidad. Aquí metemos un abstract generado 100% con
-  chatgpt para generar risas y felicidad.
+  The proliferation of generative artificial intelligence has prompted growing
+  scholarly debate about its influence on scientific communication. This study 
+  delves into this question by analyzing a corpus of 9,484 abstracts drawn from 
+  six leading social science journals — Nature Human Behaviour, Humanities and 
+  Social Sciences Communications, American Sociological Review, American
+  Political Science Review, European Sociological Review, and European Journal of
+  Political Research — spanning the period 2016–2025. We address four research
+  questions concerning the evolution of predominant topics, the influence of AI
+  on the thematic landscape, detectable changes in writing style, and shifting
+  sentiment toward AI over the decade. Employing TF-IDF, AI-lexicon frequency
+  analysis, Latent Dirichlet Allocation topic modelling, and lexicon-based
+  sentiment analysis, we explore three dimensions along which generative AI
+  appears to have reshaped social science publishing: substantive, stylistic,
+  and sentimental. On the substantive dimension, AI-related terminology grows
+  from near-zero prevalence to over 10% of abstracts by 2025, bolstering the case
+  that AI has become a central concern of social science scholarship. On the
+  stylistic dimension, LLM signature words — terms such as "delve," "foster," and
+  "bolster" — increase sharply after 2022, and the intricate trajectory of "delve"
+  in particular, which peaks and subsequently declines following a documented
+  developer intervention to curb its overuse, offers the strongest evidence of
+  systematic AI assistance in academic writing. On the sentimental dimension,
+  results unveil a predominantly positive evaluative stance toward AI across the
+  study period, which continues to foster optimism even as critical concerns
+  remain present. Taken together, these findings suggest that generative AI is
+  not merely a tool but an active force shaping the vocabulary, topical
+  priorities, and affective tone of social science scholarship. *This abstract was
+  entirely written by Claude Sonnet 4.6 (Anthropic)*.
 keywords:
   - artificial intelligence
   - social science
@@ -109,25 +119,23 @@ words <- sum(sapply(strsplit(clean, "\\s+"), function(x) sum(x != "")))
 
 ## Section 1. Introduction
 
-The rise of artificial intelligence, and in particular of generative large language models, opens questions about how AI is influencing scientific production and the communication of scientific results.
+The rise of generative LLMs have opened questions about how AI is influencing scientific production and the communication of scientific results. Our project focuses on its impact on the research production in the field of social sciences. Specifically, we analyze a corpus of abstracts drawn from six different leading social science journals. Two are part of the Nature portfolio: *Nature Human Behaviour*; and *Humanities and Social Sciences Communications* —we include articles published by what was its predecessor until June 2020, *Palgrave Communications*—. We also include the journals of the four major disciplinary associations in sociology and political science: *American Sociological Review*, *American Political Science Review*, *European Sociological Review* and  *European Journal of Political Research*. All these are among the most highly ranked in their respective fields in different indexes (see: Springer Nature, 2025a, 2025b; APSA, 2025; Oxford University Press, 2025; ASA, 2025; ECPR, 2025).
 
-Our project focuses on the field of social sciences. More specifically, we analyze a corpus of abstracts drawn from six leading social science journals, selected to ensure broad disciplinary coverage. Two are part of the Nature portfolio: *Nature Human Behaviour*; and *Humanities and Social Sciences Communications* —we include articles published by what was its predecessor until June 2020, *Palgrave Communications*—. We also include the journals of the four major disciplinary associations in sociology and political science: the *American Sociological Review*, published by the American Sociological Association; the *American Political Science Review*, published by the American Political Science Association; the *European Sociological Review*,  published by European Consortium for Sociological Research, and the *European Journal of Political Research*, journal of the European Consortium for Political Research. All these are among the most highly ranked in their respective fields in different indexes (see: Springer Nature, 2025a, 2025b; APSA, 2025; Oxford University Press, 2025; ASA, 2025; ECPR, 2025).
+Our study period includes the last decade (2016 to 2025), allowing us to capture several years before and after the rise of generative AI. Beyond their importance and reputation, we selected these journals because: together they provide broad disciplinary coverage of the social sciences; they provide a large and diverse volume of publications, enabling meaningful analysis; and their abstracts are freely accessible through OpenAlex, which allows us to systematically build such a large corpus.
 
-Our study period includes the last decade (2016 to 2025), which allows us to capture several years before and after the rise of generative AI. Beyond their importance and reputation, we selected these journals because: together they provide broad disciplinary coverage of the social sciences; they provide a large and diverse volume of publications, enabling meaningful temporal analysis; and their abstracts are freely accessible through OpenAlex, which allows us to systematically build such a large corpus.
+Before proceeding any further, we must clarify what we will understand by "AI", since this term has a rich history and is often used as an umbrella concept. We will work with two different operationalizations. Firstl, a broad concept of AI, which aims to capture any reference to artificial intelligence as a subject of discussion across the study period. This broad concept includes all forms and subfields of AI ---from classical machine learning and neural networks to recent generative models--- and we indifferently consider terms such as "artificial intelligence," "machine learning," "deep learning," "large language model," specific model names like "ChatGPT," and related expressions. The second is a narrow concept that focuses specifically on generative AI models, aiming to capture changes that occurred when these tools became widely available ---we consider the release of ChatGPT in November 2022 as a reference event in this sense---. These two concepts will be used in different parts of the project. For instance, when considering topics and sentiment, we refer to the broad concept, when analyzing effects on writing style, we are looking for the effects of the narrow concept.
 
-Before proceeding any further, we must clarify what we will understand by "AI", since this term has a rich history and is nowadays often used as an umbrella concept. We will work with two different operationalizations. The first is a broad concept of AI, with which we aim to capture any reference to artificial intelligence as a subject of discussion across the study period. This broad concept includes all forms and subfields of AI —from classical machine learning and neural networks to recent generative models— and we indifferently consider terms such as "artificial intelligence," "machine learning," "deep learning," "large language model," specific model names like "ChatGPT," and related expressions. The second is a narrow concept that focuses specifically on generative AI models, aiming to capture changes that occurred when these tools became publicly and widely available —we consider the release of ChatGPT in November 2022 as a reference event in this sense—. The two concepts will be used in different parts of the project. For instance, when considering topics and sentiment, we refer to the broad concept, when analyzing effects on writing style, we are looking for the effects of the narrow concept.
+Our project analyzes the influence of AI along three dimensions: a *substantive dimension*, analyzing whether the rise of AI has influenced the topics and questions being addressed by social scientists; a *stylistic dimension*, analyzing whether writing patterns have changed due to the use of generative language models as writing aids; and a *sentimental dimension*: analyzing general evaluative tone towards AI in social science publications.
 
-Our project analyzes the influence of AI along three different dimensions. First, a substantive dimension: analyzing whether the rise of AI has influenced the topics and questions being addressed by social scientists. Second, a stylistic dimension: analyzing whether writing patterns have changed due to the use of generative language models as writing aids. And third, a sentimental dimension: analyzing general evaluative tone towards AI in social science publications.
+These dimensions are explored through four research questions. Our first research question ---*What are the predominant topics in top social science journals by year?*--- seeks to map changes in dominant topics of our corpus across the study period. Closely related, our second research question asks: *How has AI, in the broad sense, influenced predominant topics?* We hypothesize two ways in which this could be the case: first, AI may have become a dominant topic itself; second, the availability of AI tools may have increased or influenced attention to other topics. The third research question ---*Has the availability of generative AI tools had a detectable effect on academic writing patterns?*--- explores whether writing patterns of social science abstracts have changed with the rise of generative LLMs. Finally, our fourth research question ---*How has sentiment towards AI in social science literature changed over the last decade?*--- aims to examine how the attitudes towards AI have evolved in the study period.
 
-These dimensions are explored through four research questions. Our first research question —*What are the predominant topics in top social science journals by year?*— seeks to map changes in dominant topics of our corpus across the study period. Closely related, our second research question asks: *How has AI, in the broad sense, influenced predominant topics?* We hypothesize two ways in which this could be the case: first, AI may have become a dominant topic itself; second, the availability of AI tools may have increased or influenced attention to other topics. The third research question —*Has the availability of generative AI tools had a detectable effect on academic writing patterns?*— explores whether writing patterns of social science abstracts have changed with the rise of generative LLMs. Finally, our fourth research question —*How has sentiment towards AI in social science literature changed over the last decade?*— aims to examine how the attitudes towards AI have evolved in the study period.
-
-The remainder of this project is structured as follows. In section 2 we set up the libraries, load the data, and briefly describe it. Section 3 addresses research questions one and two. Section 4 explores writing patterns before and after the rise of generative LLMs. Section 5 analyzes how sentiment towards AI has evolved over the last decade. Finally, we discuss the main findings and limitations of our project and suggest proposals for future research.
+The remainder of this project is structured as follows. In section 2 we set up the libraries, load the data, and briefly describe it. Section 3 addresses research questions one and two. Section 4 explores writing patterns before and after the rise of generative LLMs. Section 5 analyzes how sentiment towards AI has evolved over the last decade. Finally, we discuss the main findings and limitations of our project.
 
 ## Section 2. Setup, and data loading
 
 ### Packages
 
-We begin by loading all R packages required throughout this project.
+We load the required libraries.
 
 ```{r}
 #| message: false
@@ -168,7 +176,7 @@ library(httr2)
 
 ### Loading the data
 
-Our corpus was downloaded from [OpenAlex](https://openalex.org/). We created a custom R script (`openalex_download.R`, included in this project folder, along with documentation) to bulk-download article data from our target journals.
+Our corpus was downloaded from [OpenAlex](https://openalex.org/). We created a custom R script (`openalex_download.R`, included in the project folder, along with documentation) to bulk-download article data.
 
 ```{r}
 # Having run the script, we load the `.RData` file, containing all data
@@ -179,7 +187,7 @@ load("data/articles.RData")
 
 ### Brief description
 
-We begin by examining the structure of the raw dataset.
+Let's examine the structure of the raw dataset.
 
 ```{r}
 # Overview of all variables: types, missing values, and distributions
@@ -198,7 +206,7 @@ articles <- articles_raw |>
 describe(articles)
 ```
 
-Removing missing abstracts we went from 12589 to 9484 articles. We explore the distribution of articles by journal and year.
+Removing missing abstracts we went from 12589 to 9484 articles.
 
 ```{r warning=FALSE}
 #| fig-width: 8
@@ -320,25 +328,25 @@ p_total / p_facets / p_bar +
   )
 ```
 
-The number of articles in our journals is not balanced: HSSC accounts for more than 60% of the corpus, the other five journals are relatively balanced between them. We also observe a temporal imbalance: with publications greatly increasing after 2022. Both imbalances are driven by the same factor: the increase of publications in journals part of the Nature Portfolio, particularly HSSC. 
+We observe that the distribution of abstracts across journals is not balanced: HSSC accounts for more than 60% of the corpus, while the other five journals are relatively balanced between them. We also see a temporal imbalance: with publications greatly increasing after 2022. Both imbalances are driven by the same factor: the increase of publications in journals part of the Nature Portfolio, particularly HSSC. 
 
-The temporal imbalance should be acknowledged when interpreting results. Regarding the journal imbalance: we are interested in trends in social science papers, and the Nature Portfolio is a rightful and large part of that corpus; excluding their articles would make the corpus less representative. We acknowledge this imbalance as a limitation that could potentially introduce biases, but determining whether this is actually the case would require an exploration of the publishing landscape that is beyond the scope of this project.
+The temporal imbalance should be acknowledged when interpreting results. Regarding the journal imbalance: we are interested in trends in social science papers, and the Nature Portfolio is a rightful and large part of that corpus; excluding its articles would make the corpus arbitrarily less representative, we thus keep them ---this decision could potentially introduce biases, we acknowledge this trade off---.
 
 ## Section 3. AI and the evolution of social science journals' interests
 
 ### 3.1 Preprocessing setup
 
-The techniques in this section use different tokenization and filtering strategies. We will define all shared elements here, and explain which subsections use which.
+The techniques in this section use different tokenization and filtering strategies. We define all shared elements here, and explain which subsections use which.
 
 We work with two filtering tools:
 
-1.  **Standard stopwords**: using `stop_words` from `tidytext`. This will be applied in all techinques.
+1.  **Standard stopwords**: using `stop_words` from `tidytext`.
 
-2.  **Domain-specific stopwords**: a list of words that provide no relevant information in our context. This tool (`domain_stopwords`) is fully applied in unigram analyses (both TF-IDF and LDA), a subset of it (`ngram_stopwrods`) is used in n-gram analyses ---for more details on why, see section 3.1.2---.
+2.  **Domain-specific stopwords**: a custom list of words that provide no relevant information in our context. This tool (`domain_stopwords`) is fully applied in unigram analyses (both TF-IDF and LDA), a subset of it (`ngram_stopwrods`) is used in n-gram analyses ---for details on why, see section 3.1.2---.
 
 #### 3.1.1 Defining domain-specific stopwords
 
-We used *Claude Sonnet 4.6* to create an initial list of domain-specific words without informative value (see full prompt in Appendix I), then manually reviewed it, removing words we considered did have informational value, and adding others we found needed filtering while working on the analysis.
+Using *Claude Sonnet 4.6*, we created a list of domain-specific words without informative value ---full prompt in Appendix I---, then manually reviewed it, removing words we considered did have informational value, and adding others we found needed filtering.
 
 ```{r}
 # Domain-specific stopwords, organised by category.
@@ -668,7 +676,7 @@ tidy_abstracts
 
 ### 3.2 Analysis
 
-In order to address RQ1 and RQ2, we will use three complementary techniques: TF-IDF to identify distinctive vocabulary by year; word frequency analysis using a custom set of AI-related words to measure the growth of AI-related terminology by year; and LDA topic modelling.
+We will use three complementary techniques to address RQ1 and RQ2: TF-IDF to identify distinctive vocabulary by year; word frequency analysis using a custom set of AI-related words to measure the growth of AI-related terminology; and LDA for topic modelling.
 
 #### 3.2.1 Distinctive vocabulary by year (TF-IDF)
 
@@ -715,12 +723,11 @@ tfidf_by_year |>
   )
 ```
 
-Focusing on our research questions, TF-IDF reveals two main findings. First, terms related to the COVID-19 pandemic got some of the highest scores from 2020 onwards, reflecting the influence the pandemic had in social science research. Secondly, and in relation with RQ2, "AI" enters the top 8 in 2023 (coinciding with the rise of generative AI models), and has the highest value in 2025, overtaking "covid". Outside of these, TF-IDF values are notably low, and several high-ranking terms are driven by single abstracts repeating a term, or the publishing of a thematic collection, particularly in the first few years, where we have less articles ---see, for instance, the first two context windows in appendix III---. This is an expected limitation given the relatively small size of our corpus.
-
+Focusing on our research questions, TF-IDF reveals two main findings. First, terms related to the COVID-19 pandemic got some of the highest scores from 2020 onwards, reflecting the influence the pandemic had in social science. Secondly, "AI" enters the top 8 in 2023 (coinciding with the rise of generative AI models), and has the highest value in 2025, overtaking "covid". Outside of these, TF-IDF values are notably low, and several high-ranking terms are driven by single abstracts repeating a term, or the publishing of a thematic collection, particularly in the first few years, where we have less articles ---see, for instance, the first two context windows in appendix III---. This is an expected limitation given the relatively small size of our corpus.
 
 ##### Bigram TF-IDF by year
 
-For bigrams we tokenize from the raw abstracts, we separate bigrams into their component words, filter standard stopwords from each position, and reunite them before computing TF-IDF. As discussed above, we do not filter by the full domain-specific stopwords list here, we use the subset with just abstract structure terms and metadata noise.
+For bigrams we tokenize from the raw abstracts, separate bigrams into their component words, filter standard stopwords from each position, and reunite them before computing TF-IDF. As discussed above, we filter using a subset of the domain-specific stopwords.
 
 ```{r}
 # Tokenize into bigrams from raw abstracts
@@ -779,7 +786,7 @@ tfidf_bigrams_by_year |>
   )
 ```
 
-The bigram TF-IDF provides more easily interpretable results, and confirms our main observations from the unigram TF-IDF results. COVID-19 pandemic related-terms show the highest values. Beyond the pandemic, affective polarization enters the top 8 values in 2019, probably due to the rise of far right parties in western democracies. From 2023 onwards climate and sustainability words (particularly "carbon emissions") break into the top 8, likely indicating renewed attention to the climate crisis after the pandemic years. Regarding our RQ2, no terms directly related to AI appear, but we see indirectly related terms such as digital economy and digital transformation from 2023 to 2025.
+The bigram TF-IDF provides more easily interpretable results, and confirms our main observations from the unigram results. COVID-19 pandemic terms show the highest values. Beyond the pandemic, affective polarization enters the top 8 values in 2019, probably due to the rise of far right parties in western democracies. From 2023 onwards climate and sustainability words (particularly "carbon emissions") break into the top 8, likely indicating renewed attention to the climate crisis after the pandemic years. Regarding our RQ2, no terms directly related to AI appear, but we see indirectly related terms such as digital economy and digital transformation from 2023 to 2025.
 
 ##### Trigram TF-IDF by year
 
@@ -841,21 +848,17 @@ tfidf_trigrams_by_year |>
   )
 ```
 
-Trigram TF-IDF confirms the pattern in the previous results. The COVID-19 pandemic appears as the most distinctive topic after 2020 (we see new terms, like "sars cov 2" in 2022). Climate-related terms are still among the most distinctive in the years after the pandemic, suggesting a renewed attention to the topic. Focusing on RQ2, "artificial intelligence ai" enters the top 8 in 2024 and reaches the top 4 in 2025.
-
+Trigram TF-IDF reflects the same pattern. The pandemic appears as the most distinctive topic after 2020 (we see new terms, like "sars cov 2" in 2022). Climate-related terms are still among the most distinctive in the years after the pandemic, suggesting a renewed attention to the topic. Focusing on RQ2, "artificial intelligence ai" enters the top 8 in 2024 and reaches the top 4 in 2025.
 
 #### 3.2.2 AI as an emerging topic using an AI-related lexicon
 
-In this subsection we operationalise AI as a topic through a keyword lexicon built from the works of Liu, Shapira, and Yue (2021) and Ding, Lawson, and Shapira (2025). These works ---which fully cover our study period--- explore bibliometric search strategies for identifying AI-related publications, the lexicons they build are well thought out and validated by their research, and can prove useful for our purposes. We built three lexicons from these sources: a unigram, a bigram, and a trigram lexicon.
+In this subsection we operationalise AI as a topic through a keyword lexicon built upon the works of Liu *et al.* (2021) and Ding *et al.* (2025). These papers explore bibliometric search strategies for identifying AI-related publications, and provide validated lexicons that can prove useful for our purposes. We built three lexicons from these sources: a unigram, a bigram, and a trigram lexicon.
 
 ##### Building the AI lexicon
 
-We manually excluded a significant amount of n-grams from these lexicons, prioritising precision over recall. We accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. 
+We manually excluded a significant amount of n-grams from these lexicons, prioritising precision over recall. We accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded: terms (like "random forest") that refer to statistical methods classically used in social science; highly technical terms that are unlikely to appear in our corpus ---to keep the lexicon manageable---; and ambiguous terms. Liu et al. (2021, p. 3171) exclude "AI" for being an ambiguous abbreviation that overlaps with other terms like "Active Ingredient, Avian Influenza, Aromatase Inhibitor and Associative Ionization", this overlap is not a problem in a social science corpus, we thus keep "AI"---.
 
-We excluded terms like "random forest" because they refer to statistical methods classically used in social science; to keep our lexicon manageable, we excluded too technical terms that are unlikely to appear in our corpus; and excluded ambiguous terms ---Liu et al. (2021, p. 3171) exclude "AI" for being an ambiguous abbreviation that overlaps with many science and medicine terms like "Active Ingredient, Avian Influenza, Aromatase Inhibitor and Associative Ionization", this overlap is not a problem in a social science corpus, thus we do not exclude "AI"---. 
-
-We included extra n-grams to capture named generative AI models and providers absent from both sources, such as Gemini, Claude, or LLama ---while the names by themselves could lead to ambiguity (the zodiac sign, Claude Lévi-Strauss, the animal, etc.), including the version number in bigrams solves this ambiguity---.
-
+We added n-grams to capture named generative AI models absent from both sources ---Gemini, Claude, Llama, etc.---. These terms by themselves could lead to ambiguity ---the zodiac sign, Claude Lévi-Strauss, etc.---, including the version number in bigrams solves this ambiguity---.
 
 ```{r}
 # AI unigram lexicon
@@ -937,9 +940,11 @@ ai_lexicon_trigrams <- c(
 
 ##### Tokenizing abstracts at each n-gram level
 
-We tokenize abstracts at the three n-gram levels and match each against the corresponding lexicon.
+We tokenize the abstracts and match them against the corresponding lexicons.
 
 ```{r}
+# Tokenize abstracts at the three n-gram levels and match:
+
 # Source abstracts. We start from articles each time since n-gram tokenization
 # needs the original text
 abstracts_base <- articles |>
@@ -1022,7 +1027,7 @@ ggplot(ai_proportion, aes(x = publication_year, y = proportion_ai_articles)) +
   )
 ```
 
-The presence of AI-related terms was insignificant before 2019, but it quickly grew, reaching 4% in 2022 ---ChatGPT's public release---, and surpassing 10% in 2025. Since our lexicon prioritizes precision over recall, these are probably underestimates. But the trend is clear: attention to AI has greatly increased following the rise of generative AI tools. Let's explore which terms are driving the trend.
+The presence of AI-related terms was insignificant before 2019, but it grew quickly, reaching 4% in 2022 ---ChatGPT's public release---, and surpassing 10% in 2025. Since our lexicon prioritizes precision over recall, these are probably underestimates. But the trend is clear: attention to AI has greatly increased following the rise of generative AI tools. Let's explore which terms are driving the trend.
 
 ```{r}
 #| fig-width: 6
@@ -1114,7 +1119,7 @@ ai_hits |>
   )
 ```
 
-Examining "AI" in isolation, the pattern becomes even clearer: its usage explodes from 2023 onwards, coinciding with the rise of generative AI.
+Examining "AI" in isolation, the pattern becomes even clearer: its usage explodes after 2022, coinciding with the rise of generative AI.
 
 #### 3.2.3 Topic modelling (LDA)
 
@@ -1136,7 +1141,7 @@ abstracts_dtm
 cat("Precise sparsity   :", 1 - (464617/358239443), "%")
 ```
 
-We get a DTM with 9482 documents and 38566 terms, sparsity close to 100% (99.87%), indicating very varied vocabulary in our abstracts.
+We get a DTM with 9482 documents and 38566 terms, sparsity close to 100%, indicating very varied vocabulary in our abstracts.
 
 ##### LDA model with k=5
 
@@ -1176,7 +1181,7 @@ top_terms5 |>
   )
 ```
 
-We see some patterns, but topics are broad: topic 1 groups economic and sustainability terms, topic 2 politics and elections, topic 3 gender and family, and topic 4 is about COVID-19 and health. Topic 5 mixes education, AI, media, and language. In all topics, but especially 5, it seems like distinct topics are being mixed, we thus tried a higher k.
+We see some patterns, but topics are broad: topic 1 groups economic and sustainability terms, topic 2 politics and elections, topic 3 gender and family, and topic 4 is about COVID-19 and health. Topic 5 mixes education, AI, media, and language. In all topics, but especially 5, it seems like distinct topics are being mixed, we thus try a higher k.
 
 ##### LDA model with k=6
 
@@ -1215,6 +1220,7 @@ top_terms6 |>
     axis.text.y = element_text(size = 9)
   )
 ```
+
 A new media and mental health topic appears, improving interpretability. However, the remaining topics still show significant overlaps, particularly around education, we try a higher k.
 
 ##### LDA model with k=7
@@ -1255,7 +1261,7 @@ top_terms7 |>
   )
 ```
 
-At k = 7 the topics reach a pretty clear configuration: economic sustainability (topic 1), politics and elections (2), cultural discourse and identity (3), health and pandemic (4), media and mental health (5), AI and education (6), and gender inequality (7). AI is grouped with education and learning, suggesting that AI is primarly discussed in this context (and not in a topic by itself).
+Topics reach a pretty clear configuration: economic sustainability (topic 1), politics and elections (2), cultural discourse and identity (3), health and pandemic (4), media and mental health (5), AI and education (6), and gender inequality (7). AI is grouped with education and learning, it does not have a topic by itself.
 
 ##### LDA model with k=8
 
@@ -1294,9 +1300,10 @@ top_terms8 |>
     axis.text.y = element_text(size = 9)
   )
 ```
-Interpretability does not improve, the new topics 4 is hard to interpret, and itss climate direction overlaps with topic 1. No clear improvement over k = 7, which we will choose to analyze the evolution of topics over time.
 
-##### How do topics evolve year by year? 
+Interpretability does not improve, the new topic 4 is hard to interpret, and overlaps with topic 1 in the papers on climate. No clear improvement over k = 7, which we will choose to analyze the evolution of topics over time.
+
+##### How do topics evolve year by year?
 
 ```{r}
 #| fig-width: 10
@@ -1373,7 +1380,7 @@ ggplot(topics_by_year7,
   )
 ```
 
-We observe a clear pattern: topics follow a relatively stable trend throughout the decade. However, inflection points appear in relation to the main events identified in the previous subsections (the pandemic in 2020 and, particularly, the rise of generative AI). While the topic including AI (topic 6) does not seem to shift at 2022, a general pattern shift is observable across most topics after that year, suggesting the rise of generative AI had an effect, at least as a catalyst for existing trends. To check the robustness of the pattern, we visualize the same graph on all the models we have fitted.
+We observe a clear pattern: topics follow a relatively stable trend throughout the decade. However, inflection points appear in relation to the main events previously identified (the pandemic and, particularly, the rise of generative AI). While the topic including AI (topic 6) does not seem to shift at 2022, a general pattern shift is observable across most topics after that year, suggesting the rise of generative AI had an effect, at least as a catalyst for existing trends. We check the robustness of this finding analyzing the same graph on all the models we fitted.
 
 ```{r}
 # Named list to identify models in the plot
@@ -1430,9 +1437,11 @@ The shift coinciding with the rise of generative AI is consistent across all val
 
 ## Section 4. Social science journals' writting style and the rise of generative AI
 
-As discussed, papers on AI have risen exponentially since ChatGPT’s launch in 2022. Coincidentally, the use of AI to assist scientific research has exploded: 28 % of scientists use AI to write their manuscripts, according to a 2023 survey of Nature (Kwon, 2025). That figure is likely to have increased, since AI tools have multiplied and improved.
+As discussed, papers on AI have increased exponentially since ChatGPT’s launch in 2022. At the same time, the use of AI to help scientists in their research has exploded: 28 % of scientists use AI to write their manuscripts, according to a survey of Nature (Kwon, 2025). That figure is likely to have increased, since there AI providers have multiplied and its use has been democratized.
 
-When writing text, chatbots seem to have a specific “tone”, which is previously designed ---on how a chatbot’s “voice” is designed, see Derner et al., 2026---. This communication style varies between chatbots, they will systematically use some words or grammatical forms more than others (Rudnika and Mukerjee, 2025). For instance, from the beginning of the chatbot era linguists have pointed out that there are certain words that ChatGPT loves to use. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak (Matsui, 2025); it’s estimated that more than half of today’s text in the internet is AI generated (Morrone, 2025). Some studies show that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We'll analyze if this trend is confirmed in our corpus.
+When writing text, it appears that chatbots have a specific “tone”, which is previously designed (for a study of how a chatbot’s “voice” is designed, see Derner et al., 2026). This communication style, which varies from chatbot to chatbot, will systematically push some words or grammatical forms more than others (Rudnika and Mukerjee, 2025).
+
+From the beginning of the chatbot era, linguists have pointed out that there are certain words that ChatGPT favors. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak, since it’s estimated that more than half of today’s text in the internet is AI generated (Matsui, 2025; Morrone, 2025). Some studies have shown that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We’ll look into our corpus to see if there is an increase of LLM-favored words.
 
 ```{r}
 # Plot top 20 most frequent words in the corpus
@@ -1461,9 +1470,7 @@ tidy_abstracts |>
   )
 ```
 
-We’ll use the words proposed by Kousha and Thelwall (2025): “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These terms are supported by other researchers in the area as well. To them, we’ll add “core” which is a word that seems to be have been pushed by the newer versions of ChatGPT (Merrill et al, 2025).
-
-We use 4 control terms to be able to compare them to the AI words. These words will be taken out of the most frequently used words in our corpus. We eventually decided on “research”, “analysis”, “policy” and “support”. We controlled for the fact that there are more papers after 2023 in our corpus by dividing the word frequency by the total papers of that year.
+We’ll use the words that Kousha and Thelwall used in their paper, which are “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These are terms that have the support of other researchers in the area as well. To them, we’ll add “core” which is a word that according to journalists in the Washington Post has been pushed by the newer versions of ChatGPT (Merrill et al, 2025).
 
 ```{r}
 # LLM signature words, based on Kousha & Thelwall (2025) and control words
@@ -1487,6 +1494,8 @@ llm_words <- tibble(word = c(
 control_words <- tibble(word = c("research", "findings", "policy", "support"))
 ```
 
+We add 4 control terms to compare them to the AI words. These terms are taken out of the most frequently used words in our corpus. We eventually decided on “research”, “analysis”, “policy” and “support”. We also controlled for the fact that there are more papers after 2023 in our corpus by dividing the word frequency by the total papers of that year.
+
 ```{r}
 # Tokenize raw abstracts and count occurrences of each LLM signature word
 # (pattern 1) across the full corpus
@@ -1500,6 +1509,9 @@ llm_words_freq <- tidy_abstracts_raw |>
   filter(str_detect(word, regex(pattern_1, ignore_case = TRUE))) |> 
   count(word, sort = TRUE)
 
+```
+
+```{r}
 # Plot top 20 most frequent LLM signature words in the corpus
 llm_words_freq |> 
   filter(!word %in% c("analysis", "findings", "policy",
@@ -1585,10 +1597,9 @@ p_control <- plot_data |>
 p_control | p_llm
 ```
 
-Our top 10 most frequent AI-words have a distribution that goes mostly up exponentially after 2023, while our control words either were going up even before AI chatbots or have different patterns, such as "support"."Underscore", "score", "pivotal" and "foster" become more frequent after the lauch of ChatGPT. "Core" was at its lowest just before ChatGPT came out, started being used more and then started to be used again.
+Our top 10 most frequent AI-words have a distribution that goes exponentially higher after 2023, while our control words either were going up even before AI chatbots or have different patterns, such as "support". "Underscore", "score", "pivotal" and "foster" become more frequent after the launch of ChatGPT. "Core" was at its lowest just before ChatGPT came out, and then started going up in recent years, supporting other's findings.
 
-The word “delve", which was considered one of the words that revealed the most if a text was written by AI since the bot pushed it constantly, also follows the same trend, but with a twist. After the developers noticed the excessive use of the word in ChatGPT, much more than of actual human writings, they tweaked the model so that it appears less. This is also shown in our corpus, which strongly suggests that AI may be used systematically for abstracts, since not only do AI-words appear, but also AI developer decisions.
-
+The word “delve", which was considered one of the words that the OpenAI favored the most, also follows the same trend, but with a twist. After the developers noticed the excessive use of the word, they tweaked the model so that it appears less. This is also shown in our corpus, which strongly suggests that AI may be used systematically for abstracts, since not only do AI-words appear, but also AI developer decisions.
 
 ```{r}
 # Plot yearly frequency of "delve" as a proportion of total papers
@@ -1711,21 +1722,19 @@ sapling_results |>
   )
 ```
 
-As we can see, 8 out of 10 have nearly 100% ai_score, which means that they most probably were at least partially written with AI help. Again, this doesn't prove AI wrote it, but it tells us how big of an impact it has had in abstract writing styles, even in highly ranked indexed journals.
+As we can see, 8 out of 10 have nearly 100% ai_score, which means that they most probably were at least partially written with AI help. Again, this doesn't prove AI wrote it, but it points towards how big of an impact it has had in abstract writing styles, even in highly ranked indexed journals.
 
 ## Section 5. Sentiment towards AI in social science journals
 
-Our fourth research question looks at how sentiments towards AI have changed during the period studied.
+Our fourth research question looks at how sentiments towards AI have changed during the period studied. The main **limitation** here is that we cannot guarantee the sentiment is generated by evaluations directed specifically at AI itself, it may be influenced by words part of the research context ---for instance, "discrimination"---. We acknowledge this as a limitation of our project.
 
-The main **limitation** in answering this research question is that we cannot guarantee the sentiment is generated by evaluations directed specifically at AI itself, but rather that it may be influenced by words that are part of the research context. Therefore, this first analysis is far from answering the research question in depth, and would capture the general evaluative tone of abstracts that contain mentions of AI-related terms.
+To tackle this limitation, the analysis has been designed sequentially: first, sentiment analysis is conducted on the full abstracts that mention AI-related terms. Secondly, only sentences that contain explicit AI terms are used. Third, we select only those sentences that have bigrams/trigrams/fourgrams explicitly addressing the effects or consequences of AI, thus undoubtedly making AI the focus of interest in that sentence ---and not just a simple mention---.
 
-For this reason, the analysis has been designed sequentially to approach the object of study. First, a sentiment analysis is conducted on the full abstracts that mention terms related to AI. In the second step, only sentences that contain explicit AI terms are used to calculate the general sentiment of each abstract. In the third analysis, we select only those sentences that have bigrams/trigrams/fourgrams addressing AI and its effects or consequences, thus making AI the focus of interest in that sentence and not just a simple mention.
+In addition, we acknowledge the difficulty of analyzing sentiment in abstracts of scientific texts, which are characterized by the neutrality of the vocabulary used. This is reflected in the exclusion of some abstracts and sentences (across all three levels of analysis) because none of their words appear in the sentiment lexicons used, Bing and AFFIN ---although their omission may capture limitations of lexicon-based sentiment analysis---.
 
-In addition, we acknowledge the difficulty of analyzing sentiment in abstracts of scientific texts, which are characterized by the neutrality of the vocabulary used. This is reflected in the exclusion of some abstracts and sentences (across all three levels of analysis) because none of their words appear in the sentiment lexicons used, Bing and AFFIN - although their omission may capture limitations of lexicon-based sentiment analysis.
+### 5.1 Set-up for sentiment analysis
 
-### 5.0 Set-up for sentiment analysis
-
-We need to define de abstracts that would be part of the subcorpus of analysis. Therefore, we just select the abstracts that have AI related terms/n-grams, using the object ai_hits created above.
+We need to define the abstracts that will be analyzed. We subset the corpus to abstracts that included at least one AI-related n-gram ---we use the previously created `ai_hits`---.
 
 ```{r}
 # Creating the sentiment analysis subcorpus, selecting only the abstracts that contain the n-grams in ai_hits 
@@ -1735,7 +1744,7 @@ ai_abstracts <- ai_hits |>
 ai_abstracts
 ```
 
-As mentioned, abstracts with no matches in the sentiment lexicons are excluded from the sentiment computing step. In both cases of Bing and AFINN the number of abstracts excluded are 2.
+Abstracts with no matches in the sentiment lexicons are excluded from the sentiment computing step. In both cases ---Bing and AFINN---, 2 abstracts are excluded.
 
 ```{r, warning = FALSE}
 # Total of AI-related abstracts: 529 
@@ -1766,27 +1775,30 @@ get_sentiments("afinn") %>%
   count(value)
 ```
 
-The following chunk modifies the Bing lexicon removing the word "intelligence", which we realize was contributing disproportionately to positive sentiment - considering we are talking about "artificial intelligence".
+We modify the Bing lexicon removing the word "intelligence", which we realized was contributing disproportionately to positive sentiment ---unsurprisingly, we are talking about "artificial intelligence"---.
 
 ```{r}
 bing_lexicon <- get_sentiments("bing") |>
   filter(word != "intelligence") 
 ```
 
-### 5.1. General sentiment in AI-related abstracts over time
+### 5.2 General sentiment in AI-related abstracts over time
 
 This is the first approach aims to estimate the general sentiment in abstracts that mention AI-related terms.
 
-The methodological choice was to calculate a sentiment score per abstract and, after that, obtain the annual value as the average sentiment score of the articles published in a specific year. This ensures that abstracts remain the unit of analysis counting only once. In this connection, we decided to use net_sentiment_norm for Bing (that tells us if the sentiment balance is more positive or more negative and ranges from -1 to 1) and afinn_mean for AFINN (that tells us how positive or negative the matched words are on average and is normalized so it ranges from -1 to 1). This is appropriate for our research since the goal is to get a sentiment measure comparable across abstracts that does not depend on how many words/sentiment words each abstract contains.
+The methodological choice was to calculate a sentiment score per abstract, and then obtain the annual value as the average sentiment score of the articles published in a specific year. This ensures that abstracts remain the unit of analysis, each abstract having the same weight. We use `net_sentiment_norm` for Bing (tells us if the sentiment balance is more positive or negative, ranges from −1 to 1) and `afinn_mean` for AFINN (tells us how positive or negative the matched words are on average and is normalized, thus ranges from −1 to 1). This is appropriate for our research since the goal is to get a sentiment measure comparable across abstracts that does not depend on how many sentiment words each abstract contains.
 
-The subsequent analysis must be interpreted taking into account the unbalanced nature of our dataset, since the small number of articles written in the years 2017-2019 deeply affects the result of any sentiment metric.
+The subsequent analysis must be interpreted taking into account the unbalanced nature of our dataset, can affect the result of any sentiment metric.
 
 ```{r, warning=FALSE}
-# In this chunk we create two tibbles, one per lexicon, that contain the id, the publication year and the sentiment variables related to each lexicon.
-
-# In the Bing one, we compute the number of positive and negative words, the net sentiment (positive - negative) and the total sentiment words (positive + negative). With these last two values we obtain the variable of interest net_sentiment_norm (net sentiment / total sentiment words). In the AFINN tibble we computed the afinn sum and the number of sentiment words, and with these two values we obtain the variable of interest afinn_mean.  
+# In this chunk we create two tibbles, one per lexicon, that contain the id,
+# the publication year and the sentiment variables related to each lexicon.
 
 # Bing
+# We compute the number of positive and negative words, the net
+# sentiment (positive - negative) and the total sentiment words (positive +
+# negative). With these last two values we obtain the variable of interest
+# net_sentiment_norm (net sentiment / total sentiment words).
 bing_abstract_sentiment <- ai_abstracts |>
   unnest_tokens(word, abstract) |>
   inner_join(bing_lexicon, by = "word") |>
@@ -1803,6 +1815,8 @@ bing_abstract_sentiment <- ai_abstracts |>
 bing_abstract_sentiment
 
 # AFINN
+# In the AFINN tibble we computed the afinn sum and the number of sentiment
+# words, and with these two values we obtain the variable of interest afinn_mean.  
 afinn_abstract_sentiment <- ai_abstracts |>
   unnest_tokens(word, abstract) |>
   inner_join(get_sentiments("afinn"), by = "word") |>
@@ -1883,7 +1897,8 @@ ggplot(sentiment_yearly, aes(x = publication_year, y = mean_sentiment, color = l
     axis.text.y          = element_text(color = "#4a4a6a"),
     panel.grid.minor     = element_blank())
 
-# Plotting the comparison before-after the rise of AI of the annual average sentiment score: boxplot 
+# Plotting the comparison before-after the rise of AI of the annual average
+# sentiment score: boxplot 
 
 period_scores <- sentiment_scores |>
   mutate(
@@ -1924,7 +1939,7 @@ ggplot(
   )
 ```
 
-The annual mean sentiment scores shows the predominant positive tone of AI-related abstracts across the entire period. Net_sentiment_norm (Bing) illustrates a positive word balance, while afinn_mean (AFINN) is show a low-moderate intensity on average. For instance, in 2025, we can see that average sentiment intensity is low-moderate with a value around 0.162 and the balance of words is positive (0.40) meaning that 70% of words are positive and 30% negative. From 2020 onwards, AFINN is stable, whereas Bing shows a declining trend until 2022 followed by an increasing one until 2025. This could reflect a period of more cautious framing of AI that becomes more positive in the recent years. The boxplots show that the central tendency of the years after the rise of AI in 2023 has higher values according to both lexicons (which is consistent across the analysis).
+The annual mean sentiment scores show the predominant positive tone of AI-related abstracts across the entire period. `net_sentiment_norm` (Bing) illustrates a positive word balance, while `afinn_mean` (AFINN) shows a low-moderate intensity on average. For instance, in 2025, we can see that average sentiment intensity is low-moderate with a value around 0.162 and the balance of words is positive (0.40), meaning that 60% of words are positive and 40% negative. Since 2020, AFINN is stable, whereas Bing shows a declining trend until 2022 followed by an increasing one until 2025. This could reflect a period of more cautious framing of AI that becomes more positive in recent years. The boxplots show that the central tendency of the years after the rise of AI in 2023 has higher values according to both lexicons (which is consistent across the analysis).
 
 ```{r}
 #| fig-width: 10
@@ -1993,11 +2008,11 @@ ggplot(year_polarity,
     panel.spacing    = unit(1.5, "lines"))
 ```
 
-With this graph we confirm the predominant presence of positively-toned abstracts in both lexicons across years. The percentage of positive abstracts stabilizes after 2020 around 80% in AFINN and again showing an increasing tendency 2021-2025 in Bing, ranging around 60%-75%. The size of the points shows that the stabilization happens when the volume of abstracts becomes larger.
+This graph confirms the predominant presence of positively-toned abstracts in both lexicons across years. The percentage of positive abstracts stabilizes after 2020 around 80% in AFINN and again showing an increasing tendency 2021-2025 in Bing, ranging around 60%-75%. The size of the points shows that the stabilization happens when the volume of abstracts becomes larger.
 
-### 5.2 General sentiment in AI-related abstracts over time: using sentences mentioning AI
+### 5.3 General sentiment in AI-related abstracts over time: using sentences mentioning AI
 
-In the second step, we select only the sentences that explicitly mention at least one AI-related term from the unigram, bigram, or trigram lexicons. To ensure comparability with the previous abstract-level results, we computed the sentence-level sentiment (with the net_sentiment_norm and the afinn_mean) and then average it back to the abstract level, making each AI-mentioning sentence contributes equally to the abstract's overall score.
+In the second step in our analytical sequence, we select only the sentences explictly mentioning at least one AI-related term from our custom lexicon. To ensure comparability with the previous abstract-level results, we computed the sentence-level sentiment (with the net_sentiment_norm and the afinn_mean) and then averaged it back to the abstract level, making each AI-mentioning sentence contribute equally to the abstract's overall score.
 
 ```{r}
 # Creating the subcorpus of sentences that explicitly mention AI-related terms 
@@ -2224,7 +2239,7 @@ ggplot(
   )
 ```
 
-We can see that the general patterns in this analysis remain very similar: both lexicons show a positive sentiment from 2020 onwards. Afinn_mean (AFINN) and net_sentiment_norm (Bing) scores increase in this case, which means that both the intensity of sentiment words on average and the presence of positive words compare to negative ones grow when selecting AI-mentioning sentences.
+The general patterns remain very similar: both lexicons show a positive sentiment from 2020 onwards. `afinn_mean` (AFINN) and `net_sentiment_norm` (Bing) scores increase, meaning that both the intensity of sentiment words on average, and the presence of positive words compared to negative words, grow when selecting AI-mentioning sentences.
 
 ```{r}
 #| fig-width: 10
@@ -2294,9 +2309,9 @@ ggplot(sentence_year_polarity,
 
 The distribution does not illustrate pattern changes; the most notable difference would be that Bing has more variability in the positive category across years.
 
-### 5.3. Towards a more target-specific measure of sentiment around AI
+### 5.4 Towards a more target-specific measure of sentiment around AI
 
-The final stage of the analysis moves towards a more target-specific measure of sentiment around AI, trying to identify sentences in which AI is explicitly linked to evaluations, risks, benefits or implications. To do this, the code builds a new lexicon by combining AI N-grams with effect and outcome terms: we defined separate vectors for AI-side components and effect-side components, and these were combined into bigrams, trigrams, and fourgrams. After that, the same sentiment analysis procedure is applied.
+The final stage of the analysis moves towards a more target-specific measure of sentiment around AI, trying to identify sentences in which AI is explicitly linked to evaluations, risks, benefits or implications. To do this, the code builds a new lexicon by combining AI terms with effect and outcome terms: we defined separate vectors for AI-side components and effect-side components, and combine them into bigrams, trigrams, and fourgrams ---we used Claude Sonnet 4.6 to build the effect lexicon, full prompt in appendix II---. After that, the same sentiment analysis procedure is applied.
 
 ```{r}
 # Building the AI-related N-grams lexicon 
@@ -3007,9 +3022,9 @@ ggplot(target_sentence_year_polarity,
 
 The distribution of abstracts is very similar; the most remarkable difference is the neutral category in Bing reaching around 25% in 2024 before dropping in 2025; which could reflect that sentences addressing AI's effects tend to be somehow more descriptive that sentences that mentioning AI.
 
-### 5.4 Which words drive the sentiment in target-specific AI-effect sentences?
+### 5.5 Which words drive the sentiment in target-specific AI-effect sentences?
 
-Finally, we explore which words drive the sentiment in these target-specific AI-effect sentences of scientific papers' abstracts. Counting the frequency of positive and negative words we can observe that psoitive ones contribute more to the overall sentiment (trust, ethical, support and positive).
+Counting the frequency of positive and negative words we can observe that positive ones contribute more to the overall sentiment ("trust", "ethical", "support" and "positive").
 
 ```{r}
 # We create a data frame with word, sentiment, and number of mentions to see which words are more common
@@ -3081,15 +3096,16 @@ target_word_counts |>
   )
 ```
 
+
 ## Section 6. Conclussions and limitations
 
 In this final section we summarize the results of our project and discuss its limitations.
 
-Regarding **RQ1**, the topics addressed by social scientists do not change abruptly from one year to the next, they evolve gradually over time. This is expected: scientific production takes time and specialization cannot be achieved overnight. That said, our results show that certain events redirect social scientists' attention. Two events are highlighted by our results. First, the COVID-19 pandemic greatly attracted the attention of social scientists, dominating TF-IDF rankings at every n-gram level since 2020 and defining a topic by itself in LDA. Second ---connecting with **RQ2**---, AI attracted substantially more attention with the rise of generative AI. This pattern is visible in the TF-IDF analysis, where AI-related terms appear from 2023 onwards, and in the AI-lexicon frequency analysis: our conservative estimations show that abstracts containing AI-related terms increase from almost 0% in 2019 to over 10% in 2025. In the LDA results, we do not find a topic exclusively devoted to AI ---it appears as an important term within an education-related topic---. However, when examining the evolution of topics over time, we observe substantial shifts coinciding with the rise of generative AI, suggesting AI has had an influence in the second way we hypothesized in the introduction: affecting the evolution of other topics.
+Starting with **RQ1**, we found that topics addressed by social scientists do not change abruptly from year to year, they evolve gradually over time ---unsurprisingly, since scientific production takes time and specialization cannot be achieved overnight---. That said, our results show that certain events redirect social scientists' attention. Two events are highlighted by our results. First, the COVID-19 pandemic greatly attracted the attention of social scientists, dominating TF-IDF rankings at every n-gram level since 2020 and defining a topic by itself in LDA. Second ---connecting with **RQ2**---, AI attracted substantially more attention with the rise of generative AI. This pattern is visible in the TF-IDF analysis, where AI-related terms appear from 2023 onwards, and in the AI-lexicon frequency analysis: our conservative estimations show that abstracts containing AI-related terms increase from almost 0% in 2019 to over 10% in 2025. In the LDA results, we do not find a topic exclusively devoted to AI ---it appears as an important term within an education-related topic---. However, when examining the evolution of topics over time, we observe substantial shifts coinciding with the rise of generative AI, suggesting AI has had an influence in the second way we hypothesized in the introduction: affecting the evolution of other topics.
 
-Regarding **RQ3**, our results suggest that the rise of generative AI has had a detectable effect on the writing patterns of social science abstracts. The frequency of LLM signature words ---terms identified in the literature as favored by LLMs--- increases greatly from 2023 onwards. A particularly suggestive finding is the trajectory of "delve": after peaking following the release of ChatGPT, its frequency declines in recent years, mirroring a well-documented developer intervention to reduce its overuse. The fact that this decision appears traceable in top social science abstracts constitutes arguably the strongest evidence of systematic AI use in academic writing. 
+Regarding **RQ3**, our results suggest that the rise of generative AI has had a detectable effect on the writing patterns of social science abstracts. The frequency of LLM signature words ---terms identified in the literature as favored by LLMs--- increases greatly from 2023 onwards. A particularly suggestive finding is the trajectory of "delve": after peaking following the release of ChatGPT, its frequency declines in recent years, mirroring a well-documented developer intervention to reduce its overuse. The fact that this decision appears traceable in top social science abstracts constitutes arguably the strongest evidence of systematic AI use in academic writing.
 
-On **RQ4**, the results obtained across the three levels of analysis explain that the abstracts discussing AI have a predominant positive sentiment in 2017-2025, especially after 2023. In the most reliable years, the balance of positive-negative words is positive, and the average intensity of sentiment is low-moderate, and both tend to increase as we attempt to approach AI in each step of analysis. Regarding the distributions, positive abstracts account for around 60-85% of the corpus in all cases, although we also observe that abstracts directly addressing AI are scarce. Finally, the words driving sentiment in target-specific sentences are associated with AI benefits showing that literature holds a positive view of AI but also accounts for some important critical concerns.
+As for **RQ4**, the results obtained across the three levels of analysis explain that the abstracts discussing AI have a predominant positive sentiment in 2017-2025, especially after 2023. In the most reliable years, the balance of positive-negative words is positive, and the average intensity of sentiment is low-moderate, and both tend to increase as we attempt to approach AI in each step of analysis. Regarding the distributions, positive abstracts account for around 60-85% of the corpus in all cases, although we also observe that abstracts directly addressing AI are scarce. Finally, the words driving sentiment in target-specific sentences are associated with AI benefits showing that literature holds a positive view of AI but also accounts for some important critical concerns.
 
 Several limitations must be acknowledged. Our corpus is imbalanced across years (few abstracts at the start of the study period) and journals (HSSC accounts for over 60% of the corpus); potentially introducing biases that are difficult to fully assess, as discussed in section 2. Future work should examine more journals. In addition, our analysis is restricted to abstracts, which may not fully represent the content of the articles, exploring full article text could improve the analysis across the three dimensions studied. Finally, our findings are descriptive: we identify patterns consistent with the rise of generative AI, but cannot establish causality. Lexicon-based sentiment analysis also carries well-known limitations in the neutral register of scientific writing.
 
