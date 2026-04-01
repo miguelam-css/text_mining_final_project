@@ -1746,7 +1746,13 @@ ai_abstracts
 
 Abstracts with no matches in the sentiment lexicons are excluded from the sentiment computing step. In both cases ---Bing and AFINN---, 2 abstracts are excluded.
 
+We modified the Bing lexicon removing the word "intelligence", which we realized was contributing disproportionately to positive sentiment ---unsurprisingly, we are talking about "artificial intelligence"---.
+
 ```{r, warning = FALSE}
+# Remove "intelligence" from bing lexicon
+bing_lexicon <- get_sentiments("bing") |>
+  filter(word != "intelligence") 
+
 # Total of AI-related abstracts: 529 
 ai_abstracts |> 
   summarise(n_ai_abstracts = n_distinct(id))
@@ -1768,18 +1774,11 @@ Since both lexicons are negatively biased, this could influence the direction of
 
 ```{r}
 # Calculating the number of times that a sentiment or a value appears in each lexicon > negatively biased
-get_sentiments("bing") %>% 
+get_sentiments("bing") |>
   count(sentiment)
 
-get_sentiments("afinn") %>% 
+get_sentiments("afinn") |>
   count(value)
-```
-
-We modify the Bing lexicon removing the word "intelligence", which we realized was contributing disproportionately to positive sentiment ---unsurprisingly, we are talking about "artificial intelligence"---.
-
-```{r}
-bing_lexicon <- get_sentiments("bing") |>
-  filter(word != "intelligence") 
 ```
 
 ### 5.2 General sentiment in AI-related abstracts over time
@@ -2858,10 +2857,11 @@ target_sentence_abstract_yearly
 ```
 
 ```{r}
-# Plotting the evolution of the annual average sentiment score (using target-specific sentences): line chart 
 #| fig-width: 7
 #| fig-height: 5
 
+# Plotting the evolution of the annual average sentiment score
+# (using target-specific sentences): line graph
 ggplot(
   target_sentence_abstract_yearly,
   aes(x = publication_year, y = mean_sentiment, color = lexicon)
