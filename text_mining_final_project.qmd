@@ -1,6 +1,6 @@
 ---
 title: "Exploring the influence of Artificial Intelligence on social science publishing"
-subtitle: "An analysis of the abstracts published in six leading journals (2015-2025)"
+subtitle: "An analysis of the abstracts published in six leading journals (2016-2025)"
 author: 
   - Alicia Mira
   - Eva Lambistos
@@ -114,7 +114,7 @@ words <- sum(sapply(strsplit(clean, "\\s+"), function(x) sum(x != "")))
 ```
 
 ::: {.text-end}
-<br>[*Word count in body text: `r words` words.*]{style="font-size: 78%"} <br> [*[Excluding abstract, references, and appendices.]*]{style="font-size: 65%"}
+<br>[*Body text word count: `r words` words.*]{style="font-size: 78%"} <br> [*[Excludes code chunks, abstract, references, and appendices.]*]{style="font-size: 65%"}
 :::
 
 ## Section 1. Introduction
@@ -1441,7 +1441,7 @@ As discussed, papers on AI have increased exponentially since ChatGPT’s launch
 
 When writing text, it appears that chatbots have a specific “tone”, which is previously designed (for a study of how a chatbot’s “voice” is designed, see Derner et al., 2026). This communication style, which varies from chatbot to chatbot, will systematically push some words or grammatical forms more than others (Rudnicka, 2025).
 
-From the beginning of the chatbot era, linguists have pointed out that there are certain words that ChatGPT favors. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak, since it’s estimated that more than half of today’s text in the internet is AI generated (Matsui, 2025; Morrone, 2025). Some studies have shown that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We’ll look into our corpus to see if there is an increase of LLM-favored words.
+From the beginning of the chatbot era, linguists have pointed out that there are certain words that ChatGPT favors. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak, since it’s estimated that more than half of today’s text in the internet is AI generated (Morrone, 2025). Some studies have shown that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We’ll look into our corpus to see if there is an increase of LLM-favored words.
 
 ```{r}
 # Plot top 20 most frequent words in the corpus
@@ -1470,7 +1470,7 @@ tidy_abstracts |>
   )
 ```
 
-We’ll use the words that Kousha and Thelwall used in their paper, which are “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These are terms that have the support of other researchers in the area as well. To them, we’ll add “core” which is a word that according to journalists in the Washington Post has been pushed by the newer versions of ChatGPT (Merrill et al, 2025).
+We’ll use the words that Kousha and Thelwall used in their paper, which are “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These are terms that have the support of other researchers in the area as well. To them, we’ll add “core” which is a word that according to journalists in the Washington Post has been pushed by the newer versions of ChatGPT (Merrill et al., 2025).
 
 ```{r}
 # LLM signature words, based on Kousha & Thelwall (2025) and control words
