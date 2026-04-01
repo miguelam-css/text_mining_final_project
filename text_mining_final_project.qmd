@@ -123,7 +123,7 @@ The rise of generative LLMs have opened questions about how AI is influencing sc
 
 Our study period includes the last decade (2016 to 2025), allowing us to capture several years before and after the rise of generative AI. Beyond their importance and reputation, we selected these journals because: together they provide broad disciplinary coverage of the social sciences; they provide a large and diverse volume of publications, enabling meaningful analysis; and their abstracts are freely accessible through OpenAlex, which allows us to systematically build such a large corpus.
 
-Before proceeding any further, we must clarify what we will understand by "AI", since this term has a rich history and is often used as an umbrella concept. We will work with two different operationalizations. Firstl, a broad concept of AI, which aims to capture any reference to artificial intelligence as a subject of discussion across the study period. This broad concept includes all forms and subfields of AI ---from classical machine learning and neural networks to recent generative models--- and we indifferently consider terms such as "artificial intelligence," "machine learning," "deep learning," "large language model," specific model names like "ChatGPT," and related expressions. The second is a narrow concept that focuses specifically on generative AI models, aiming to capture changes that occurred when these tools became widely available ---we consider the release of ChatGPT in November 2022 as a reference event in this sense---. These two concepts will be used in different parts of the project. For instance, when considering topics and sentiment, we refer to the broad concept, when analyzing effects on writing style, we are looking for the effects of the narrow concept.
+Before proceeding any further, we must clarify what we will understand by "AI", since this term has a rich history and is often used as an umbrella concept. We will work with two different operationalizations. Firstly, a broad concept of AI, which aims to capture any reference to artificial intelligence as a subject of discussion across the study period. This broad concept includes all forms and subfields of AI ---from classical machine learning and neural networks to recent generative models--- and we indifferently consider terms such as "artificial intelligence," "machine learning," "deep learning," "large language model," specific model names like "ChatGPT," and related expressions. The second is a narrow concept that focuses specifically on generative AI models, aiming to capture changes that occurred when these tools became widely available ---we consider the release of ChatGPT in November 2022 as a reference event in this sense---. These two concepts will be used in different parts of the project. For instance, when considering topics and sentiment, we refer to the broad concept, when analyzing effects on writing style, we are looking for the effects of the narrow concept.
 
 Our project analyzes the influence of AI along three dimensions: a *substantive dimension*, analyzing whether the rise of AI has influenced the topics and questions being addressed by social scientists; a *stylistic dimension*, analyzing whether writing patterns have changed due to the use of generative language models as writing aids; and a *sentimental dimension*: analyzing general evaluative tone towards AI in social science publications.
 
@@ -150,7 +150,7 @@ We load the required libraries.
 #                        "topicmodels", "quanteda", "quanteda.textplots",
 #                        "textstem", "igraph", "ggraph", "widyr", "reshape2",
 #                        "RColorBrewer", "wordcloud", "explore", "patchwork",
-#                        "scales", "httr2", "DT")
+#                        "scales", "httr2")
 # install.packages(
 #   required_packages[!required_packages %in%installed.packages()[, "Package"]])
 
@@ -2267,7 +2267,9 @@ afinn_sentence_year_polarity <- afinn_sentence_to_abstract |>
   mutate(lexicon = "AFINN")
 
 # Combine both lexicons
-sentence_year_polarity <- sentence_year_polarity |>
+sentence_year_polarity <- bind_rows(
+  bing_sentence_year_polarity,
+  afinn_sentence_year_polarity) |>
   group_by(publication_year, lexicon) |>
   mutate(
     total = sum(n),
@@ -2953,7 +2955,8 @@ In 2024 and 2025 both lexicons increase showing a moderately positive sentiment 
 #| fig-width: 10
 #| fig-height: 6
 
-# Plotting the number of positive, negative, and neutral AI-related abstracts by year (using target-specific sentences)
+# Plotting the number of positive, negative, and neutral AI-related abstracts
+# by year (using target-specific sentences)
 
 #| fig-width: 7
 #| fig-height: 5
