@@ -2,13 +2,38 @@
 title: "Exploring the influence of Artificial Intelligence on social science publishing"
 subtitle: "An analysis of the abstracts published in six leading journals (2015-2025)"
 author: 
-  - "Alicia Mira"
-  - "Eva Lambistos"
-  - "Miguel Agenjo Montejo"
-  - "Noah Fürup"
+  - Alicia Mira
+  - Eva Lambistos
+  - Miguel Agenjo
+  - Noah Fürup
+date: today
+abstract: |
+  Aquí metemos un abstract generado 100% con chatgpt para generar risas y
+  felicidad. Aquí metemos un abstract generado 100% con chatgpt para generar
+  risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt para
+  generar risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt
+  para generar risas y felicidad. Aquí metemos un abstract generado 100% con
+  Aquí metemos un abstract generado 100% con chatgpt para generar risas y
+  felicidad. Aquí metemos un abstract generado 100% con chatgpt para generar
+  risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt para
+  generar risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt
+  para generar risas y felicidad. Aquí metemos un abstract generado 100% con
+  chatgpt para generar risas y felicidad. Porque somos unos guasones.
+  Aquí metemos un abstract generado 100% con chatgpt para generar risas y
+  felicidad. Aquí metemos un abstract generado 100% con chatgpt para generar
+  risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt para
+  generar risas y felicidad. Aquí metemos un abstract generado 100% con chatgpt
+  para generar risas y felicidad. Aquí metemos un abstract generado 100% con
+  chatgpt para generar risas y felicidad.
+keywords:
+  - artificial intelligence
+  - social science
+  - topic modelling
+  - academic writing
+  - generative AI
 format:
   html:
-    theme: flatly
+    theme: litera
     toc: true
     toc-depth: 4
     toc-title: "Table of Contents"
@@ -18,10 +43,69 @@ format:
     include-in-header:
       text: |
         <style>
-          body { font-family: serif; }
+          body { 
+            font-family: Georgia, serif; 
+            color: #1a1a2e; 
+            text-align: justify;
+            hyphens: auto;
+          }
+          h1, h2, h3, h4 { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-weight: 300;
+            color: #2C3E6B;
+            text-align: left;
+          }
+          a { color: #2C3E6B; }
+          #TOC { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            text-align: left; 
+          }
         </style>
 editor: visual
 ---
+
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# This code only counts the words in the document, allowing us to automatically
+# update word count, we don't show the chunk in the render.
+# the render.
+
+# Read all lines of the source file
+qmd_lines <- readLines("text_mining_final_project.qmd")
+
+# Find the line index where the YAML header ends (second "---")
+yaml_end  <- which(qmd_lines == "---")[2]
+
+# Find the line index where the References section begins
+ref_line  <- which(grepl("^## References", qmd_lines))[1]
+
+# Keep only the lines between YAML and References
+body      <- qmd_lines[(yaml_end + 1):(ref_line - 1)]
+
+# Flag to track whether we are inside a code chunk
+in_chunk  <- FALSE
+
+# Vector to store lines that count as prose
+clean     <- c()
+
+for (line in body) {
+  # Toggle in_chunk when we hit a code fence (``` )
+  if (grepl("^```", line)) { in_chunk <- !in_chunk; next }
+  # Skip code and lines with "#"
+  if (!in_chunk && !grepl("^#", line)) clean <- c(clean, line)
+}
+
+# Split each line into words and sum them up
+words <- sum(sapply(strsplit(clean, "\\s+"), function(x) sum(x != "")))
+```
+
+::: {.text-end}
+<br>[*Word count: `r words` words.*]{style="font-size: 78%"} <br> [\**Excluding abstract, references, and appendices.*]{style="font-size: 65%"}
+:::
 
 ## Section 1. Introduction
 
@@ -49,12 +133,18 @@ We begin by loading all R packages required throughout this project.
 #| message: false
 #| warning: false
 
+# The following packages are required to run this notebook.
 
-#PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION #PACKAGE INSTALLATION 
+# Uncomment and run the lines below to install packages not installed in your
+# system.
 
-
-
-# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS # REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS# REVISAR SI USAMOS MÁS O SI HAY ALGUNO QUE NO USAMOS
+# required_packages <- c("tidyverse", "tidytext", "textdata", "sentimentr",
+#                        "topicmodels", "quanteda", "quanteda.textplots",
+#                        "textstem", "igraph", "ggraph", "widyr", "reshape2",
+#                        "RColorBrewer", "wordcloud", "explore", "patchwork",
+#                        "scales", "httr2", "DT")
+# install.packages(
+#   required_packages[!required_packages %in%installed.packages()[, "Package"]])
 
 library(tidyverse)
 library(tidytext)
@@ -98,7 +188,7 @@ describe(articles_raw)
 
 Not all records include abstracts (19.6% NAs). Since our entire analysis is based on abstract text, we remove records without abstracts or publication year, and restrict the corpus to our study period (2016–2025). Another relevant column is `publication_year`, there are no missing values, so we do not need to filter any observations out.
 
-```{r}
+```{r warning=FALSE}
 # Filter: keep only records with an abstract, within our study period
 articles <- articles_raw |> 
   filter(!is.na(abstract)) |>
@@ -110,9 +200,12 @@ describe(articles)
 
 Removing missing abstracts we went from 12589 to 9484 articles. We explore the distribution of articles by journal and year.
 
-```{r}
-#| fig-width: 7
-#| fig-height: 5.5
+```{r warning=FALSE}
+#| fig-width: 8
+#| fig-height: 6.5
+
+# In this chunk we create a plot to explore the distribution of publications
+
 # Merge Palgrave Communications into HSSC — same journal, renamed June 2020
 # Full names with abbreviations in parentheses for clarity
 articles_merged <- articles |>
@@ -255,192 +348,246 @@ domain_stopwords <- tibble(
     
     # 1. Academic boilerplate verbs
     # Verbs used generically across all abstracts regardless of topic.
-    # Includes base forms, 3rd-person singular, past/passive, and gerund inflections.
-    "examine", "investigate", "explore", "suggest", "find", "show", "demonstrate", "analyze",
-    "analyse", "assess", "evaluate", "discuss", "argue", "propose", "address", "consider",
-    "focus", "aim", "seek", "test", "draw", "provide", "offer", "highlight",
-    "reveal", "indicate", "identify", "contribute", "develop", "present", "describe", "explain",
-    "understand", "improve", "enhance", "employ", "apply", "use", "utilize", "utilise",
-    "adopt", "extend", "advance", "inform", "situate", "engage", "establish", "illustrate",
-    "document", "note", "observe", "report", "review", "compare", "measure", "estimate",
-    "predict", "capture", "synthesize", "synthesise", "integrate", "combine", "incorporate", "build",
-    "construct", "formulate", "frame", "conceptualize", "conceptualise", "operationalize", "operationalise", "uncover",
-    "shed", "map", "trace", "track", "model", "simulate", "validate", "verify",
-    "confirm", "challenge", "question", "reflect", "emphasize", "emphasise", "stress", "acknowledge",
-    "recognize", "recognise", "account", "imply", "examines", "investigates", "explores", "suggests",
-    "finds", "shows", "demonstrates", "analyses", "analyzes", "assesses", "evaluates", "discusses",
-    "argues", "proposes", "addresses", "considers", "focuses", "aims", "seeks", "draws",
-    "provides", "offers", "highlights", "reveals", "indicates", "identifies", "contributes", "develops",
-    "presents", "describes", "explains", "improves", "enhances", "employs", "applies", "adopts",
-    "extends", "informs", "engages", "establishes", "illustrates", "documents", "notes", "observes",
-    "reports", "compares", "measures", "estimates", "predicts", "captures", "builds", "constructs",
-    "integrates", "combines", "incorporates", "uncovers", "sheds", "maps", "traces", "tracks",
-    "models", "validates", "confirms", "challenges", "questions", "reflects", "emphasizes", "emphasises",
-    "stresses", "acknowledges", "recognizes", "recognises", "accounts", "implies", "examined", "investigated",
-    "explored", "suggested", "found", "shown", "demonstrated", "analyzed", "analysed", "assessed",
-    "evaluated", "discussed", "argued", "proposed", "addressed", "considered", "focused", "aimed",
-    "sought", "drawn", "provided", "offered", "highlighted", "revealed", "indicated", "identified",
-    "contributed", "developed", "presented", "described", "explained", "improved", "enhanced", "employed",
-    "applied", "adopted", "extended", "informed", "engaged", "established", "illustrated", "documented",
-    "noted", "observed", "reported", "compared", "measured", "estimated", "predicted", "captured",
-    "built", "constructed", "integrated", "combined", "incorporated", "uncovered", "mapped", "tracked",
-    "modeled", "modelled", "validated", "confirmed", "challenged", "reflected", "emphasized", "emphasised",
-    "stressed", "acknowledged", "recognized", "recognised", "examining", "investigating", "exploring", "suggesting",
-    "finding", "showing", "demonstrating", "analyzing", "analysing", "assessing", "evaluating", "discussing",
-    "arguing", "proposing", "addressing", "considering", "focusing", "aiming", "seeking", "drawing",
-    "providing", "offering", "highlighting", "revealing", "indicating", "identifying", "contributing", "developing",
-    "presenting", "describing", "explaining", "understanding", "improving", "enhancing", "employing", "applying",
-    "adopting", "extending", "informing", "engaging", "establishing", "illustrating", "documenting", "noting",
-    "observing", "reporting", "comparing", "measuring", "estimating", "predicting", "capturing", "building",
-    "constructing", "integrating", "combining", "incorporating", "uncovering", "shedding", "mapping", "tracing",
-    "tracking", "modeling", "modelling", "validating", "confirming", "challenging", "questioning", "reflecting",
-    "emphasizing", "emphasising", "stressing", "acknowledging", "recognizing", "recognising",
+    # Includes base forms, 3rd-person singular, past/passive, and gerund
+    # inflections.
+    "examine", "investigate", "explore", "suggest", "find", "show",
+    "demonstrate", "analyze", "analyse", "assess", "evaluate", "discuss",
+    "argue", "propose", "address", "consider", "focus", "aim", "seek", "test",
+    "draw", "provide", "offer", "highlight", "reveal", "indicate", "identify",
+    "contribute", "develop", "present", "describe", "explain", "understand",
+    "improve", "enhance", "employ", "apply", "use", "utilize", "utilise",
+    "adopt", "extend", "advance", "inform", "situate", "engage", "establish",
+    "illustrate", "document", "note", "observe", "report", "review", "compare",
+    "measure", "estimate", "predict", "capture", "synthesize", "synthesise",
+    "integrate", "combine", "incorporate", "build", "construct", "formulate",
+    "frame", "conceptualize", "conceptualise", "operationalize",
+    "operationalise", "uncover", "shed", "map", "trace", "track", "model",
+    "simulate", "validate", "verify", "confirm", "challenge", "question",
+    "reflect", "emphasize", "emphasise", "stress", "acknowledge", "recognize",
+    "recognise", "account", "imply", "examines", "investigates", "explores",
+    "suggests", "finds", "shows", "demonstrates", "analyses", "analyzes",
+    "assesses", "evaluates", "discusses", "argues", "proposes", "addresses",
+    "considers", "focuses", "aims", "seeks", "draws", "provides", "offers",
+    "highlights", "reveals", "indicates", "identifies", "contributes",
+    "develops", "presents", "describes", "explains", "improves", "enhances",
+    "employs", "applies", "adopts", "extends", "informs", "engages",
+    "establishes", "illustrates", "documents", "notes", "observes", "reports",
+    "compares", "measures", "estimates", "predicts", "captures", "builds",
+    "constructs", "integrates", "combines", "incorporates", "uncovers",
+    "sheds", "maps", "traces", "tracks", "models", "validates", "confirms",
+    "challenges", "questions", "reflects", "emphasizes", "emphasises",
+    "stresses", "acknowledges", "recognizes", "recognises", "accounts",
+    "implies", "examined", "investigated", "explored", "suggested", "found",
+    "shown", "demonstrated", "analyzed", "analysed", "assessed", "evaluated",
+    "discussed", "argued", "proposed", "addressed", "considered", "focused",
+    "aimed", "sought", "drawn", "provided", "offered", "highlighted",
+    "revealed", "indicated", "identified", "contributed", "developed",
+    "presented", "described", "explained", "improved", "enhanced", "employed",
+    "applied", "adopted", "extended", "informed", "engaged", "established",
+    "illustrated", "documented", "noted", "observed", "reported", "compared",
+    "measured", "estimated", "predicted", "captured", "built", "constructed",
+    "integrated", "combined", "incorporated", "uncovered", "mapped", "tracked",
+    "modeled", "modelled", "validated", "confirmed", "challenged", "reflected",
+    "emphasized", "emphasised", "stressed", "acknowledged", "recognized",
+    "recognised", "examining", "investigating", "exploring", "suggesting",
+    "finding", "showing", "demonstrating", "analyzing", "analysing",
+    "assessing", "evaluating", "discussing", "arguing", "proposing",
+    "addressing", "considering", "focusing", "aiming", "seeking", "drawing",
+    "providing", "offering", "highlighting", "revealing", "indicating",
+    "identifying", "contributing", "developing", "presenting", "describing",
+    "explaining", "understanding", "improving", "enhancing", "employing",
+    "applying", "adopting", "extending", "informing", "engaging",
+    "establishing", "illustrating", "documenting", "noting", "observing",
+    "reporting", "comparing", "measuring", "estimating", "predicting",
+    "capturing", "building", "constructing", "integrating", "combining",
+    "incorporating", "uncovering", "shedding", "mapping", "tracing",
+    "tracking", "modeling", "modelling", "validating", "confirming",
+    "challenging", "questioning", "reflecting", "emphasizing", "emphasising",
+    "stressing", "acknowledging", "recognizing", "recognising",
     
     # 2. Generic methodological terms
     # Words describing research designs, data types, statistical procedures,
     # and analytical approaches ubiquitous across all social science.
-    "data", "dataset", "datasets", "survey", "surveys", "questionnaire", "questionnaires", "interview",
-    "interviews", "observation", "observations", "fieldwork", "experiment", "experiments", "experimental", "sample",
-    "samples", "sampling", "subsample", "subsamples", "respondent", "respondents", "participant", "participants",
-    "informant", "informants", "census", "panel", "panels", "cohort", "cohorts", "wave",
-    "waves", "method", "methods", "methodology", "methodological", "approach", "approaches", "framework",
-    "frameworks", "design", "designs", "procedure", "procedures", "protocol", "protocols", "technique",
-    "techniques", "instrument", "instruments", "paradigm", "paradigms", "quantitative", "statistical", "regression",
-    "regressions", "multivariate", "bivariate", "univariate", "logistic", "probit", "ols", "coefficient",
-    "coefficients", "parameter", "parameters", "estimation", "estimator", "estimators", "specification", "specifications",
-    "robustness", "validity", "reliability", "endogeneity", "heterogeneity", "heteroskedasticity", "autocorrelation", "collinearity",
-    "multicollinearity", "moderation", "mediation", "mediating", "moderating", "confound", "confounding", "confounder",
-    "instrumental", "iv", "equation", "equations", "variance", "covariance", "correlation", "correlations",
-    "significance", "p-value", "confidence", "interval", "intervals", "standard", "deviation", "deviations",
-    "mean", "median", "mode", "distribution", "distributions", "skewness", "kurtosis", "outlier",
-    "outliers", "imputation", "weighting", "weights", "weight", "index", "indices", "indicator",
-    "indicators", "score", "scores", "scale", "scales", "latent", "manifest", "loading",
-    "loadings", "eigenvalue", "eigenvalues", "goodness", "aic", "bic", "rmsea", "cfi",
-    "tli", "srmr", "anova", "manova", "ancova", "bootstrapping", "bootstrap", "simulation",
-    "simulations", "bayesian", "frequentist", "likelihood", "maximum", "posterior", "credible", "hypothesis",
-    "null", "alternative", "threshold", "lag", "lags", "lagged", "fixed", "random",
-    "causal", "causality", "qualitative", "grounded", "thematic", "coding",
-    "codes", "code", "theme", "themes", "category", "categories", "saturation", "triangulation",
-    "reflexivity", "positionality", "intersubjectivity", "hermeneutic", "phenomenological", "phenomenology", "interpretive", "constructivist",
-    "analysis", "analytic", "analytical", "longitudinal", "cross-sectional", "multilevel", "multivariable", "hierarchical",
-    "meta-analytic", "scoping", "realist", "synthesis", "syntheses", "mixed", "measurement", "variable",
-    "variables", "dependent", "independent", "control", "controls", "controlled", "controlling", "proxy",
-    "proxies", "check", "checks", "sensitivity", "validation", "replication", "comparative",
+    "data", "dataset", "datasets", "survey", "surveys", "questionnaire",
+    "questionnaires", "interview", "interviews", "observation", "observations",
+    "fieldwork", "experiment", "experiments", "experimental", "sample",
+    "samples", "sampling", "subsample", "subsamples", "respondent",
+    "respondents", "participant", "participants", "informant", "informants",
+    "census", "panel", "panels", "cohort", "cohorts", "wave", "waves",
+    "method", "methods", "methodology", "methodological", "approach",
+    "approaches", "framework", "frameworks", "design", "designs", "procedure",
+    "procedures", "protocol", "protocols", "technique", "techniques",
+    "instrument", "instruments", "paradigm", "paradigms", "quantitative",
+    "statistical", "regression", "regressions", "multivariate", "bivariate",
+    "univariate", "logistic", "probit", "ols", "coefficient", "coefficients",
+    "parameter", "parameters", "estimation", "estimator", "estimators",
+    "specification", "specifications", "robustness", "validity", "reliability",
+    "endogeneity", "heterogeneity", "heteroskedasticity", "autocorrelation",
+    "collinearity", "multicollinearity", "moderation", "mediation",
+    "mediating", "moderating", "confound", "confounding", "confounder",
+    "instrumental", "iv", "equation", "equations", "variance", "covariance",
+    "correlation", "correlations", "significance", "p-value", "confidence",
+    "interval", "intervals", "standard", "deviation", "deviations", "mean",
+    "median", "mode", "distribution", "distributions", "skewness", "kurtosis",
+    "outlier", "outliers", "imputation", "weighting", "weights", "weight",
+    "index", "indices", "indicator", "indicators", "score", "scores", "scale",
+    "scales", "latent", "manifest", "loading", "loadings", "eigenvalue",
+    "eigenvalues", "goodness", "aic", "bic", "rmsea", "cfi", "tli", "srmr",
+    "anova", "manova", "ancova", "bootstrapping", "bootstrap", "simulation",
+    "simulations", "bayesian", "frequentist", "likelihood", "maximum",
+    "posterior", "credible", "hypothesis", "null", "alternative", "threshold",
+    "lag", "lags", "lagged", "fixed", "random", "causal", "causality",
+    "qualitative", "grounded", "thematic", "coding", "codes", "code", "theme",
+    "themes", "category", "categories", "saturation", "triangulation",
+    "reflexivity", "positionality", "intersubjectivity", "hermeneutic",
+    "phenomenological", "phenomenology", "interpretive", "constructivist",
+    "analysis", "analytic", "analytical", "longitudinal", "cross-sectional",
+    "multilevel", "multivariable", "hierarchical", "meta-analytic", "scoping",
+    "realist", "synthesis", "syntheses", "mixed", "measurement", "variable",
+    "variables", "dependent", "independent", "control", "controls",
+    "controlled", "controlling", "proxy", "proxies", "check", "checks",
+    "sensitivity", "validation", "replication", "comparative",
     
     # 3. Abstract structure boilerplate
     # Organisational scaffolding often used in academic abstracts:
     # document labels, rhetorical-move markers, literature-positioning words,
     # linking tokens, and non-discriminative evaluative fillers.
-    "study", "studies", "paper", "papers", "article", "articles", "research", "work",
-    "works", "thesis", "dissertation", "chapter", "chapters", "book", "books", "manuscript",
-    "manuscripts", "introduction", "background", "motivation", "objective", "objectives", "purpose", "purposes",
-    "goal", "goals", "rationale", "overview", "summary", "abstract", "conclusion", "conclusions",
-    "discussion", "implication", "implications", "contribution", "contributions", "limitation", "limitations", "recommendation",
-    "recommendations", "direction", "directions", "findings", "result", "results", "outcome", "outcomes",
-    "literature", "prior", "previous", "existing", "recent", "current", "past", "earlier",
-    "contemporary", "traditional", "conventional", "growing", "emerging", "nascent", "based", "using",
-    "used", "given", "among", "across", "within", "via", "through", "including",
-    "particularly", "specifically", "notably", "especially", "primarily", "mainly", "largely", "generally",
-    "broadly", "widely", "commonly", "typically", "often", "frequently", "usually", "rarely",
-    "however", "therefore", "thus", "hence", "whereas", "whereby", "therein", "furthermore",
-    "moreover", "additionally", "nevertheless", "nonetheless", "accordingly", "consequently", "subsequently", "previously",
-    "finally", "overall", "together", "concluded", "concludes", "derives", "derived", "conducted",
-    "collected", "published", "carried", "undertaken", "outlined", "important", "significant", "key",
-    "main", "major", "primary", "central", "core", "fundamental", "essential", "critical",
-    "crucial", "vital", "notable", "relevant", "valuable", "meaningful", "useful", "effective",
-    "novel", "innovative", "original", "unique", "comprehensive", "systematic", "rigorous", "robust",
-    "substantial", "strong", "potential", "possible", "likely", "apparent", "clear", "direct",
-    "indirect", "further", "additional", "various", "diverse", "multiple", "different", "similar",
-    "comparable", "specific", "particular", "general", "broad", "wide", "limited", "due",
-    "despite", "although", "though", "while", "whether", "both", "either", "neither",
+    "study", "studies", "paper", "papers", "article", "articles", "research",
+    "work", "works", "thesis", "dissertation", "chapter", "chapters", "book",
+    "books", "manuscript", "manuscripts", "introduction", "background",
+    "motivation", "objective", "objectives", "purpose", "purposes", "goal",
+    "goals", "rationale", "overview", "summary", "abstract", "conclusion",
+    "conclusions", "discussion", "implication", "implications", "contribution",
+    "contributions", "limitation", "limitations", "recommendation",
+    "recommendations", "direction", "directions", "findings", "result",
+    "results", "outcome", "outcomes", "literature", "prior", "previous",
+    "existing", "recent", "current", "past", "earlier", "contemporary",
+    "traditional", "conventional", "growing", "emerging", "nascent", "based",
+    "using", "used", "given", "among", "across", "within", "via", "through",
+    "including", "particularly", "specifically", "notably", "especially",
+    "primarily", "mainly", "largely", "generally", "broadly", "widely",
+    "commonly", "typically", "often", "frequently", "usually", "rarely",
+    "however", "therefore", "thus", "hence", "whereas", "whereby", "therein",
+    "furthermore", "moreover", "additionally", "nevertheless", "nonetheless",
+    "accordingly", "consequently", "subsequently", "previously", "finally",
+    "overall", "together", "concluded", "concludes", "derives", "derived",
+    "conducted", "collected", "published", "carried", "undertaken", "outlined",
+    "important", "significant", "key", "main", "major", "primary", "central",
+    "core", "fundamental", "essential", "critical", "crucial", "vital",
+    "notable", "relevant", "valuable", "meaningful", "useful", "effective",
+    "novel", "innovative", "original", "unique", "comprehensive", "systematic",
+    "rigorous", "robust", "substantial", "strong", "potential", "possible",
+    "likely", "apparent", "clear", "direct", "indirect", "further",
+    "additional", "various", "diverse", "multiple", "different", "similar",
+    "comparable", "specific", "particular", "general", "broad", "wide",
+    "limited", "due", "despite", "although", "though", "while", "whether",
+    "both", "either", "neither",
     
     # 4. Generic social science concepts
-    # Terms so broadly used in social science that they provide no discriminative
-    # topical signal: generic agents, process/mechanism words, structural terms,
-    # effect/outcome nouns, generic descriptors, and temporal/spatial terms.
-    "society", "societies", "social", "individual", "individuals", "group", "groups", "population",
-    "populations", "people", "person", "persons", "human", "humans", "actor", "actors",
-    "agent", "agents", "member", "members", "community", "communities", "public", "citizen",
-    "citizens", "subject", "subjects", "user", "users", "stakeholder", "stakeholders", "researcher",
-    "researchers", "author", "authors", "scholar", "scholars", "behavior", "behaviour", "behaviors",
-    "behaviours", "attitude", "attitudes", "perception", "perceptions", "belief", "beliefs", "preference",
-    "preferences", "value", "values", "norm", "norms", "practice", "practices", "experience",
-    "experiences", "interaction", "interactions", "process", "processes", "mechanism", "mechanisms", "dynamic",
-    "dynamics", "pattern", "patterns", "relationship", "relationships", "relation", "relations", "association",
-    "associations", "link", "links", "connection", "connections", "nexus", "interplay", "structure",
-    "structures", "system", "systems", "network", "networks", "institution", "institutions", "organization",
-    "organizations", "organisation", "organisations", "context", "contexts", "condition", "conditions", "environment",
-    "environments", "setting", "settings", "domain", "domains", "sphere", "field", "fields",
-    "sector", "sectors", "dimension", "dimensions", "aspect", "aspects", "element", "elements",
-    "component", "components", "feature", "features", "factor", "factors", "effect", "effects",
-    "impact", "impacts", "influence", "influences", "consequence", "consequences", "change", "changes",
-    "difference", "differences", "variation", "variations", "increase", "increases", "decrease", "decreases",
-    "reduction", "reductions", "improvement", "improvements", "development", "developments", "growth", "decline",
-    "shift", "shifts", "transition", "transitions", "transformation", "transformations", "role", "roles",
-    "level", "levels", "degree", "degrees", "extent", "scope", "range", "type",
-    "types", "form", "forms", "kind", "kinds", "way", "ways", "modes",
-    "nature", "perspective", "perspectives", "view", "views", "lens", "time", "period",
-    "periods", "stage", "stages", "phase", "phases", "era", "eras", "decade",
-    "decades", "year", "years", "month", "months", "day", "days", "long",
-    "short", "term", "terms", "run", "world", "global", "international", "national",
-    "local", "regional", "urban", "rural", "cross", "domestic", "foreign", "western",
-    "eastern", "northern", "southern",
+    # Terms so broadly used in social science that they provide no
+    # discriminative topical signal: generic agents, process/mechanism words,
+    # structural terms, effect/outcome nouns, generic descriptors, and
+    # temporal/spatial terms.
+    "society", "societies", "social", "individual", "individuals", "group",
+    "groups", "population", "populations", "people", "person", "persons",
+    "human", "humans", "actor", "actors", "agent", "agents", "member",
+    "members", "community", "communities", "public", "citizen", "citizens",
+    "subject", "subjects", "user", "users", "stakeholder", "stakeholders",
+    "researcher", "researchers", "author", "authors", "scholar", "scholars",
+    "behavior", "behaviour", "behaviors", "behaviours", "attitude",
+    "attitudes", "perception", "perceptions", "belief", "beliefs",
+    "preference", "preferences", "value", "values", "norm", "norms",
+    "practice", "practices", "experience", "experiences", "interaction",
+    "interactions", "process", "processes", "mechanism", "mechanisms",
+    "dynamic", "dynamics", "pattern", "patterns", "relationship",
+    "relationships", "relation", "relations", "association", "associations",
+    "link", "links", "connection", "connections", "nexus", "interplay",
+    "structure", "structures", "system", "systems", "network", "networks",
+    "institution", "institutions", "organization", "organizations",
+    "organisation", "organisations", "context", "contexts", "condition",
+    "conditions", "environment", "environments", "setting", "settings",
+    "domain", "domains", "sphere", "field", "fields", "sector", "sectors",
+    "dimension", "dimensions", "aspect", "aspects", "element", "elements",
+    "component", "components", "feature", "features", "factor", "factors",
+    "effect", "effects", "impact", "impacts", "influence", "influences",
+    "consequence", "consequences", "change", "changes", "difference",
+    "differences", "variation", "variations", "increase", "increases",
+    "decrease", "decreases", "reduction", "reductions", "improvement",
+    "improvements", "development", "developments", "growth", "decline",
+    "shift", "shifts", "transition", "transitions", "transformation",
+    "transformations", "role", "roles", "level", "levels", "degree", "degrees",
+    "extent", "scope", "range", "type", "types", "form", "forms", "kind",
+    "kinds", "way", "ways", "modes", "nature", "perspective", "perspectives",
+    "view", "views", "lens", "time", "period", "periods", "stage", "stages",
+    "phase", "phases", "era", "eras", "decade", "decades", "year", "years",
+    "month", "months", "day", "days", "long", "short", "term", "terms", "run",
+    "world", "global", "international", "national", "local", "regional",
+    "urban", "rural", "cross", "domestic", "foreign", "western", "eastern",
+    "northern", "southern",
     
     # 5. Journal specific and publication boilerplate
     # Words introduced by journal formatting, editorial conventions, copyright
     # notices, metadata fragments, and abstract-template boilerplate specific
     # to these six journals.
-    "copyright", "rights", "reserved", "license", "licensed", "licence", "licenced", "attribution",
-    "commons", "creative", "reproduced", "reproduction", "permission", "permissions", "prohibited", "doi",
-    "http", "https", "www", "org", "com", "net", "edu", "vol",
-    "volume", "issue", "number", "pp", "page", "pages", "journal", "springer",
-    "oxford", "cambridge", "wiley", "elsevier", "taylor", "francis", "routledge", "sage",
-    "plos", "arxiv", "preprint", "open", "access", "publication", "publications", "publish",
-    "publisher", "publishing", "editor", "editors", "editorial", "peer", "reviewed", "accepted",
-    "submission", "submitted", "revised", "revision", "correspondence", "email", "orcid", "affiliation",
-    "affiliations", "department", "university", "universities", "keywords", "keyword", "jel",
-    "classification", "palgrave", "collection", "published", "cambridge.org", "doi.org", "10.1093",
-    "s41599", "10.1057",
+    "copyright", "rights", "reserved", "license", "licensed", "licence",
+    "licenced", "attribution", "commons", "creative", "reproduced",
+    "reproduction", "permission", "permissions", "prohibited", "doi", "http",
+    "https", "www", "org", "com", "net", "edu", "vol", "volume", "issue",
+    "number", "pp", "page", "pages", "journal", "springer", "oxford",
+    "cambridge", "wiley", "elsevier", "taylor", "francis", "routledge", "sage",
+    "plos", "arxiv", "preprint", "open", "access", "publication",
+    "publications", "publish", "publisher", "publishing", "editor", "editors",
+    "editorial", "peer", "reviewed", "accepted", "submission", "submitted",
+    "revised", "revision", "correspondence", "email", "orcid", "affiliation",
+    "affiliations", "department", "university", "universities", "keywords",
+    "keyword", "jel", "classification", "palgrave", "collection", "published",
+    "cambridge.org", "doi.org", "10.1093", "s41599", "10.1057",
     
     # 6. Encoding artefacts and noise
     # Tokens from PDF/HTML extraction, encoding issues, OCR, or tokenisation:
-    # Latin abbreviations, single characters, URL fragments, Greek letter tokens,
-    # ligature remnants, and other non-linguistic noise.
-    "i.e", "e.g", "et", "al", "etc", "ibid", "cf", "vs",
-    "viz", "nb", "fig", "figs", "tab", "tabs", "eq", "eqs",
-    "pg", "n.d", "n.a", "na", "nd", "a", "b", "c",
-    "d", "e", "f", "g", "h", "i", "j", "k",
-    "l", "m", "n", "o", "p", "q", "r", "s",
-    "t", "u", "v", "w", "x", "y", "z", "oe",
-    "ae", "fi", "ff", "ffi", "fl", "ffl", "html", "pdf",
-    "xml", "json", "url", "uri", "beta", "alpha", "gamma", "delta",
-    "sigma", "omega", "lambda", "mu", "nu", "rho", "phi", "chi", "07",
-    "eta", "kappa", "tau", "theta", "epsilon", "zeta", "table", "appendix",
-    "supplementary", "supplement", "support", "supporting", "information", "available", "request",
+    # Latin abbreviations, single characters, URL fragments, Greek letter
+    # tokens, ligature remnants, and other non-linguistic noise.
+    "i.e", "e.g", "et", "al", "etc", "ibid", "cf", "vs", "viz", "nb", "fig",
+    "figs", "tab", "tabs", "eq", "eqs", "pg", "n.d", "n.a", "na", "nd", "a",
+    "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p",
+    "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "oe", "ae", "fi", "ff",
+    "ffi", "fl", "ffl", "html", "pdf", "xml", "json", "url", "uri", "beta",
+    "alpha", "gamma", "delta", "sigma", "omega", "lambda", "mu", "nu", "rho",
+    "phi", "chi", "07", "eta", "kappa", "tau", "theta", "epsilon", "zeta",
+    "table", "appendix", "supplementary", "supplement", "support",
+    "supporting", "information", "available", "request",
     
     # 7. High-frequency function words
     # Discourse connectives, hedging adverbs, academic filler adjectives,
     # numbers-as-words, and filler nouns that standard lists (snowball, SMART,
     # onix) miss but which carry no thematic signal in this corpus.
-    "alternatively", "conversely", "meanwhile", "simultaneously", "otherwise", "namely", "predominantly", "chiefly",
-    "mostly", "jointly", "collectively", "respectively", "comparatively", "relatively", "apparently", "seemingly",
-    "arguably", "potentially", "possibly", "unlikely", "presumably", "ostensibly", "admittedly", "importantly",
-    "interestingly", "surprisingly", "crucially", "significantly", "substantially", "considerably", "markedly", "increasingly",
-    "positively", "negatively", "directly", "indirectly", "highly", "strongly", "effectively", "consistently",
-    "robustly", "empirically", "theoretically", "conceptually", "practically", "systematically", "comprehensively", "rigorously",
-    "explicitly", "implicitly", "dominant", "prominent", "salient", "unprecedented", "thorough", "considerable",
-    "efficient", "successful", "increasing", "rising", "expanding", "deepening", "widening", "ongoing",
-    "continuing", "persistent", "enduring", "modest", "marginal", "partial", "complex", "complicated",
-    "nuanced", "multifaceted", "multidimensional", "interdisciplinary", "heterogeneous", "homogeneous", "distinct", "varied",
-    "consistent", "inconsistent", "contradictory", "complementary", "broader", "deeper", "wider", "stronger",
-    "weaker", "higher", "lower", "greater", "lesser", "larger", "smaller", "one",
-    "two", "three", "four", "five", "six", "seven", "eight", "nine",
-    "ten", "first", "second", "third", "fourth", "fifth", "half", "quarter",
-    "percent", "percentage", "proportion", "share", "ratio", "rate", "insight", "insights",
-    "understandings", "knowledge", "advancement", "progress", "step", "steps", "effort", "efforts",
-    "attempt", "attempts", "need", "needs", "opportunity", "opportunities", "gap", "gaps",
-    "concern", "concerns", "issues", "debate", "debates", "discussions", "attention", "lack",
-    "absence", "presence", "existence"
+    "alternatively", "conversely", "meanwhile", "simultaneously", "otherwise",
+    "namely", "predominantly", "chiefly", "mostly", "jointly", "collectively",
+    "respectively", "comparatively", "relatively", "apparently", "seemingly",
+    "arguably", "potentially", "possibly", "unlikely", "presumably",
+    "ostensibly", "admittedly", "importantly", "interestingly", "surprisingly",
+    "crucially", "significantly", "substantially", "considerably", "markedly",
+    "increasingly", "positively", "negatively", "directly", "indirectly",
+    "highly", "strongly", "effectively", "consistently", "robustly",
+    "empirically", "theoretically", "conceptually", "practically",
+    "systematically", "comprehensively", "rigorously", "explicitly",
+    "implicitly", "dominant", "prominent", "salient", "unprecedented",
+    "thorough", "considerable", "efficient", "successful", "increasing",
+    "rising", "expanding", "deepening", "widening", "ongoing", "continuing",
+    "persistent", "enduring", "modest", "marginal", "partial", "complex",
+    "complicated", "nuanced", "multifaceted", "multidimensional",
+    "interdisciplinary", "heterogeneous", "homogeneous", "distinct", "varied",
+    "consistent", "inconsistent", "contradictory", "complementary", "broader",
+    "deeper", "wider", "stronger", "weaker", "higher", "lower", "greater",
+    "lesser", "larger", "smaller", "one", "two", "three", "four", "five",
+    "six", "seven", "eight", "nine", "ten", "first", "second", "third",
+    "fourth", "fifth", "half", "quarter", "percent", "percentage",
+    "proportion", "share", "ratio", "rate", "insight", "insights",
+    "understandings", "knowledge", "advancement", "progress", "step", "steps",
+    "effort", "efforts", "attempt", "attempts", "need", "needs", "opportunity",
+    "opportunities", "gap", "gaps", "concern", "concerns", "issues", "debate",
+    "debates", "discussions", "attention", "lack", "absence", "presence",
+    "existence"
   ),
   
   # Defining a category column  allows us to easily subset later
@@ -833,8 +980,6 @@ ai_hits
 
 ##### AI terms frequency over time
 
-**REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH** **REVISAR ESTE GRÁFICO PARA UNIFICAR CON NOAH**
- 
 ```{r}
 # Count unique articles containing at least one AI related term per year
 ai_articles_by_year <- ai_hits |>
@@ -843,7 +988,9 @@ ai_articles_by_year <- ai_hits |>
 
 # Total number of abstracts per year
 abstracts_by_year <- articles |>
-  filter(!is.na(abstract), publication_year >= 2016, publication_year <= 2025) |>
+  filter(!is.na(abstract),
+         publication_year >= 2016,
+         publication_year <= 2025) |>
   count(publication_year, name = "total_abstracts")
 
 # Compute proportion
@@ -860,17 +1007,22 @@ ggplot(ai_proportion, aes(x = publication_year, y = proportion_ai_articles)) +
   scale_x_continuous(breaks = 2016:2025) +
   scale_y_continuous(labels = percent_format(accuracy = 1)) + 
   labs(
-    title = "AI-related terminology in social science abstracts",
-    subtitle = "Proportion of articles containing at least one AI term, by year",
-    x = "Publication year",
-    y = "Proportion of articles (%)"
+    title = 
+      "AI-related terminology in social science abstracts",
+    subtitle = 
+      "Proportion of articles containing at least one AI term, by year",
+    x = 
+      "Publication year",
+    y = 
+      "Proportion of articles (%)"
   ) +
   theme_minimal(base_family = "serif") +
   theme(
-    plot.title         = element_text(size = 14, face = "bold", color = "#1a1a2e"),
+    plot.title         = element_text(size = 14, face = "bold",
+                                      color = "#1a1a2e"),
     plot.subtitle      = element_text(size = 10, color = "#4a4a6a"),
     axis.text          = element_text(color = "#4a4a6a"),
-    panel.grid.major.x = element_blank(), # Removes vertical grid lines for cleaner bars
+    panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank()
   )
 ```
@@ -897,7 +1049,8 @@ ai_hits |>
   ungroup() |>
   # Add 0 value to missing ranks so every year has exactly ranks 1 through 5
   # and all bars have the same width
-  complete(publication_year = 2016:max(publication_year), rank = 1:5, fill = list(proportion = 0)) |>
+  complete(publication_year = 2016:max(publication_year),
+           rank = 1:5, fill = list(proportion = 0)) |>
   # Create invisible unique names for the blank bars using spaces
   mutate(
     term = ifelse(is.na(term), strrep(" ", rank), term),
@@ -922,7 +1075,8 @@ ai_hits |>
   ) +
   theme_minimal(base_family = "serif") +
   theme(
-    strip.text         = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    strip.text         = element_text(face = "bold", size = 10,
+                                      color = "#1a1a2e"),
     axis.text.y        = element_text(size = 9, color = "#4a4a6a"),
     axis.text.x        = element_text(color = "#4a4a6a"),
     panel.grid.major.y = element_blank()
@@ -937,7 +1091,8 @@ ai_hits |>
   filter(term == "ai") |>
   distinct(id, publication_year) |>
   count(publication_year, name = "article_count") |>
-  complete(publication_year = 2016:max(publication_year), fill = list(article_count = 0)) |>
+  complete(publication_year = 2016:max(publication_year),
+           fill = list(article_count = 0)) |>
   # Join total abstracts per year to compute proportion
   left_join(abstracts_by_year, by = "publication_year") |>
   mutate(proportion = article_count / total_abstracts) |>
@@ -946,7 +1101,9 @@ ai_hits |>
   ggplot(aes(x = publication_year, y = proportion)) +
   geom_line(color = "#2C3E6B", linewidth = 1) +
   geom_point(color = "#2C3E6B", size = 2) +
-  scale_x_continuous(breaks = function(x) seq(ceiling(min(x)), floor(max(x)), by = 1)) +
+  scale_x_continuous(breaks = function(x) seq(ceiling(min(x)),
+                                              floor(max(x)),
+                                              by = 1)) +
   scale_y_continuous(labels = percent_format(accuracy = 0.1)) +
   labs(
     title = "Trend of the term 'ai' over time",
@@ -1204,10 +1361,14 @@ ggplot(topics_by_year7,
   scale_x_continuous(breaks = 2016:2025) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   labs(
-    title    = "Topic prevalence over time (LDA, k = 7)",
-    subtitle = "Average γ per topic per year — dashed lines mark key inflection points",
-    x = "Publication year",
-    y = "Average topic proportion (γ)"
+    title =
+      "Topic prevalence over time (LDA, k = 7)",
+    subtitle =
+      "Average γ per topic per year — dashed lines mark key inflection points",
+    x =
+      "Publication year",
+    y =
+      "Average topic proportion (γ)"
   ) +
   theme_minimal(base_family = "serif") +
   theme(
@@ -1274,9 +1435,9 @@ The shift coinciding with the rise of generative AI is consistent across all val
 
 ## Section 4. Social science journals' writting style and the rise of generative AI
 
-As we have seen until now, papers on AI have risen exponentially since ChatGPT’s lauch in 2022. At the same time, the use of AI itself to, at least, help scientists in their research has exploded: 30 % of scientists use AI to write their manuscripts, according to a 2023 survey of Nature (Phillaman, 2024). That figure is likely to have increased a lot since there AI providers have multiplied and its use has been democratized.
+As we have seen until now, papers on AI have risen exponentially since ChatGPT’s launch in 2022. At the same time, the use of AI itself to, at least, help scientists in their research has exploded: 28 % of scientists use AI to write their manuscripts, according to a 2023 survey of Nature (Kwon, 2025). That figure is likely to have increased a lot since there AI providers have multiplied and its use has been democratized.
 
-When writing text, it appears that chatbots have a specific “tone”, a way of speaking, which is previously designed (for a study of how a chatbot’s “voice” is designed, see Derner et al., 2026) This communication style varies from chatbot to chatbot, they will systematically use some words or grammatical forms more than others (Rudnika and Mukerjee, 2025). For instance, from the beginning of the chatbot era linguists have pointed out that there are certain words that ChatGPT loves to use. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak, since it’s estimated that more than half of today’s text in the internet is AI generated (). Some studies have already tested that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We’ll look into our corpus to see if there is an increase of LLM-related words.
+When writing text, it appears that chatbots have a specific “tone”, a way of speaking, which is previously designed (for a study of how a chatbot’s “voice” is designed, see Derner et al., 2026) This communication style varies from chatbot to chatbot, they will systematically use some words or grammatical forms more than others (Rudnika and Mukerjee, 2025). For instance, from the beginning of the chatbot era linguists have pointed out that there are certain words that ChatGPT loves to use. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak (Matsui, 2025), since it’s estimated that more than half of today’s text in the internet is AI generated (Morrone, 2025). Some studies have already tested that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We’ll look into our corpus to see if there is an increase of LLM-related words.
 
 ```{r}
 # Plot top 20 most frequent words in the corpus
@@ -1294,9 +1455,11 @@ tidy_abstracts |>
   ) +
   theme_minimal(base_family = "serif") +
   theme(
-    plot.title         = element_text(size = 14, face = "bold", color = "#1a1a2e"),
+    plot.title         = element_text(size = 14, face = "bold",
+                                      color = "#1a1a2e"),
     plot.subtitle      = element_text(size = 10, color = "#4a4a6a"),
-    axis.text.y        = element_text(color = "#4a4a6a", margin = margin(r = 0)),
+    axis.text.y        = element_text(color = "#4a4a6a",
+                                      margin = margin(r = 0)),
     axis.text.x        = element_text(color = "#4a4a6a"),
     panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank()
@@ -1344,22 +1507,25 @@ llm_words_freq <- tidy_abstracts_raw |>
 
 # Plot top 20 most frequent LLM signature words in the corpus
 llm_words_freq |> 
-  filter(!word %in% c("analysis", "findings", "policy", "support", "policymakers")) |>
+  filter(!word %in% c("analysis", "findings", "policy",
+                      "support", "policymakers")) |>
   slice_max(n, n = 20) |> # Deterministic extraction replaces head(20)
   ggplot(aes(x = n, y = reorder(word, n))) +
   geom_col(fill = "#2C3E6B", width = 0.7) +
   scale_x_continuous(expand = expansion(mult = c(0, 0.05))) +
   labs(
     title = "Frequency of AI signature words in abstracts",
-    subtitle = "Top 20 terms, excluding generic policy and analysis vocabulary",
+    subtitle ="Top 20 terms, excluding generic policy and analysis vocabulary",
     x = "Count",
     y = "Word"
   ) +
   theme_minimal(base_family = "serif") +
   theme(
-    plot.title         = element_text(size = 14, face = "bold", color = "#1a1a2e"),
-    plot.subtitle      = element_text(size = 10, color = "#4a4a6a"), # Restored subtitle styling
-    axis.text.y        = element_text(color = "#4a4a6a", margin = margin(r = 0)),
+    plot.title         = element_text(size = 14, face = "bold",
+                                      color = "#1a1a2e"),
+    plot.subtitle      = element_text(size = 10, color = "#4a4a6a"), 
+    axis.text.y        = element_text(color = "#4a4a6a",
+                                      margin = margin(r = 0)),
     axis.text.x        = element_text(color = "#4a4a6a"),
     panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank()
@@ -1389,13 +1555,15 @@ plot_data <- tidy_abstracts_raw |>
 
 shared_theme <- theme_minimal(base_family = "serif") +
   theme(
-    strip.text         = element_text(face = "bold", size = 9, color = "#1a1a2e"),
+    strip.text         = element_text(face = "bold", size = 9,
+                                      color = "#1a1a2e"),
     axis.text.x        = element_text(size = 7, color = "#4a4a6a"),
     axis.text.y        = element_text(size = 7, color = "#4a4a6a"),
     axis.title         = element_text(size = 9, color = "#4a4a6a"),
     panel.grid.minor   = element_blank(),
     panel.grid.major   = element_line(color = "#e8e8f0", linewidth = 0.4),
-    plot.title         = element_text(size = 10, face = "bold", color = "#1a1a2e"),
+    plot.title         = element_text(size = 10, face = "bold",
+                                      color = "#1a1a2e"),
     plot.background    = element_rect(fill = "white", color = NA)
   )
 
@@ -1450,7 +1618,8 @@ tidy_abstracts_raw |>
   ) +
   theme_minimal(base_family = "serif") +
   theme(
-    plot.title       = element_text(size = 12, face = "bold", color = "#1a1a2e"),
+    plot.title       = element_text(size = 12, face = "bold",
+                                    color = "#1a1a2e"),
     axis.text.x      = element_text(size = 7, color = "#4a4a6a"),
     axis.text.y      = element_text(size = 7, color = "#4a4a6a"),
     axis.title       = element_text(size = 9, color = "#4a4a6a"),
@@ -1477,10 +1646,10 @@ after_ai_papers <-
 articles_with_words/after_ai_papers * 100
 ```
 
-This doesn’t prove that a given abstract has been written by AI. This can’t be even proven really, neither if we used an AI detector, because they aren't always reliable. Nevertheless, We’ll pass an AI detector to a sample of 10 of the flagged abstracts to see if it was written by AI, using the API of Sapling, an AI detector.
+This doesn’t prove that a given abstract has been written by AI. This can’t be even proven really, neither if we used an AI detector, because they aren't always reliable (Erol et al., 2025). Nevertheless, We’ll pass an AI detector to a sample of 10 of the flagged abstracts to see if it was written by AI, using the API of Sapling, an AI detector.
 
 ```{r}
-#| fig-width: 7
+#| fig-width: 9
 #| fig-height: 3
 
 # We pass a sample of 10 abstracts flagged as containing LLM words to the
@@ -1527,12 +1696,14 @@ sapling_results |>
   geom_point(color = "#2C3E6B", size = 2.5) +
   geom_vline(xintercept = 0.5, linetype = "dashed",
              color = "#7F8C8D", linewidth = 0.4) +
-  scale_x_continuous(limits = c(0, 1), labels = scales::percent_format(accuracy = 1)) +
+  scale_x_continuous(limits = c(0, 1),
+                     labels = scales::percent_format(accuracy = 1)) +
   labs(
-    title = "AI detection scores for sampled abstracts",
-    subtitle = "Scores above 0.5 suggest likely AI-assisted writing (Sapling AI detector)",
-    x = "AI score",
-    y = NULL
+   title = "AI detection scores for sampled abstracts",
+   subtitle =
+   "Scores above 0.5 suggest likely AI-assisted writing (Sapling AI detector)",
+   x ="AI score",
+   y = NULL
   ) +
   theme_minimal(base_family = "serif") +
   theme(
@@ -1554,9 +1725,38 @@ As we can see, 8 out of 10 have nearly 100% ai_score, which means that they most
 
 ## References
 
+American Sociological Association (ASA) (2025). *American Sociological Review*: About the journal. Retrieved March 27, 2026, from https://www.asanet.org/journals/asr/
+
+American Political Science Association (APSA) (2025). *American Political Science Review*: About the journal. Retrieved March 27, 2026, from https://www.apsanet.org/apsr
+
+Derner, E., Kučera, D., Gulati, A., Bagheri, A., & Oliver, N. (2026). Mind the style: Impact of communication style on human-chatbot interaction. *arXiv*. https://arxiv.org/abs/2602.17850
+
 Ding, L., Lawson, C., & Shapira, P. (2025). Rise of generative artificial intelligence in science. *Scientometrics*, 130(9), 5093–5114. https://doi.org/10.1007/s11192-025-05413-z
 
+Erol, G., Ergen, A., Gülşen Erol, B., Kaya Ergen, Ş., Bora, T. S., Çölgeçen, A. D., Araz, B., Şahin, C., Bostancı, G., Kılıç, İ., Macit, Z. B., Sevgi, U. T., & Güngör, A. (2025). Can we trust academic AI detective? Accuracy and limitations of AI-output detectors. *Acta Neurochirurgica*, *167*(1), 214. https://doi.org/10.1007/s00701-025-06622-4
+
+European Consortium for Political Research (ECPR) (2025). *European Journal of Political Research*: Journal metrics. Retrieved March 27, 2026, from https://ecpr.eu/ContentPage.aspx?ID=122
+
+Gray, A. (2024). ChatGPT "contamination": Estimating the prevalence of LLMs in the scholarly literature. *arXiv*. https://arxiv.org/abs/2403.16887
+
+Kousha, K., & Thelwall, M. (2025). How much are LLMs changing the language of academic papers after ChatGPT? A multi-database and full text analysis. *arXiv*. https://arxiv.org/abs/2509.09596
+
+Kwon, D. (2025, May 14). Is it OK for AI to write science papers? Nature survey shows researchers are split. *Nature*, *641*, 574–578. https://doi.org/10.1038/d41586-025-01463-8
+
 Liu, N., Shapira, P., & Yue, X. (2021). Tracking developments in artificial intelligence research: Constructing and applying a new search strategy. *Scientometrics*, 126(4), 3153–3192. https://doi.org/10.1007/s11192-021-03868-4
+
+Merrill, J. B., Chen, S. Y., & Kumer, E. (2025, November 13). What are the clues that ChatGPT wrote something? We analyzed its style. *The Washington Post*. https://www.washingtonpost.com/technology/interactive/2025/how-detect-chatgpt-em-dash/
+
+Oxford University Press (2025). *European Sociological Review*: About the journal. Retrieved March 27, 2026, from https://academic.oup.com/esr
+
+Morrone, M. (2025, October 14). Exclusive: AI writing hasn't overwhelmed the web yet. *Axios*. https://www.axios.com/2025/10/14/ai-generated-writing-humans
+
+Rudnicka, K. (2025, July 9). Each AI chatbot has its own distinctive writing style — just as humans do. *Scientific American*. https://www.scientificamerican.com/article/chatgpt-and-gemini-ai-have-uniquely-different-writing-styles/
+
+Springer Nature (2025a). Journal metrics. *Nature Human Behaviour*. Retrieved March 27, 2026, from https://www.nature.com/nathumbehav/journal-impact
+
+Springer Nature (2025b). Indexing. *Humanities and Social Sciences Communications*. Retrieved March 27, 2026, from https://www.nature.com/palcomms/journal-information/indexing
+
 
 ## Appendix I - Domain specific stopword list prompt
 
@@ -1593,15 +1793,15 @@ averaging 150–250 words), written in academic English.
 </project_context>
 
 <corpus_frequency_data>
-The file corpus_word_freq.csv is attached. It contains the top words in the corpus 
-after removing standard English stopwords  and  numeric tokens, generated directly
-from thousands of abstracts using tidytext. Columns:
+The file corpus_word_freq.csv is attached. It contains the top words in the
+corpus  after removing standard English stopwords  and  numeric tokens,
+generated directly from thousands of abstracts using tidytext. Columns:
   - word: the token (lowercase)
   - n: raw frequency count across all abstracts
 
 Use this frequency data as empirical grounding for your stopword list:
-  - Words that appear here at high frequency AND carry no thematic/discriminative 
-    value are strong candidates for inclusion in the stopword list
+  - Words that appear here at high frequency AND carry no thematic or
+  discriminative  value are strong candidates for inclusion in the stopword list
   - Do not limit yourself to words in this list — be exhaustive across all 7 
     categories — but treat high-frequency words as a priority checklist to 
     ensure nothing obvious is missed
@@ -1617,7 +1817,7 @@ removed from this corpus. These are words that:
   (a) carry no thematic or discriminative value for social science research AND
   (b) appear at high frequency across the corpus, AND
 
-Before generating each category, cross-check it against the corpus_frequency_data 
+Before generating each category, check it against the corpus_frequency_data 
 above to ensure all high-frequency uninformative words are captured.
 
 Return the list as a clean, categorised R tibble with a column for the stopword 
@@ -1626,44 +1826,47 @@ the rationale for each category.
 </task>
 
 <categories_to_cover>
-Generate stopwords across ALL of the following categories. For each category, think 
-systematically about what words in that class appear in social science abstracts, words like:
+Generate stopwords across ALL of the following categories. For each category,
+think  systematically about what words in that class appear in social science
+abstracts, words like:
 
 1. ACADEMIC BOILERPLATE VERBS
-   Verbs used generically across all abstracts regardless of topic: reporting verbs 
-   ("examine", "investigate", "explore", "suggest", "find", "show", "demonstrate", 
-   "analyze", "assess", "evaluate", "discuss", "argue", "propose", "address", 
-   "consider", "focus", "aim", "seek", "test", "draw", "provide", "offer", 
-   "highlight", "reveal", "indicate", "identify", "contribute", "develop"), 
-   and their inflected forms where relevant.
+   Verbs used generically across all abstracts regardless of topic: reporting
+   verbs ("examine", "investigate", "explore", "suggest", "find", "show",
+   "demonstrate", "analyze", "assess", "evaluate", "discuss", "argue",
+   "propose", "address",  "consider", "focus", "aim", "seek", "test", "draw",
+   "provide", "offer", "highlight", "reveal", "indicate", "identify",
+   "contribute", "develop"), and their inflected forms where relevant.
 
 2. GENERIC METHODOLOGICAL TERMS
    Words describing research designs, data types, and analytical approaches that 
    are ubiquitous across social science and carry no topical signal: "survey", 
-   "questionnaire", "interview", "sample", "dataset",  "longitudinal", "cross-sectional",
-   "regression", "model", "framework",  "approach", "method", "methodology",
-   "analysis", "data", "measure", "variable", "coefficient", "estimate", "robustness",
-   "validity", "reliability", etc.
+   "questionnaire", "interview", "sample", "dataset",  "longitudinal",
+   "cross-sectional", "regression", "model", "framework",  "approach", "method",
+   "methodology", "analysis", "data", "measure", "variable", "coefficient",
+   "estimate", "robustness", "validity", "reliability", etc.
 
 3. ABSTRACT-STRUCTURAL BOILERPLATE
-   Phrases and words used to signal the structure of an abstract itself rather than 
-   its content: "paper", "study", "article", "research", "literature", "review", 
-   "background", "objective", "purpose", "contribution", "implication", "finding", 
-   "result", "conclusion", "evidence", "prior", "existing", "previous", "recent", 
-   "current", "present", "based", "using", "used", "given", "among", "across".
+   Phrases and words used to signal the structure of an abstract itself rather
+   than its content: "paper", "study", "article", "research", "literature",
+   "review", "background", "objective", "purpose", "contribution",
+   "implication", "finding", "result", "conclusion", "evidence", "prior",
+   "existing", "previous", "recent", "current", "present", "based", "using",
+   "used", "given", "among", "across".
 
 4. GENERIC SOCIAL SCIENCE CONCEPTS
    Terms so broadly used in social science that they provide no discriminative 
-   topical signal between documents: "society", "social", "individual", "group", 
-   "population", "people", "person", "human", "behavior", "behaviour", "attitude", 
-   "perception", "factor", "role", "relationship", "impact", "effect", "influence", 
-   "context", "level", "process", "system", "structure", "pattern", "change", 
-   "difference", "association", "correlation", etc.
+   topical signal between documents: "society", "social", "individual",
+   "group", "population", "people", "person", "human", "behavior", "behaviour",
+   "attitude", "perception", "factor", "role", "relationship", "impact",
+   "effect", "influence", "context", "level", "process", "system", "structure",
+   "pattern", "change", "difference", "association", "correlation", etc.
 
 5. JOURNAL-SPECIFIC AND PUBLICATION BOILERPLATE
-   Words likely introduced by journal formatting, editorial conventions, or abstract 
-   templates specific to these six journals: copyright notices, volume/issue markers, 
-   DOI fragments, and any words that appear due to systematic metadata leakage.
+   Words likely introduced by journal formatting, editorial conventions, or
+   abstract templates specific to these six journals: copyright notices,
+   volume/issue markers, DOI fragments, and any words that appear due to
+   systematic metadata leakage.
 
 6. ENCODING ARTEFACTS AND NOISE
    Tokens that result from text extraction, encoding issues, or tokenisation: 
@@ -1673,33 +1876,33 @@ systematically about what words in that class appear in social science abstracts
 7. HIGH-FREQUENCY FUNCTION WORDS NOT CAUGHT BY STANDARD STOPWORD LISTS
    Domain-specific function-like words that standard English stopword lists 
    (e.g., the Snowball or SMART lists) miss but which are uninformative in this 
-   corpus: discipline-specific connectives, hedging phrases reduced to single tokens 
-   ("however", "furthermore", "moreover", "nevertheless", "thus", "therefore", 
-   "hence", "whereas", "whereby", "therein"), and academic filler adjectives 
-   ("important", "significant", "key", "major", "critical", "novel", "robust", 
-   "comprehensive", "systematic", "rigorous", "substantial").
+   corpus: discipline-specific connectives, hedging phrases reduced to single 
+   tokens ("however", "furthermore", "moreover", "nevertheless", "thus",
+   "therefore", "hence", "whereas", "whereby", "therein"), and academic filler 
+   adjectives ("important", "significant", "key", "major", "critical", "novel",
+   "robust", "comprehensive", "systematic", "rigorous", "substantial").
 </categories_to_cover>
 
 <preservation_rules>
-CRITICAL: The following word classes must NOT appear in the stopword list, even if 
-they are frequent. Removing them would destroy the thematic signal needed for RQ1 
-and RQ2:
+CRITICAL: The following word classes must NOT appear in the stopword list, even
+if they are frequent. Removing them would destroy the thematic signal needed for
+RQ1 and RQ2:
 
-  - AI and technology terms: any term related to artificial intelligence, machine 
-    learning, large language models, specific model names, or related technology. 
-    These are central to RQ2 and must be preserved.
-  - Substantive social science topic terms: words indexing real research topics 
-    such as "inequality", "democracy", "migration", "climate", "health", "labor", 
-    "race", "gender", "education", "voting", "polarization", "trust", "identity", 
-    "discrimination", "poverty", "welfare", etc.
-  - Sentiment-bearing terms: words with clear positive or negative valence that 
-    will be needed for the sentiment analysis in Section 5.
-  - Proper nouns and named entities: country names, institutional names, author 
-    names — these may carry topical signal.
-  - Temporally specific terms: words that may index pre/post ChatGPT content, 
-    which are needed for the temporal analyses in Sections 3–6.
+ - AI and technology terms: any term related to artificial intelligence, machine 
+   learning, large language models, specific model names, or related technology. 
+   These are central to RQ2 and must be preserved.
+ - Substantive social science topic terms: words indexing real research topics 
+   such as "inequality", "democracy", "migration", "climate", "health", "labor", 
+   "race", "gender", "education", "voting", "polarization", "trust", "identity", 
+   "discrimination", "poverty", "welfare", etc.
+ - Sentiment-bearing terms: words with clear positive or negative valence that 
+   will be needed for the sentiment analysis in Section 5.
+ - Proper nouns and named entities: country names, institutional names, author 
+   names — these may carry topical signal.
+ - Temporally specific terms: words that may index pre/post ChatGPT content, 
+   which are needed for the temporal analyses in Sections 3–6.
 
-When in doubt about whether a word carries signal, err on the side of keeping it.
+When in doubt about whether a word carries signal, keep it.
 </preservation_rules>
 
 <output_format>
@@ -1742,9 +1945,10 @@ Rules:
 ::: {style="border: 1px solid #ccc; padding: 1em; border-radius: 4px;"}
 ```         
 You are an expert computational linguist and text mining specialist working on a 
-systematic literature review about AI and its effects. Your task is to create three 
-R vectors of n-grams that will be used to identify academic journal abstracts addressing artificial intelligence (AI) or its effects, consequences, risks, 
-benefits, or impacts.
+systematic literature review about AI and its effects. Your task is to create
+three R vectors of n-grams that will be used to identify academic journal
+abstracts addressing artificial intelligence (AI) or its effects, consequences,
+risks,  benefits, or impacts.
 
 <objective>
 Precision over recall. We accept missing relevant abstracts, but every abstract 
@@ -1753,9 +1957,9 @@ matched by these n-grams must unambiguously be about AI or its effects.
 
 <existing_ai_lexicon>
 We already have a lexicon that identifies AI-related vocabulary. Use it as your 
-reference for how AI is referred to across our corpus. Your component vectors must 
-be compatible with this lexicon —meaning the AI-side tokens should draw from these 
-terms or their natural variants—.
+reference for how AI is referred to across our corpus. Your component vectors
+must  be compatible with this lexicon —meaning the AI-side tokens should draw
+from these  terms or their natural variants—.
 
 # AI unigram lexicon
 ai_lexicon_unigrams <- c(
@@ -1790,10 +1994,10 @@ ai_lexicon_trigrams <- c(
 </existing_ai_lexicon>
 
 <task>
-Rather than writing every n-gram by hand, use a **combinatorial approach**: define 
-separate component vectors for the AI side and the effects side, then generate the 
-final n-gram vectors programmatically using outer() and paste(). This makes the 
-lexicon scalable and easy to maintain.
+Rather than writing every n-gram by hand, use a **combinatorial approach**:
+define separate component vectors for the AI side and the effects side, then
+generate the final n-gram vectors programmatically using outer() and paste().
+This makes thelexicon scalable and easy to maintain.
 The architecture for each n-gram size is as follows:
 ## BIGRAMS (2 words total)
 Combine:
@@ -1804,9 +2008,9 @@ Generate with:
   ai_sentiment_bigrams <- unique(trimws(as.vector(
     outer(ai_side_1w, effect_side_1w, paste)
   )))
-Note: outer() by default produces [AI term] + [effect term] order. To also capture
-[effect term] + [AI term] order (e.g. "risks ai", "benefits llm"), generate both 
-directions and combine:
+Note: outer() by default produces [AI term] + [effect term] order. To also
+capture [effect term] + [AI term] order (e.g. "risks ai", "benefits llm"),
+generate both directions and combine:
   ai_sentiment_bigrams <- unique(trimws(c(
     as.vector(outer(ai_side_1w, effect_side_1w, paste)),
     as.vector(outer(effect_side_1w, ai_side_1w, paste))
@@ -1831,7 +2035,7 @@ Pattern B — [2-word effect prefix] + [1-word AI term]:
   ai_sentiment_trigrams <- unique(trimws(c(trigrams_a, trigrams_b)))
   
 ## FOURGRAMS (4 words total)
-Fourgrams can be formed from three structural patterns. Generate all and combine:
+Fourgrams can be formed from 3 structural patterns. Generate all and combine:
 Pattern A — [2-word effect prefix] + [2-word AI term]:
   effect_side_2w_pre × ai_side_2w
   Example: "effects of" + "machine learning" → "effects of machine learning"
@@ -1840,12 +2044,13 @@ Pattern B — [2-word AI term] + [2-word effect term]:
   Example: "machine learning" + "job displacement" → 
            "machine learning job displacement"
 Pattern C — [3-word effect prefix] + [1-word AI term]:
-  effect_side_3w_pre × ai_side_1w
-  Example: "ethical implications of" + "ai" → "ethical implications of ai"
-  fourgrams_a <- as.vector(outer(effect_side_2w_pre, ai_side_2w, paste))
-  fourgrams_b <- as.vector(outer(ai_side_2w, effect_side_2w, paste))
-  fourgrams_c <- as.vector(outer(effect_side_3w_pre, ai_side_1w, paste))
-  ai_sentiment_fourgrams <- unique(trimws(c(fourgrams_a, fourgrams_b, fourgrams_c)))
+ effect_side_3w_pre × ai_side_1w
+ Example: "ethical implications of" + "ai" → "ethical implications of ai"
+ fourgrams_a <- as.vector(outer(effect_side_2w_pre, ai_side_2w, paste))
+ fourgrams_b <- as.vector(outer(ai_side_2w, effect_side_2w, paste))
+ fourgrams_c <- as.vector(outer(effect_side_3w_pre, ai_side_1w, paste))
+ ai_sentiment_fourgrams <- unique(trimws(c(fourgrams_a, fourgrams_b,
+                                           fourgrams_c)))
 </task>
 
 <component_vector_requirements>
@@ -1855,7 +2060,9 @@ The effects/outcome side vectors must cover a broad semantic field, including:
 - Direct outcome terms: effects, impacts, consequences, implications, outcomes, 
   influence
 - Valence terms: benefits, risks, harms, dangers, threats, opportunities, 
-  advantages, disadvantages, challenges (IMPORTANT: make sure that non-neutral terms are balanced, that is, make sure there is no bias towards "positive" or "negative" valence)
+  advantages, disadvantages, challenges (IMPORTANT: make sure that non-neutral
+  terms are balanced, that is, make sure there is no bias towards "positive" or
+  "negative" valence)
 - Societal dimensions: ethical, social, economic, labor, employment, inequality, 
   bias, fairness, privacy, security, trust, accountability, transparency
 - Governance terms: regulation, policy, governance, legislation, oversight
@@ -1863,13 +2070,15 @@ The effects/outcome side vectors must cover a broad semantic field, including:
   concerns, fears
 - Domain-specific effect nouns: automation, misinformation, discrimination, 
   creativity, decision-making, displacement, surveillance
-Use ALL terms from the existing lexicon on the AI side —include every term across 
-unigrams, bigrams, and trigrams without exception—.
+Use ALL terms from the existing lexicon on the AI side —include every term
+across unigrams, bigrams, and trigrams without exception—.
 </component_vector_requirements>
 
 <precision_rules>
 The only constraint on generated combinations is semantic unambiguity: if a 
-combination appears in an abstract, it must mean that AI or its effects addressed. Whether a combination actually occurs in the corpus is irrelevant —unmatched n-grams are harmless—. Go for exhaustive coverage. Do not prune for 
+combination appears in an abstract, it must mean that AI or its effects
+addressed. Whether a combination actually occurs in the corpus is irrelevant 
+—unmatched n-grams are harmless—. Go for exhaustive coverage. Do not prune for 
 plausibility. 
 Apply unique() and trimws() to deduplicate and clean whitespace.
 </precision_rules>
@@ -1978,7 +2187,8 @@ Some of the terms in the TF-IDF results were unclear: they were abbreviations or
 # kwic = european sociological (this is metadata that we cannot filter without
 # potentially losing relevant information, since the bigram is composed by
 # two terms that could be meaninful in other combinations)
-kwic(quanteda::tokens(abstracts_corpus), phrase("european sociological"), window = 8)
+kwic(quanteda::tokens(abstracts_corpus), phrase("european sociological"),
+     window = 8)
 
 # Year 2017
 # kwic = social pact
@@ -1994,7 +2204,8 @@ kwic(quanteda::tokens(abstracts_corpus), phrase("fairy tale"), window = 8)
 
 # Year 2020
 # kwic = science diplomacy
-kwic(quanteda::tokens(abstracts_corpus), phrase("science diplomacy"), window = 8)
+kwic(quanteda::tokens(abstracts_corpus), phrase("science diplomacy"),
+     window = 8)
 # kwic = grass pea
 kwic(quanteda::tokens(abstracts_corpus), phrase("grass pea"), window = 8)
 # kwic = gun culture
