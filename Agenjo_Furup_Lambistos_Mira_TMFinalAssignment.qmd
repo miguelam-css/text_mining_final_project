@@ -1,0 +1,3707 @@
+---
+title: "Exploring the influence of Artificial Intelligence on social science publishing"
+subtitle: "An analysis of the abstracts published in six leading journals (2016-2025)"
+author: 
+  - Alicia Mira
+  - Eva Lambistos
+  - Miguel Agenjo
+  - Noah Fürup
+date: today
+abstract: |
+  The proliferation of generative artificial intelligence has prompted growing
+  scholarly debate about its influence on scientific communication. This study 
+  delves into this question by analyzing a corpus of 9,484 abstracts drawn from 
+  six leading social science journals — Nature Human Behaviour, Humanities and 
+  Social Sciences Communications, American Sociological Review, American
+  Political Science Review, European Sociological Review, and European Journal of
+  Political Research — spanning the period 2016–2025. We address four research
+  questions concerning the evolution of predominant topics, the influence of AI
+  on the thematic landscape, detectable changes in writing style, and shifting
+  sentiment toward AI over the decade. Employing TF-IDF, AI-lexicon frequency
+  analysis, Latent Dirichlet Allocation topic modelling, and lexicon-based
+  sentiment analysis, we explore three dimensions along which generative AI
+  appears to have reshaped social science publishing: substantive, stylistic,
+  and sentimental. On the substantive dimension, AI-related terminology grows
+  from near-zero prevalence to over 10% of abstracts by 2025, bolstering the case
+  that AI has become a central concern of social science scholarship. On the
+  stylistic dimension, LLM signature words — terms such as "delve," "foster," and
+  "bolster" — increase sharply after 2022, and the intricate trajectory of "delve"
+  in particular, which peaks and subsequently declines following a documented
+  developer intervention to curb its overuse, offers the strongest evidence of
+  systematic AI assistance in academic writing. On the sentimental dimension,
+  results unveil a predominantly positive evaluative stance toward AI across the
+  study period, which continues to foster optimism even as critical concerns
+  remain present. Taken together, these findings suggest that generative AI is
+  not merely a tool but an active force shaping the vocabulary, topical
+  priorities, and affective tone of social science scholarship. *This abstract was
+  entirely written by Claude Sonnet 4.6 (Anthropic)*.
+keywords:
+  - artificial intelligence
+  - social science
+  - topic modelling
+  - academic writing
+  - generative AI
+format:
+  html:
+    theme: litera
+    toc: true
+    toc-depth: 4
+    toc-title: "Table of Contents"
+    number-sections: false
+    embed-resources: true
+    df-print: paged
+    include-in-header:
+      text: |
+        <style>
+          body { 
+            font-family: Georgia, serif; 
+            color: #1a1a2e; 
+            text-align: justify;
+            hyphens: auto;
+          }
+          h1, h2, h3, h4 { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-weight: 300;
+            color: #2C3E6B;
+            text-align: left;
+          }
+          a { color: #2C3E6B; }
+          #TOC { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            text-align: left; 
+          }
+        </style>
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# This code only counts the words in the document, allowing us to automatically
+# update word count, we don't show the chunk in the render.
+# the render.
+
+# Read all lines of the source file
+qmd_lines <- readLines("Agenjo_Furup_Lambistos_Mira_TMFinalAssignment.qmd")
+
+# Find the line index where the YAML header ends (second "---")
+yaml_end  <- which(qmd_lines == "---")[2]
+
+# Find the line index where the References section begins
+ref_line  <- which(grepl("^## References", qmd_lines))[1]
+
+# Keep only the lines between YAML and References
+body      <- qmd_lines[(yaml_end + 1):(ref_line - 1)]
+
+# Flag to track whether we are inside a code chunk
+in_chunk  <- FALSE
+
+# Vector to store lines that count as prose
+clean     <- c()
+
+for (line in body) {
+  # Toggle in_chunk when we hit a code fence (``` )
+  if (grepl("^```", line)) { in_chunk <- !in_chunk; next }
+  # Skip code and lines with "#"
+  if (!in_chunk && !grepl("^#", line)) clean <- c(clean, line)
+}
+
+# Split each line into words and sum them up
+words <- sum(sapply(strsplit(clean, "\\s+"), function(x) sum(x != "")))
+```
+
+::: text-end
+<br>[*Body text word count: `r words` words.*]{style="font-size: 78%"} <br> [*\[Excludes code chunks, abstract, references, and appendices.\]*]{style="font-size: 65%"}
+:::
+
+## Section 1. Introduction
+
+The rise of generative LLMs have opened questions about how AI is influencing scientific production and the communication of scientific results. Our project focuses on its impact on the research production in the field of social sciences. Specifically, we analyze a corpus of abstracts drawn from six different leading social science journals. Two are part of the Nature portfolio: *Nature Human Behaviour*; and *Humanities and Social Sciences Communications* —we include articles published by what was its predecessor until June 2020, *Palgrave Communications*—. We also include the journals of the four major disciplinary associations in sociology and political science: *American Sociological Review*, *American Political Science Review*, *European Sociological Review* and *European Journal of Political Research*. All these are among the most highly ranked in their respective fields in different indexes (see: Springer Nature, 2025a, 2025b; APSA, 2025; Oxford University Press, 2025; ASA, 2025; ECPR, 2025).
+
+Our study period includes the last decade (2016 to 2025), allowing us to capture several years before and after the rise of generative AI. Beyond their importance and reputation, we selected these journals because: together they provide broad disciplinary coverage of the social sciences; they provide a large and diverse volume of publications, enabling meaningful analysis; and their abstracts are freely accessible through OpenAlex, which allows us to systematically build such a large corpus.
+
+Before proceeding any further, we must clarify what we will understand by "AI", since this term has a rich history and is often used as an umbrella concept. We will work with two different operationalizations. Firstly, a broad concept of AI, which aims to capture any reference to artificial intelligence as a subject of discussion across the study period. This broad concept includes all forms and subfields of AI ---from classical machine learning and neural networks to recent generative models--- and we indifferently consider terms such as "artificial intelligence," "machine learning," "deep learning," "large language model," specific model names like "ChatGPT," and related expressions. The second is a narrow concept that focuses specifically on generative AI models, aiming to capture changes that occurred when these tools became widely available ---we consider the release of ChatGPT in November 2022 as a reference event in this sense---. These two concepts will be used in different parts of the project. For instance, when considering topics and sentiment, we refer to the broad concept, when analyzing effects on writing style, we are looking for the effects of the narrow concept.
+
+Our project analyzes the influence of AI along three dimensions: a *substantive dimension*, analyzing whether the rise of AI has influenced the topics and questions being addressed by social scientists; a *stylistic dimension*, analyzing whether writing patterns have changed due to the use of generative language models as writing aids; and a *sentimental dimension*: analyzing general evaluative tone towards AI in social science publications.
+
+These dimensions are explored through four research questions. Our first research question ---*What are the predominant topics in top social science journals by year?*--- seeks to map changes in dominant topics of our corpus across the study period. Closely related, our second research question asks: *How has AI, in the broad sense, influenced predominant topics?* We hypothesize two ways in which this could be the case: first, AI may have become a dominant topic itself; second, the availability of AI tools may have increased or influenced attention to other topics. The third research question ---*Has the availability of generative AI tools had a detectable effect on academic writing patterns?*--- explores whether writing patterns of social science abstracts have changed with the rise of generative LLMs. Finally, our fourth research question ---*How has sentiment towards AI in social science literature changed over the last decade?*--- aims to examine how the attitudes towards AI have evolved in the study period.
+
+The remainder of this project is structured as follows. In section 2 we set up the libraries, load the data, and briefly describe it. Section 3 addresses research questions one and two. Section 4 explores writing patterns before and after the rise of generative LLMs. Section 5 analyzes how sentiment towards AI has evolved over the last decade. Finally, we discuss the main findings and limitations of our project.
+
+## Section 2. Setup, and data loading
+
+### Packages
+
+We load the required libraries.
+
+```{r}
+#| message: false
+#| warning: false
+
+# The following packages are required to run this notebook.
+
+# Uncomment and run the lines below to install packages not installed in your
+# system.
+
+# required_packages <- c("tidyverse", "tidytext", "textdata", "sentimentr",
+#                        "topicmodels", "quanteda", "quanteda.textplots",
+#                        "textstem", "igraph", "ggraph", "widyr", "reshape2",
+#                        "RColorBrewer", "wordcloud", "explore", "patchwork",
+#                        "scales", "httr2")
+# install.packages(
+#   required_packages[!required_packages %in%installed.packages()[, "Package"]])
+
+library(tidyverse)
+library(tidytext)
+library(textdata)
+library(sentimentr)
+library(topicmodels)
+library(quanteda)
+library(quanteda.textplots)
+library(textstem)
+library(igraph)
+library(ggraph)
+library(widyr)
+library(reshape2)
+library(RColorBrewer)
+library(wordcloud)
+library(explore)
+library(patchwork)
+library(scales)
+library(httr2)
+```
+
+### Loading the data
+
+Our corpus was downloaded from [OpenAlex](https://openalex.org/). We created a custom R script (`openalex_download.R`, included in the project folder, along with documentation) to bulk-download article data.
+
+```{r}
+# Having run the script, we load the `.RData` file, containing all data
+# structures exactly as they were returned by the OpenAlex API. This creates
+# the object `articles_raw` in the environment
+load("data/articles.RData")
+```
+
+### Brief description
+
+Let's examine the structure of the raw dataset.
+
+```{r}
+# Overview of all variables: types, missing values, and distributions
+describe(articles_raw)
+```
+
+Not all records include abstracts (19.6% NAs). Since our entire analysis is based on abstract text, we remove records without abstracts or publication year, and restrict the corpus to our study period (2016–2025).
+
+```{r warning=FALSE}
+# Filter: keep only records with an abstract, within our study period
+articles <- articles_raw |> 
+  filter(!is.na(abstract)) |>
+  filter(publication_year >= 2016, publication_year <= 2025)
+
+# Let's observe our new filtered data:
+describe(articles)
+```
+
+Removing missing abstracts we went from 12589 to 9484 articles.
+
+```{r warning=FALSE}
+#| fig-width: 8
+#| fig-height: 6.5
+
+# In this chunk we create a plot to explore the distribution of publications
+
+# Merge Palgrave Communications into HSSC — same journal, renamed June 2020
+# Full names with abbreviations in parentheses for clarity
+articles_merged <- articles |>
+  mutate(source_display_name = if_else(
+    source_display_name == "Palgrave Communications",
+    "Humanities and Social Sciences Communications",
+    source_display_name
+  )) |>
+  mutate(journal_label = case_match(
+    source_display_name,
+    "American Political Science Review"             ~ "American Political Science Review (APSR)",
+    "American Sociological Review"                  ~ "American Sociological Review (ASR)",
+    "European Journal of Political Research"        ~ "European Journal of Political Research (EJPR)",
+    "European Sociological Review"                  ~ "European Sociological Review (ESR)",
+    "Nature Human Behaviour"                        ~ "Nature Human Behaviour (NHB)",
+    "Humanities and Social Sciences Communications" ~ "Humanities and Social Sciences Communications (HSSC)"
+  ))
+
+# Color palette — keys must match journal_label values exactly
+journal_colors <- c(
+  "American Political Science Review (APSR)"             = "#2C3E6B",
+  "American Sociological Review (ASR)"                   = "#C0392B",
+  "European Journal of Political Research (EJPR)"        = "#8E44AD",
+  "European Sociological Review (ESR)"                   = "#E67E22",
+  "Nature Human Behaviour (NHB)"                         = "#27AE60",
+  "Humanities and Social Sciences Communications (HSSC)" = "#2980B9"
+)
+
+# Plot 1: Total abstracts per year (Macro-level overview)
+# Colored in a neutral gray to differentiate from journal-specific data
+p_total <- articles_merged |>
+  count(publication_year) |>
+  ggplot(aes(x = publication_year, y = n)) +
+  geom_col(fill = "#7F8C8D", width = 0.7) +
+  scale_x_continuous(breaks = seq(2016, 2025, by = 3)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  labs(x = NULL, y = "Total abstracts", title = "Total abstracts by year") +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title       = element_text(size = 10, face = "bold", color = "#1a1a2e"),
+    axis.text.x      = element_text(size = 7, color = "#4a4a6a"),
+    axis.text.y      = element_text(size = 7, color = "#4a4a6a"),
+    axis.title       = element_text(size = 9, color = "#4a4a6a"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "#e8e8f0", linewidth = 0.4),
+    plot.background  = element_rect(fill = "white", color = NA)
+  )
+
+# Plot 2: one facet per journal, bars by year
+# Each panel has its own y-axis scale (scales = "free_y") so within-journal
+# trends are visible even for journals with very different volumes
+p_facets <- articles_merged |>
+  count(journal_label, publication_year) |>
+  ggplot(aes(x = publication_year, y = n, fill = journal_label)) +
+  geom_col(width = 0.7) +
+  facet_wrap(~ journal_label, ncol = 2, scales = "free_y") +
+  scale_fill_manual(values = journal_colors, guide = "none") +
+  scale_x_continuous(breaks = seq(2016, 2025, by = 3)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  labs(x = NULL, y = "Number of abstracts") +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text       = element_text(size = 8, face = "bold", color = "#1a1a2e",
+                                    hjust = 0), # hjust = 0 aligns to the left
+    axis.text.x      = element_text(size = 7, color = "#4a4a6a"),
+    axis.text.y      = element_text(size = 7, color = "#4a4a6a"),
+    axis.title       = element_text(size = 9, color = "#4a4a6a"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "#e8e8f0", linewidth = 0.4),
+    plot.background  = element_rect(fill = "white", color = NA)
+  )
+
+# Plot 3: thin stacked horizontal bar showing corpus composition
+# No labels — colors alone carry the journal identity, matched to the facets above
+p_bar <- articles_merged |>
+  count(journal_label) |>
+  mutate(
+    pct = n / sum(n),
+    journal_label = fct_reorder(journal_label, n)
+  ) |>
+  ggplot(aes(x = pct, y = 1, fill = journal_label)) +
+  geom_col(orientation = "y", width = 0.6) +
+  scale_fill_manual(values = journal_colors, guide = "none") +
+  scale_x_continuous(labels = scales::percent, expand = c(0, 0)) +
+  labs(x = "Share of total abstracts", y = NULL) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    axis.text.y      = element_blank(),
+    axis.text.x      = element_text(size = 7, color = "#4a4a6a"),
+    axis.title.x     = element_text(size = 9, color = "#4a4a6a", margin = margin(t = 6)),
+    panel.grid       = element_blank(),
+    plot.background  = element_rect(fill = "white", color = NA)
+  )
+
+# Stack the three plots vertically with patchwork
+# heights = c(3, 10, 1) structures the visual hierarchy: Total trend -> Journal specific -> Proportion breakdown
+p_total / p_facets / p_bar +
+  plot_layout(heights = c(3, 10, 1)) +
+  plot_annotation(
+    title    = "Number of abstracts per year and journal",
+    subtitle = "Palgrave Communications merged with HSSC (same journal, renamed June 2020)",
+    theme    = theme(
+      plot.title      = element_text(size = 14, face = "bold", color = "#1a1a2e",
+                                     family = "serif", margin = margin(b = 4)),
+      plot.subtitle   = element_text(size = 9, color = "#4a4a6a",
+                                     family = "serif", margin = margin(b = 12)),
+      plot.caption    = element_text(size = 7, color = "#7a7a9a",
+                                     family = "serif", hjust = 0,
+                                     margin = margin(t = 10)),
+      plot.background = element_rect(fill = "white", color = NA)
+    )
+  )
+```
+
+We observe that the distribution of abstracts across journals is not balanced: HSSC accounts for more than 60% of the corpus, while the other five journals are relatively balanced between them. We also see a temporal imbalance: with publications greatly increasing after 2022. Both imbalances are driven by the same factor: the increase of publications in journals part of the Nature Portfolio, particularly HSSC.
+
+The temporal imbalance should be acknowledged when interpreting results. Regarding the journal imbalance: we are interested in trends in social science papers, and the Nature Portfolio is a rightful and large part of that corpus; excluding its articles would make the corpus arbitrarily less representative, we thus keep them ---this decision could potentially introduce biases, we acknowledge this trade off---.
+
+## Section 3. AI and the evolution of social science journals' interests
+
+### 3.1 Preprocessing setup
+
+The techniques in this section use different tokenization and filtering strategies. We define all shared elements here, and explain which subsections use which.
+
+We work with two filtering tools:
+
+1.  **Standard stopwords**: using `stop_words` from `tidytext`.
+
+2.  **Domain-specific stopwords**: a custom list of words that provide no relevant information in our context. This tool (`domain_stopwords`) is fully applied in unigram analyses (both TF-IDF and LDA), a subset of it (`ngram_stopwrods`) is used in n-gram analyses ---for details on why, see section 3.1.2---.
+
+#### 3.1.1 Defining domain-specific stopwords
+
+Using *Claude Sonnet 4.6*, we created a list of domain-specific words without informative value ---full prompt in Appendix I---, then manually reviewed it, removing words we considered did have informational value, and adding others we found needed filtering.
+
+```{r}
+# Domain-specific stopwords, organised by category.
+# The category column allows subsetting for different filtering strategies.
+domain_stopwords <- tibble(
+  word = c(
+    
+    # 1. Academic boilerplate verbs
+    # Verbs used generically across all abstracts regardless of topic.
+    # Includes base forms, 3rd-person singular, past/passive, and gerund
+    # inflections.
+    "examine", "investigate", "explore", "suggest", "find", "show",
+    "demonstrate", "analyze", "analyse", "assess", "evaluate", "discuss",
+    "argue", "propose", "address", "consider", "focus", "aim", "seek", "test",
+    "draw", "provide", "offer", "highlight", "reveal", "indicate", "identify",
+    "contribute", "develop", "present", "describe", "explain", "understand",
+    "improve", "enhance", "employ", "apply", "use", "utilize", "utilise",
+    "adopt", "extend", "advance", "inform", "situate", "engage", "establish",
+    "illustrate", "document", "note", "observe", "report", "review", "compare",
+    "measure", "estimate", "predict", "capture", "synthesize", "synthesise",
+    "integrate", "combine", "incorporate", "build", "construct", "formulate",
+    "frame", "conceptualize", "conceptualise", "operationalize",
+    "operationalise", "uncover", "shed", "map", "trace", "track", "model",
+    "simulate", "validate", "verify", "confirm", "challenge", "question",
+    "reflect", "emphasize", "emphasise", "stress", "acknowledge", "recognize",
+    "recognise", "account", "imply", "examines", "investigates", "explores",
+    "suggests", "finds", "shows", "demonstrates", "analyses", "analyzes",
+    "assesses", "evaluates", "discusses", "argues", "proposes", "addresses",
+    "considers", "focuses", "aims", "seeks", "draws", "provides", "offers",
+    "highlights", "reveals", "indicates", "identifies", "contributes",
+    "develops", "presents", "describes", "explains", "improves", "enhances",
+    "employs", "applies", "adopts", "extends", "informs", "engages",
+    "establishes", "illustrates", "documents", "notes", "observes", "reports",
+    "compares", "measures", "estimates", "predicts", "captures", "builds",
+    "constructs", "integrates", "combines", "incorporates", "uncovers",
+    "sheds", "maps", "traces", "tracks", "models", "validates", "confirms",
+    "challenges", "questions", "reflects", "emphasizes", "emphasises",
+    "stresses", "acknowledges", "recognizes", "recognises", "accounts",
+    "implies", "examined", "investigated", "explored", "suggested", "found",
+    "shown", "demonstrated", "analyzed", "analysed", "assessed", "evaluated",
+    "discussed", "argued", "proposed", "addressed", "considered", "focused",
+    "aimed", "sought", "drawn", "provided", "offered", "highlighted",
+    "revealed", "indicated", "identified", "contributed", "developed",
+    "presented", "described", "explained", "improved", "enhanced", "employed",
+    "applied", "adopted", "extended", "informed", "engaged", "established",
+    "illustrated", "documented", "noted", "observed", "reported", "compared",
+    "measured", "estimated", "predicted", "captured", "built", "constructed",
+    "integrated", "combined", "incorporated", "uncovered", "mapped", "tracked",
+    "modeled", "modelled", "validated", "confirmed", "challenged", "reflected",
+    "emphasized", "emphasised", "stressed", "acknowledged", "recognized",
+    "recognised", "examining", "investigating", "exploring", "suggesting",
+    "finding", "showing", "demonstrating", "analyzing", "analysing",
+    "assessing", "evaluating", "discussing", "arguing", "proposing",
+    "addressing", "considering", "focusing", "aiming", "seeking", "drawing",
+    "providing", "offering", "highlighting", "revealing", "indicating",
+    "identifying", "contributing", "developing", "presenting", "describing",
+    "explaining", "understanding", "improving", "enhancing", "employing",
+    "applying", "adopting", "extending", "informing", "engaging",
+    "establishing", "illustrating", "documenting", "noting", "observing",
+    "reporting", "comparing", "measuring", "estimating", "predicting",
+    "capturing", "building", "constructing", "integrating", "combining",
+    "incorporating", "uncovering", "shedding", "mapping", "tracing",
+    "tracking", "modeling", "modelling", "validating", "confirming",
+    "challenging", "questioning", "reflecting", "emphasizing", "emphasising",
+    "stressing", "acknowledging", "recognizing", "recognising",
+    
+    # 2. Generic methodological terms
+    # Words describing research designs, data types, statistical procedures,
+    # and analytical approaches ubiquitous across all social science.
+    "data", "dataset", "datasets", "survey", "surveys", "questionnaire",
+    "questionnaires", "interview", "interviews", "observation", "observations",
+    "fieldwork", "experiment", "experiments", "experimental", "sample",
+    "samples", "sampling", "subsample", "subsamples", "respondent",
+    "respondents", "participant", "participants", "informant", "informants",
+    "census", "panel", "panels", "cohort", "cohorts", "wave", "waves",
+    "method", "methods", "methodology", "methodological", "approach",
+    "approaches", "framework", "frameworks", "design", "designs", "procedure",
+    "procedures", "protocol", "protocols", "technique", "techniques",
+    "instrument", "instruments", "paradigm", "paradigms", "quantitative",
+    "statistical", "regression", "regressions", "multivariate", "bivariate",
+    "univariate", "logistic", "probit", "ols", "coefficient", "coefficients",
+    "parameter", "parameters", "estimation", "estimator", "estimators",
+    "specification", "specifications", "robustness", "validity", "reliability",
+    "endogeneity", "heterogeneity", "heteroskedasticity", "autocorrelation",
+    "collinearity", "multicollinearity", "moderation", "mediation",
+    "mediating", "moderating", "confound", "confounding", "confounder",
+    "instrumental", "iv", "equation", "equations", "variance", "covariance",
+    "correlation", "correlations", "significance", "p-value", "confidence",
+    "interval", "intervals", "standard", "deviation", "deviations", "mean",
+    "median", "mode", "distribution", "distributions", "skewness", "kurtosis",
+    "outlier", "outliers", "imputation", "weighting", "weights", "weight",
+    "index", "indices", "indicator", "indicators", "score", "scores", "scale",
+    "scales", "latent", "manifest", "loading", "loadings", "eigenvalue",
+    "eigenvalues", "goodness", "aic", "bic", "rmsea", "cfi", "tli", "srmr",
+    "anova", "manova", "ancova", "bootstrapping", "bootstrap", "simulation",
+    "simulations", "bayesian", "frequentist", "likelihood", "maximum",
+    "posterior", "credible", "hypothesis", "null", "alternative", "threshold",
+    "lag", "lags", "lagged", "fixed", "random", "causal", "causality",
+    "qualitative", "grounded", "thematic", "coding", "codes", "code", "theme",
+    "themes", "category", "categories", "saturation", "triangulation",
+    "reflexivity", "positionality", "intersubjectivity", "hermeneutic",
+    "phenomenological", "phenomenology", "interpretive", "constructivist",
+    "analysis", "analytic", "analytical", "longitudinal", "cross-sectional",
+    "multilevel", "multivariable", "hierarchical", "meta-analytic", "scoping",
+    "realist", "synthesis", "syntheses", "mixed", "measurement", "variable",
+    "variables", "dependent", "independent", "control", "controls",
+    "controlled", "controlling", "proxy", "proxies", "check", "checks",
+    "sensitivity", "validation", "replication", "comparative",
+    
+    # 3. Abstract structure boilerplate
+    # Organisational scaffolding often used in academic abstracts:
+    # document labels, rhetorical-move markers, literature-positioning words,
+    # linking tokens, and non-discriminative evaluative fillers.
+    "study", "studies", "paper", "papers", "article", "articles", "research",
+    "work", "works", "thesis", "dissertation", "chapter", "chapters", "book",
+    "books", "manuscript", "manuscripts", "introduction", "background",
+    "motivation", "objective", "objectives", "purpose", "purposes", "goal",
+    "goals", "rationale", "overview", "summary", "abstract", "conclusion",
+    "conclusions", "discussion", "implication", "implications", "contribution",
+    "contributions", "limitation", "limitations", "recommendation",
+    "recommendations", "direction", "directions", "findings", "result",
+    "results", "outcome", "outcomes", "literature", "prior", "previous",
+    "existing", "recent", "current", "past", "earlier", "contemporary",
+    "traditional", "conventional", "growing", "emerging", "nascent", "based",
+    "using", "used", "given", "among", "across", "within", "via", "through",
+    "including", "particularly", "specifically", "notably", "especially",
+    "primarily", "mainly", "largely", "generally", "broadly", "widely",
+    "commonly", "typically", "often", "frequently", "usually", "rarely",
+    "however", "therefore", "thus", "hence", "whereas", "whereby", "therein",
+    "furthermore", "moreover", "additionally", "nevertheless", "nonetheless",
+    "accordingly", "consequently", "subsequently", "previously", "finally",
+    "overall", "together", "concluded", "concludes", "derives", "derived",
+    "conducted", "collected", "published", "carried", "undertaken", "outlined",
+    "important", "significant", "key", "main", "major", "primary", "central",
+    "core", "fundamental", "essential", "critical", "crucial", "vital",
+    "notable", "relevant", "valuable", "meaningful", "useful", "effective",
+    "novel", "innovative", "original", "unique", "comprehensive", "systematic",
+    "rigorous", "robust", "substantial", "strong", "potential", "possible",
+    "likely", "apparent", "clear", "direct", "indirect", "further",
+    "additional", "various", "diverse", "multiple", "different", "similar",
+    "comparable", "specific", "particular", "general", "broad", "wide",
+    "limited", "due", "despite", "although", "though", "while", "whether",
+    "both", "either", "neither",
+    
+    # 4. Generic social science concepts
+    # Terms so broadly used in social science that they provide no
+    # discriminative topical signal: generic agents, process/mechanism words,
+    # structural terms, effect/outcome nouns, generic descriptors, and
+    # temporal/spatial terms.
+    "society", "societies", "social", "individual", "individuals", "group",
+    "groups", "population", "populations", "people", "person", "persons",
+    "human", "humans", "actor", "actors", "agent", "agents", "member",
+    "members", "community", "communities", "public", "citizen", "citizens",
+    "subject", "subjects", "user", "users", "stakeholder", "stakeholders",
+    "researcher", "researchers", "author", "authors", "scholar", "scholars",
+    "behavior", "behaviour", "behaviors", "behaviours", "attitude",
+    "attitudes", "perception", "perceptions", "belief", "beliefs",
+    "preference", "preferences", "value", "values", "norm", "norms",
+    "practice", "practices", "experience", "experiences", "interaction",
+    "interactions", "process", "processes", "mechanism", "mechanisms",
+    "dynamic", "dynamics", "pattern", "patterns", "relationship",
+    "relationships", "relation", "relations", "association", "associations",
+    "link", "links", "connection", "connections", "nexus", "interplay",
+    "structure", "structures", "system", "systems", "network", "networks",
+    "institution", "institutions", "organization", "organizations",
+    "organisation", "organisations", "context", "contexts", "condition",
+    "conditions", "environment", "environments", "setting", "settings",
+    "domain", "domains", "sphere", "field", "fields", "sector", "sectors",
+    "dimension", "dimensions", "aspect", "aspects", "element", "elements",
+    "component", "components", "feature", "features", "factor", "factors",
+    "effect", "effects", "impact", "impacts", "influence", "influences",
+    "consequence", "consequences", "change", "changes", "difference",
+    "differences", "variation", "variations", "increase", "increases",
+    "decrease", "decreases", "reduction", "reductions", "improvement",
+    "improvements", "development", "developments", "growth", "decline",
+    "shift", "shifts", "transition", "transitions", "transformation",
+    "transformations", "role", "roles", "level", "levels", "degree", "degrees",
+    "extent", "scope", "range", "type", "types", "form", "forms", "kind",
+    "kinds", "way", "ways", "modes", "nature", "perspective", "perspectives",
+    "view", "views", "lens", "time", "period", "periods", "stage", "stages",
+    "phase", "phases", "era", "eras", "decade", "decades", "year", "years",
+    "month", "months", "day", "days", "long", "short", "term", "terms", "run",
+    "world", "global", "international", "national", "local", "regional",
+    "urban", "rural", "cross", "domestic", "foreign", "western", "eastern",
+    "northern", "southern",
+    
+    # 5. Journal specific and publication boilerplate
+    # Words introduced by journal formatting, editorial conventions, copyright
+    # notices, metadata fragments, and abstract-template boilerplate specific
+    # to these six journals.
+    "copyright", "rights", "reserved", "license", "licensed", "licence",
+    "licenced", "attribution", "commons", "creative", "reproduced",
+    "reproduction", "permission", "permissions", "prohibited", "doi", "http",
+    "https", "www", "org", "com", "net", "edu", "vol", "volume", "issue",
+    "number", "pp", "page", "pages", "journal", "springer", "oxford",
+    "cambridge", "wiley", "elsevier", "taylor", "francis", "routledge", "sage",
+    "plos", "arxiv", "preprint", "open", "access", "publication",
+    "publications", "publish", "publisher", "publishing", "editor", "editors",
+    "editorial", "peer", "reviewed", "accepted", "submission", "submitted",
+    "revised", "revision", "correspondence", "email", "orcid", "affiliation",
+    "affiliations", "department", "university", "universities", "keywords",
+    "keyword", "jel", "classification", "palgrave", "collection", "published",
+    "cambridge.org", "doi.org", "10.1093", "s41599", "10.1057",
+    
+    # 6. Encoding artefacts and noise
+    # Tokens from PDF/HTML extraction, encoding issues, OCR, or tokenisation:
+    # Latin abbreviations, single characters, URL fragments, Greek letter
+    # tokens, ligature remnants, and other non-linguistic noise.
+    "i.e", "e.g", "et", "al", "etc", "ibid", "cf", "vs", "viz", "nb", "fig",
+    "figs", "tab", "tabs", "eq", "eqs", "pg", "n.d", "n.a", "na", "nd", "a",
+    "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p",
+    "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "oe", "ae", "fi", "ff",
+    "ffi", "fl", "ffl", "html", "pdf", "xml", "json", "url", "uri", "beta",
+    "alpha", "gamma", "delta", "sigma", "omega", "lambda", "mu", "nu", "rho",
+    "phi", "chi", "07", "eta", "kappa", "tau", "theta", "epsilon", "zeta",
+    "table", "appendix", "supplementary", "supplement", "support",
+    "supporting", "information", "available", "request",
+    
+    # 7. High-frequency function words
+    # Discourse connectives, hedging adverbs, academic filler adjectives,
+    # numbers-as-words, and filler nouns that standard lists (snowball, SMART,
+    # onix) miss but which carry no thematic signal in this corpus.
+    "alternatively", "conversely", "meanwhile", "simultaneously", "otherwise",
+    "namely", "predominantly", "chiefly", "mostly", "jointly", "collectively",
+    "respectively", "comparatively", "relatively", "apparently", "seemingly",
+    "arguably", "potentially", "possibly", "unlikely", "presumably",
+    "ostensibly", "admittedly", "importantly", "interestingly", "surprisingly",
+    "crucially", "significantly", "substantially", "considerably", "markedly",
+    "increasingly", "positively", "negatively", "directly", "indirectly",
+    "highly", "strongly", "effectively", "consistently", "robustly",
+    "empirically", "theoretically", "conceptually", "practically",
+    "systematically", "comprehensively", "rigorously", "explicitly",
+    "implicitly", "dominant", "prominent", "salient", "unprecedented",
+    "thorough", "considerable", "efficient", "successful", "increasing",
+    "rising", "expanding", "deepening", "widening", "ongoing", "continuing",
+    "persistent", "enduring", "modest", "marginal", "partial", "complex",
+    "complicated", "nuanced", "multifaceted", "multidimensional",
+    "interdisciplinary", "heterogeneous", "homogeneous", "distinct", "varied",
+    "consistent", "inconsistent", "contradictory", "complementary", "broader",
+    "deeper", "wider", "stronger", "weaker", "higher", "lower", "greater",
+    "lesser", "larger", "smaller", "one", "two", "three", "four", "five",
+    "six", "seven", "eight", "nine", "ten", "first", "second", "third",
+    "fourth", "fifth", "half", "quarter", "percent", "percentage",
+    "proportion", "share", "ratio", "rate", "insight", "insights",
+    "understandings", "knowledge", "advancement", "progress", "step", "steps",
+    "effort", "efforts", "attempt", "attempts", "need", "needs", "opportunity",
+    "opportunities", "gap", "gaps", "concern", "concerns", "issues", "debate",
+    "debates", "discussions", "attention", "lack", "absence", "presence",
+    "existence"
+  ),
+  
+  # Defining a category column  allows us to easily subset later
+  category = c(
+    # 1. Academic boilerplate verbs
+    rep("boilerplate_verb", 310),
+    # 2. Generic methodological terms
+    rep("methodological_term", 215),
+    # 3. Abstract structure boilerplate
+    rep("abstract_boilerplate", 176),
+    # 4. Generic social science concepts
+    rep("generic_social_science", 209),
+    # 5. Journal specific and publication boilerplate
+    rep("publication_boilerplate", 80),
+    # 6. Encoding artefacts and noise
+    rep("encoding_artefact", 88),
+    # 7. High-frequency function words
+    rep("domain_function_word", 147)
+  )
+)
+```
+
+#### 3.1.2 N-gram stopwords (subset for bigram/trigram pipelines)
+
+For bigram and trigram analyses, we apply just a subset of `domain_stopwords`. Single words like "social" or "people" do not provide relevant information in our current context, but form meaningful n-grams ("social media" or "Roma people"), we should thus keep them. But we do filter terms that only produce noise.
+
+```{r}
+# Subset of domain stopwords need for n-gram filtering (publication metadata,
+# abstract specific words, journal self-references, etc.). Since we defined
+# categories, we can easily choose the relevant subset.
+ngram_stopwords <- domain_stopwords |>
+  filter(category %in% c("boilerplate_verb",
+                         "abstract_boilerplate",
+                         "publication_boilerplate",
+                         "encoding_artefact"))
+```
+
+In addition, we include a filter for recent years, which appear frequently in abstracts, with no relevant meaning (often pointing to recent events or publication years). For example:
+
+```{r}
+# Print an abstract with a recent year:
+articles |>
+     filter(str_detect(abstract, "2021")) |>
+     slice(1) |>
+     pull(abstract)
+```
+
+We do not filter all numbers out, since they could be meaningful figures.
+
+```{r}
+# Recent years as noise tokens
+year_noise <- tibble(word = as.character(2015:2025),
+                     category = "year_noise")
+ngram_stopwords <- bind_rows(ngram_stopwords, year_noise)
+```
+
+#### 3.1.3 Filtered unigram corpus (shared by unigram TF-IDF and LDA)
+
+Since both the unigram TF-IDF (section 3.2.1) and the LDA (section 3.2.3) use the same tokenization and filtering, we perform it here, to avoid repetitions.
+
+```{r}
+# We start by tokenizing at the word level, keeping metadata columns
+tidy_abstracts <- articles |>
+  unnest_tokens(word, abstract, token = "words")
+
+# Then filter standard stopwords, the full set of domain-specific stopwords,
+# and recent years.
+tidy_abstracts <- tidy_abstracts |> 
+  # Standard stopwords
+  anti_join(stop_words, by = "word") |>
+  # Full domain stopwords
+  anti_join(domain_stopwords, by = "word") |>
+  # Recent years
+  filter(!word %in% as.character(2015:2025))
+
+tidy_abstracts
+```
+
+### 3.2 Analysis
+
+We will use three complementary techniques to address RQ1 and RQ2: TF-IDF to identify distinctive vocabulary by year; word frequency analysis using a custom set of AI-related words to measure the growth of AI-related terminology; and LDA for topic modelling.
+
+#### 3.2.1 Distinctive vocabulary by year (TF-IDF)
+
+We use TF-IDF to identify the most distinctive terms of each year, treating each year as a single document. We apply this at three n-gram levels.
+
+##### Unigram TF-IDF by year
+
+```{r}
+# Count how many times each word appears in each year
+words_by_year <- tidy_abstracts |>
+  count(publication_year, word, sort = TRUE)
+
+# Compute TF-IDF treating each year as a "document"
+tfidf_by_year <- words_by_year |>
+  bind_tf_idf(word, publication_year, n) |>
+  arrange(desc(tf_idf))
+
+tfidf_by_year
+```
+
+```{r}
+#| fig-width: 8
+#| fig-height: 12
+
+# Top 8 most distinctive words per year
+tfidf_by_year |>
+  group_by(publication_year) |>
+  slice_max(tf_idf, n = 8) |>
+  ungroup() |>
+  mutate(word = reorder_within(word, tf_idf, publication_year)) |>
+  ggplot(aes(tf_idf, word, fill = factor(publication_year))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ publication_year, scales = "free", ncol = 2) +
+  scale_y_reordered() +
+  labs(
+    title = "Most distinctive words per year (TF-IDF)",
+    x = "TF-IDF",
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 8)
+  )
+```
+
+Focusing on our research questions, TF-IDF reveals two main findings. First, terms related to the COVID-19 pandemic got some of the highest scores from 2020 onwards, reflecting the influence the pandemic had in social science. Secondly, "AI" enters the top 8 in 2023 (coinciding with the rise of generative AI models), and has the highest value in 2025, overtaking "covid". Outside of these, TF-IDF values are notably low, and several high-ranking terms are driven by single abstracts repeating a term, or the publishing of a thematic collection, particularly in the first few years, where we have less articles ---see, for instance, the first two context windows in appendix III---. This is an expected limitation given the relatively small size of our corpus.
+
+##### Bigram TF-IDF by year
+
+For bigrams we tokenize from the raw abstracts, separate bigrams into their component words, filter standard stopwords from each position, and reunite them before computing TF-IDF. As discussed above, we filter using a subset of the domain-specific stopwords.
+
+```{r}
+# Tokenize into bigrams from raw abstracts
+bigrams_by_year <- articles |>
+  select(id, publication_year, abstract) |>
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) |>
+  filter(!is.na(bigram)) |>
+  # Separate into two columns to filter stopwords per position
+  separate(bigram, c("word1", "word2"), sep = " ") |>
+  filter(
+    !word1 %in% stop_words$word,
+    !word2 %in% stop_words$word,
+    !word1 %in% ngram_stopwords$word,
+    !word2 %in% ngram_stopwords$word
+  ) |>
+  # Reunite into a single bigram column
+  unite(bigram, word1, word2, sep = " ") |>
+  # Count by year
+  count(publication_year, bigram, sort = TRUE)
+
+bigrams_by_year
+```
+
+```{r}
+# Compute TF-IDF on bigrams, treating each year as a "document"
+tfidf_bigrams_by_year <- bigrams_by_year |>
+  bind_tf_idf(bigram, publication_year, n) |>
+  arrange(desc(tf_idf))
+
+tfidf_bigrams_by_year
+```
+
+```{r}
+#| fig-width: 9
+#| fig-height: 12
+
+# Top 8 most distinctive bigrams per year
+tfidf_bigrams_by_year |>
+  group_by(publication_year) |>
+  slice_max(tf_idf, n = 8) |>
+  ungroup() |>
+  mutate(bigram = reorder_within(bigram, tf_idf, publication_year)) |>
+  ggplot(aes(tf_idf, bigram, fill = factor(publication_year))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ publication_year, scales = "free", ncol = 2) +
+  scale_y_reordered() +
+  labs(
+    title = "Most distinctive bigrams per year (TF-IDF)",
+    x = "TF-IDF",
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 8)
+  )
+```
+
+The bigram TF-IDF provides more easily interpretable results, and confirms our main observations from the unigram results. COVID-19 pandemic terms show the highest values. Beyond the pandemic, affective polarization enters the top 8 values in 2019, probably due to the rise of far right parties in western democracies. From 2023 onwards climate and sustainability words (particularly "carbon emissions") break into the top 8, likely indicating renewed attention to the climate crisis after the pandemic years. Regarding our RQ2, no terms directly related to AI appear, but we see indirectly related terms such as digital economy and digital transformation from 2023 to 2025.
+
+##### Trigram TF-IDF by year
+
+We perform TF-IDF on trigrams using the same workflow as with bigrams.
+
+```{r}
+# Same workflow for trigrams: tokenize, separate, filter, reunite
+trigrams_by_year <- articles |>
+  select(id, publication_year, abstract) |>
+  unnest_tokens(trigram, abstract, token = "ngrams", n = 3) |>
+  filter(!is.na(trigram)) |>
+  separate(trigram, c("word1", "word2", "word3"), sep = " ") |>
+  filter(
+    !word1 %in% stop_words$word,
+    !word2 %in% stop_words$word,
+    !word3 %in% stop_words$word,
+    !word1 %in% ngram_stopwords$word,
+    !word2 %in% ngram_stopwords$word,
+    !word3 %in% ngram_stopwords$word
+  ) |>
+  unite(trigram, word1, word2, word3, sep = " ") |>
+  count(publication_year, trigram, sort = TRUE)
+
+trigrams_by_year
+```
+
+```{r}
+# Compute TF-IDF on trigrams
+tfidf_trigrams_by_year <- trigrams_by_year |>
+  bind_tf_idf(trigram, publication_year, n) |>
+  arrange(desc(tf_idf))
+
+tfidf_trigrams_by_year
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 12
+
+# Top 8 most distinctive trigrams per year
+tfidf_trigrams_by_year |>
+  group_by(publication_year) |>
+  slice_max(tf_idf, n = 8) |>
+  ungroup() |>
+  mutate(trigram = reorder_within(trigram, tf_idf, publication_year)) |>
+  ggplot(aes(tf_idf, trigram, fill = factor(publication_year))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ publication_year, scales = "free", ncol = 2) +
+  scale_y_reordered() +
+  labs(
+    title = "Most distinctive trigrams per year (TF-IDF)",
+    x = "TF-IDF",
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 7)
+  )
+```
+
+Trigram TF-IDF reflects the same pattern. The pandemic appears as the most distinctive topic after 2020 (we see new terms, like "sars cov 2" in 2022). Climate-related terms are still among the most distinctive in the years after the pandemic, suggesting a renewed attention to the topic. Focusing on RQ2, "artificial intelligence ai" enters the top 8 in 2024 and reaches the top 4 in 2025.
+
+#### 3.2.2 AI as an emerging topic using an AI-related lexicon
+
+In this subsection we operationalise AI as a topic through a keyword lexicon built upon the works of Liu *et al.* (2021) and Ding *et al.* (2025). These papers explore bibliometric search strategies for identifying AI-related publications, and provide validated lexicons that can prove useful for our purposes. We built three lexicons from these sources: a unigram, a bigram, and a trigram lexicon.
+
+##### Building the AI lexicon
+
+We manually excluded a significant amount of n-grams from these lexicons, prioritising precision over recall. We accept that our lexicon will capture fewer AI-related abstracts, but we have higher confidence that each match is capturing a genuine AI-related article. We excluded: terms (like "random forest") that refer to statistical methods classically used in social science; highly technical terms that are unlikely to appear in our corpus ---to keep the lexicon manageable---; and ambiguous terms. Liu et al. (2021, p. 3171) exclude "AI" for being an ambiguous abbreviation that overlaps with other terms like "Active Ingredient, Avian Influenza, Aromatase Inhibitor and Associative Ionization", this overlap is not a problem in a social science corpus, we thus keep "AI"---.
+
+We added n-grams to capture named generative AI models absent from both sources ---Gemini, Claude, Llama, etc.---. These terms by themselves could lead to ambiguity ---the zodiac sign, Claude Lévi-Strauss, etc.---, including the version number in bigrams solves this ambiguity---.
+
+```{r}
+# AI unigram lexicon
+ai_lexicon_unigrams <- c(
+  # Liu et al. (2021)
+  "autoencoder",
+  "perceptron",
+  "neurocomputing",
+  # Ding et al. (2025)
+  "chatgpt",
+  "llm",
+  # Custom
+  "ai",
+  "deepseek",
+  "openai"
+)
+
+# AI bigram lexicon
+ai_lexicon_bigrams <- c(
+  # Liu et al. (2021)
+  "artificial intelligence",
+  "neural network",
+  "machine learning",
+  "deep learning",
+  "reinforcement learning",
+  "learning algorithm",
+  "backpropagation learning",
+  "backpropagation algorithm",
+  "machine intelligence",
+  "computational intelligence",
+  "neural model",
+  "deep network",
+  # Ding et al. (2025)
+  "generative ai",
+  "language model",
+  "pretrained transformer",
+  "ai-generated content",
+  "openai gpt",
+  # Custom
+  "claude sonnet",
+  "claude opus",
+  "claude haiku",
+  "google gemini",
+  "gemini pro",
+  "gemini ultra",
+  "microsoft copilot",
+  "github copilot",
+  "mistral ai",
+  "meta llama",
+  "llama 2",
+  "llama 3",
+  "stable diffusion",
+  "gpt 5",
+  "gpt 4",
+  "gpt 3",
+  "gpt 2",
+  "gpt 1",
+  "dall e",
+  # Custom
+  "agentic ai"
+)
+
+# AI trigram lexicon
+ai_lexicon_trigrams <- c(
+  # Ding et al. (2025)
+  "large language model",
+  "generative language model",
+  "generative large language",
+  "generative pretrained transformer",
+  "generative artificial intelligence",
+  "artificial intelligence generated",
+  "openai large language",
+  # Custom
+  "openai language model",
+  "ai language model",
+  "ai generated content"
+)
+```
+
+##### Tokenizing abstracts at each n-gram level
+
+We tokenize the abstracts and match them against the corresponding lexicons.
+
+```{r}
+# Tokenize abstracts at the three n-gram levels and match:
+
+# Source abstracts. We start from articles each time since n-gram tokenization
+# needs the original text
+abstracts_base <- articles |>
+  select(id, publication_year, abstract)
+
+# Unigram matches: tokenize at word level and match against unigram lexicon
+ai_hits_unigrams <- abstracts_base |>
+  unnest_tokens(word, abstract, token = "words") |>
+  filter(word %in% ai_lexicon_unigrams) |>
+  rename(term = word) |>
+  mutate(ngram_level = "unigram")
+
+# Bigram matches: tokenize at bigram level and match against bigram lexicon
+ai_hits_bigrams <- abstracts_base |>
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) |>
+  filter(!is.na(bigram)) |>
+  filter(bigram %in% ai_lexicon_bigrams) |>
+  rename(term = bigram) |>
+  mutate(ngram_level = "bigram")
+
+# Trigram matches: tokenize at trigram level and match against trigram lexicon
+ai_hits_trigrams <- abstracts_base |>
+  unnest_tokens(trigram, abstract, token = "ngrams", n = 3) |>
+  filter(!is.na(trigram)) |>
+  filter(trigram %in% ai_lexicon_trigrams) |>
+  rename(term = trigram) |>
+  mutate(ngram_level = "trigram")
+
+# Combine all matches into a single dataframe
+ai_hits <- bind_rows(ai_hits_unigrams, ai_hits_bigrams, ai_hits_trigrams)
+ai_hits
+```
+
+##### AI terms frequency over time
+
+```{r}
+# Count unique articles containing at least one AI related term per year
+ai_articles_by_year <- ai_hits |>
+  distinct(id, publication_year) |>
+  count(publication_year, name = "articles_with_ai")
+
+# Total number of abstracts per year
+abstracts_by_year <- articles |>
+  filter(!is.na(abstract),
+         publication_year >= 2016,
+         publication_year <= 2025) |>
+  count(publication_year, name = "total_abstracts")
+
+# Compute proportion
+ai_proportion <- ai_articles_by_year |>
+  left_join(abstracts_by_year, by = "publication_year") |>
+  mutate(proportion_ai_articles = articles_with_ai / total_abstracts)
+
+# Find the maximum proportion to place the annotation dynamically
+max_prop <- max(ai_proportion$proportion_ai_articles, na.rm = TRUE)
+
+ggplot(ai_proportion, aes(x = publication_year, y = proportion_ai_articles)) +
+  # Use geom_col for a bar plot instead of geom_line
+  geom_col(fill = "#2C3E6B", width = 0.7) +
+  scale_x_continuous(breaks = 2016:2025) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) + 
+  labs(
+    title = 
+      "AI-related terminology in social science abstracts",
+    subtitle = 
+      "Proportion of articles containing at least one AI term, by year",
+    x = 
+      "Publication year",
+    y = 
+      "Proportion of articles (%)"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title         = element_text(size = 14, face = "bold",
+                                      color = "#1a1a2e"),
+    plot.subtitle      = element_text(size = 10, color = "#4a4a6a"),
+    axis.text          = element_text(color = "#4a4a6a"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank()
+  )
+```
+
+The presence of AI-related terms was insignificant before 2019, but it grew quickly, reaching 4% in 2022 ---ChatGPT's public release---, and surpassing 10% in 2025. Since our lexicon prioritizes precision over recall, these are probably underestimates. But the trend is clear: attention to AI has greatly increased following the rise of generative AI tools. Let's explore which terms are driving the trend.
+
+```{r}
+#| fig-width: 6
+#| fig-height: 8
+# Top AI terms per year by proportion of articles
+ai_hits |>
+  # Keep only unique combinations of article, year, and term
+  distinct(id, publication_year, term) |>
+  # Count the number of articles per term per year
+  count(publication_year, term, name = "article_count") |>
+  # Join total abstracts per year to compute proportion
+  left_join(abstracts_by_year, by = "publication_year") |>
+  mutate(proportion = article_count / total_abstracts) |>
+  # Group by publication year and get most frequent terms
+  group_by(publication_year) |>
+  slice_max(proportion, n = 5, with_ties = FALSE) |>
+  # Assign a rank (1 to 5) to the top terms
+  mutate(rank = row_number()) |>
+  ungroup() |>
+  # Add 0 value to missing ranks so every year has exactly ranks 1 through 5
+  # and all bars have the same width
+  complete(publication_year = 2016:max(publication_year),
+           rank = 1:5, fill = list(proportion = 0)) |>
+  # Create invisible unique names for the blank bars using spaces
+  mutate(
+    term = ifelse(is.na(term), strrep(" ", rank), term),
+    term = reorder_within(term, -rank, publication_year)
+  ) |>
+  
+  # Plot it
+  ggplot(aes(x = proportion, y = term, fill = factor(publication_year))) +
+  geom_col(show.legend = FALSE, fill = "#2C3E6B") +
+  facet_wrap(~ publication_year, scales = "free", ncol = 2) +
+  scale_x_continuous(
+    labels = percent_format(accuracy = 0.1),
+    expand = expansion(mult = c(0, 0.1)),
+    n.breaks = 3
+  ) +
+  scale_y_reordered() +
+  labs(
+    title = "Top AI-related terms per year",
+    subtitle = "Proportion of articles containing each term",
+    x = NULL,
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text         = element_text(face = "bold", size = 10,
+                                      color = "#1a1a2e"),
+    axis.text.y        = element_text(size = 9, color = "#4a4a6a"),
+    axis.text.x        = element_text(color = "#4a4a6a"),
+    panel.grid.major.y = element_blank()
+  )
+```
+
+Before 2020 fewer than five abstracts match any lexicon term; from 2020 onwards, *artificial intelligence* and its abbreviation are the main drivers; from 2023, *chatgpt* and *generative ai* appear at the same time as mentions to AI greatly increase, suggesting the rise of generative AI influenced academic interests in the social sciences. Since *"ai"* is the main driver, we explore it by itself:
+
+```{r}
+# Filter and count for just the term "ai"
+ai_hits |>
+  filter(term == "ai") |>
+  distinct(id, publication_year) |>
+  count(publication_year, name = "article_count") |>
+  complete(publication_year = 2016:max(publication_year),
+           fill = list(article_count = 0)) |>
+  # Join total abstracts per year to compute proportion
+  left_join(abstracts_by_year, by = "publication_year") |>
+  mutate(proportion = article_count / total_abstracts) |>
+  
+  # Plot it
+  ggplot(aes(x = publication_year, y = proportion)) +
+  geom_line(color = "#2C3E6B", linewidth = 1) +
+  geom_point(color = "#2C3E6B", size = 2) +
+  scale_x_continuous(breaks = function(x) seq(ceiling(min(x)),
+                                              floor(max(x)),
+                                              by = 1)) +
+  scale_y_continuous(labels = percent_format(accuracy = 0.1)) +
+  labs(
+    title = "Trend of the term 'ai' over time",
+    subtitle = "Proportion of articles containing the term",
+    x = "Publication Year",
+    y = "Proportion of articles (%)"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    axis.text.y        = element_text(size = 9, color = "#4a4a6a"),
+    axis.text.x        = element_text(color = "#4a4a6a"),
+    panel.grid.minor.x = element_blank()
+  )
+```
+
+Examining "AI" in isolation, the pattern becomes even clearer: its usage explodes after 2022, coinciding with the rise of generative AI.
+
+#### 3.2.3 Topic modelling (LDA)
+
+We move from individual words to latent topics, using LDA to discover the main topics in our corpus, and examine how their weights have evolved over our study period.
+
+##### Preparing the Document-Term Matrix
+
+```{r}
+# We create the Document-Term Matrix (DTM) required by LDA.
+# We cast our tidy data (already filtered by standard and domain stopwords)
+# to DTM format using the article id as the document identifier.
+abstracts_dtm <- tidy_abstracts |>
+  count(id, word) |>
+  cast_dtm(id, word, n)
+
+abstracts_dtm
+
+# Manually calculate sparsity to see the exact value:
+cat("Precise sparsity   :", 1 - (464617/358239443), "%")
+```
+
+We get a DTM with 9482 documents and 38566 terms, sparsity close to 100%, indicating very varied vocabulary in our abstracts.
+
+##### LDA model with k=5
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model5 <- LDA(abstracts_dtm, k = 5, control = list(seed = 123))
+
+# Extract per-topic-per-word probabilities (beta)
+topics_beta5 <- tidy(lda_model5, matrix = "beta")
+
+# Top 10 highest-probability words per topic
+top_terms5 <- topics_beta5 |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+# Visualize top terms per topic
+top_terms5 |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = "Top 10 terms per topic (LDA, k = 5)",
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+
+We see some patterns, but topics are broad: topic 1 groups economic and sustainability terms, topic 2 politics and elections, topic 3 gender and family, and topic 4 is about COVID-19 and health. Topic 5 mixes education, AI, media, and language. In all topics, but especially 5, it seems like distinct topics are being mixed, we thus try a higher k.
+
+##### LDA model with k=6
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model6 <- LDA(abstracts_dtm, k = 6, control = list(seed = 123))
+
+# Extract per-topic-per-word probabilities (beta)
+topics_beta6 <- tidy(lda_model6, matrix = "beta")
+
+# Top 10 highest-probability words per topic
+top_terms6 <- topics_beta6 |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+# Visualize top terms per topic
+top_terms6 |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = "Top 10 terms per topic (LDA, k = 6)",
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+
+A new media and mental health topic appears, improving interpretability. However, the remaining topics still show significant overlaps, particularly around education, we try a higher k.
+
+##### LDA model with k=7
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model7 <- LDA(abstracts_dtm, k = 7, control = list(seed = 123))
+
+# Extract per-topic-per-word probabilities (beta)
+topics_beta7 <- tidy(lda_model7, matrix = "beta")
+
+# Top 10 highest-probability words per topic
+top_terms7 <- topics_beta7 |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+# Visualize top terms per topic
+top_terms7 |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = "Top 10 terms per topic (LDA, k = 7)",
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+
+Topics reach a pretty clear configuration: economic sustainability (topic 1), politics and elections (2), cultural discourse and identity (3), health and pandemic (4), media and mental health (5), AI and education (6), and gender inequality (7). AI is grouped with education and learning, it does not have a topic by itself.
+
+##### LDA model with k=8
+
+```{r}
+#| fig-width: 9
+#| fig-height: 8
+
+# Fit the LDA model. We set a seed for reproducibility.
+lda_model8 <- LDA(abstracts_dtm, k = 8, control = list(seed = 123))
+
+# Extract per-topic-per-word probabilities (beta)
+topics_beta8 <- tidy(lda_model8, matrix = "beta")
+
+# Top 10 highest-probability words per topic
+top_terms8 <- topics_beta8 |>
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+
+# Visualize top terms per topic
+top_terms8 |>
+  mutate(term = reorder_within(term, beta, topic)) |>
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(
+    title = "Top 10 terms per topic (LDA, k = 8)",
+    x = expression(beta),
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    strip.text  = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+
+Interpretability does not improve, the new topic 4 is hard to interpret, and overlaps with topic 1 in the papers on climate. No clear improvement over k = 7, which we will choose to analyze the evolution of topics over time.
+
+##### How do topics evolve year by year?
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+
+# Extract per-document-per-topic probabilities (gamma)
+topics_gamma7 <- tidy(lda_model7, matrix = "gamma")
+
+# Join gamma with article metadata and average by year
+topics_by_year7 <- topics_gamma7 |>
+  left_join(
+    articles |>
+      select(id, publication_year) |>
+      mutate(id = as.character(id)),
+    by = c("document" = "id")
+  ) |>
+  group_by(topic, publication_year) |>
+  summarise(mean_gamma = mean(gamma), .groups = "drop")
+
+# First point of each topic for the label layer (all except topic 1)
+first_points <- topics_by_year7 |>
+  group_by(topic) |>
+  slice_min(publication_year, n = 1) |>
+  filter(topic != 1)
+
+# Last point of topic 1 for the label layer
+last_point_t1 <- topics_by_year7 |>
+  filter(topic == 1) |>
+  slice_max(publication_year, n = 1)
+
+# Plot: topic prevalence by year (line plot)
+ggplot(topics_by_year7,
+       aes(x = publication_year, y = mean_gamma, color = factor(topic))) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  # Larger point at first year for topics 2-7
+  geom_point(data = first_points, size = 7) +
+  # Topic number inside the first point (topics 2-7)
+  geom_text(data = first_points, aes(label = topic),
+            color = "white", size = 3, fontface = "bold", family = "serif") +
+  # Larger point at last year for topic 1
+  geom_point(data = last_point_t1, size = 7) +
+  # Topic number inside the last point (topic 1)
+  geom_text(data = last_point_t1, aes(label = topic),
+            color = "white", size = 3, fontface = "bold", family = "serif") +
+  # Reference lines at key events
+  geom_vline(xintercept = 2019.5, linetype = "dashed",
+             color = "grey50", linewidth = 0.4) +
+  geom_vline(xintercept = 2022.5, linetype = "dashed",
+             color = "grey50", linewidth = 0.4) +
+  annotate("text", x = 2017.5, y = Inf, label = "Pre-pandemic",
+           vjust = 1.5, size = 3, color = "grey40", family = "serif") +
+  annotate("text", x = 2021,   y = Inf, label = "Pandemic",
+           vjust = 1.5, size = 3, color = "grey40", family = "serif") +
+  annotate("text", x = 2024,   y = Inf, label = "Rise of generative AI",
+           vjust = 1.5, size = 3, color = "grey40", family = "serif") +
+  scale_x_continuous(breaks = 2016:2025) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    title =
+      "Topic prevalence over time (LDA, k = 7)",
+    subtitle =
+      "Average γ per topic per year — dashed lines mark key inflection points",
+    x =
+      "Publication year",
+    y =
+      "Average topic proportion (γ)"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title      = element_text(size = 14, face = "bold"),
+    plot.subtitle   = element_text(size = 10, color = "#4a4a6a"),
+    legend.position = "none"
+  )
+```
+
+We observe a clear pattern: topics follow a relatively stable trend throughout the decade. However, inflection points appear in relation to the main events previously identified (the pandemic and, particularly, the rise of generative AI). While the topic including AI (topic 6) does not seem to shift at 2022, a general pattern shift is observable across most topics after that year, suggesting the rise of generative AI had an effect, at least as a catalyst for existing trends. We check the robustness of this finding analyzing the same graph on all the models we fitted.
+
+```{r}
+# Named list to identify models in the plot
+model_list <- list(
+  "k = 5" = lda_model5,
+  "k = 6" = lda_model6,
+  "k = 7" = lda_model7,
+  "k = 8" = lda_model8
+)
+
+# Extract gamma for all models and bind them into one dataframe
+# .id = "k_val" creates a column with the names from the list above
+all_gamma <- map_dfr(model_list, ~tidy(.x, matrix = "gamma"), .id = "k_val")
+
+# Join with metadata and average by year and k_val
+all_topics_by_year <- all_gamma |>
+  left_join(
+    articles |>
+      select(id, publication_year) |>
+      mutate(id = as.character(id)),
+    by = c("document" = "id")
+  ) |>
+  group_by(k_val, topic, publication_year) |>
+  summarise(mean_gamma = mean(gamma), .groups = "drop")
+
+# Create the faceted plot
+ggplot(all_topics_by_year, 
+       aes(x = publication_year, y = mean_gamma, color = factor(topic))) +
+  geom_line(linewidth = 0.8, alpha = 0.8) +
+  geom_point(size = 1.2) +
+  # Add reference lines (Annotations removed for clarity in facets)
+  geom_vline(xintercept = c(2019.5, 2022.5), linetype = "dashed", 
+             color = "grey70", linewidth = 0.3) +
+  # Faceting: 2 columns, 2 rows. free_y is critical for comparing trends.
+  facet_wrap(~ k_val, ncol = 2, scales = "free_y") + 
+  scale_x_continuous(breaks = seq(2016, 2024, by = 2)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  labs(
+    title = "Topic Prevalence Stability across different values of k",
+    x = "Publication Year",
+    y = "Mean Topic Proportion (γ)",
+    color = "Topic #"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position = "bottom",
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold"),
+    panel.spacing = unit(1.5, "lines")
+  )
+```
+
+The shift coinciding with the rise of generative AI is consistent across all values of k.
+
+## Section 4. Social science journals' writing style and the rise of generative AI
+
+As discussed, papers on AI have increased exponentially since ChatGPT’s launch in 2022. At the same time, the use of AI to help scientists in their research has exploded: 28 % of scientists use AI to write their manuscripts, according to a survey of Nature (Kwon, 2025). That figure is likely to have increased, since there AI providers have multiplied and its use has been democratized.
+
+When writing text, it appears that chatbots have a specific “tone”, which is previously designed (for a study of how a chatbot’s “voice” is designed, see Derner et al., 2026). This communication style, which varies from chatbot to chatbot, will systematically push some words or grammatical forms more than others (Rudnicka, 2025).
+
+From the beginning of the chatbot era, linguists have pointed out that there are certain words that ChatGPT favors. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak, since it’s estimated that more than half of today’s text in the internet is AI generated (Morrone, 2025). Some studies have shown that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We’ll look into our corpus to see if there is an increase of LLM-favored words.
+
+```{r}
+# Plot top 20 most frequent words in the corpus
+tidy_abstracts |>
+  count(word, sort = TRUE) |>
+  slice_max(n, n = 20) |>
+  ggplot(aes(x = n, y = reorder(word, n))) +
+  geom_col(fill = "#2C3E6B", width = 0.7) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.05))) +
+  labs(
+    title = "Top 20 most used words in the corpus",
+    subtitle = "Absolute frequency of the most common terms",
+    x = "Count",
+    y = "Word"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title         = element_text(size = 14, face = "bold",
+                                      color = "#1a1a2e"),
+    plot.subtitle      = element_text(size = 10, color = "#4a4a6a"),
+    axis.text.y        = element_text(color = "#4a4a6a",
+                                      margin = margin(r = 0)),
+    axis.text.x        = element_text(color = "#4a4a6a"),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+We’ll use the words that Kousha and Thelwall used in their paper, which are “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These are terms that have the support of other researchers in the area as well. To them, we’ll add “core”, a word favored by the newer versions of ChatGPT (Merrill et al., 2025).
+
+```{r}
+# LLM signature words, based on Kousha & Thelwall (2025) and control words
+llm_words <- tibble(word = c(
+  "underscore", "underscores", "underscored", "underscoring",
+  "delve", "delves", "delved", "delving",
+  "showcase", "showcases", "showcased", "showcasing",
+  "unveil", "unveils", "unveiled", "unveiling",
+  "intricate", "intricates", "intricated", "intricating",
+  "meticulous", "meticulously",
+  "pivotal",
+  "heighten", "heightens", "heightened", "heightening",
+  "nuance", "nuances", "nuanced",
+  "bolster", "bolsters", "bolstered", "bolstering",
+  "foster", "fosters", "fostered", "fostering",
+  "interplay", "interplays", "interplayed", "interplaying",
+# Added to account for 2025 findings
+  "core"
+))
+
+control_words <- tibble(word = c("research", "findings", "policy", "support"))
+```
+
+We add 4 control terms to compare them to the AI words. These terms are taken out of the most frequently used words in our corpus. We eventually decided on “research”, “analysis”, “policy” and “support”. We also controlled for the fact that there are more papers after 2023 in our corpus by dividing the word frequency by the total papers of that year.
+
+```{r}
+# Tokenize raw abstracts and count occurrences of each LLM signature word
+# (pattern 1) across the full corpus
+tidy_abstracts_raw <- articles |>
+  select(id, publication_year, source_display_name, abstract) |>
+  unnest_tokens(word, abstract)
+
+pattern_1 <- paste(llm_words$word, collapse = "|")
+
+llm_words_freq <- tidy_abstracts_raw |>
+  filter(str_detect(word, regex(pattern_1, ignore_case = TRUE))) |> 
+  count(word, sort = TRUE)
+
+```
+
+```{r}
+# Plot top 20 most frequent LLM signature words in the corpus
+llm_words_freq |> 
+  filter(!word %in% c("analysis", "findings", "policy",
+                      "support", "policymakers")) |>
+  slice_max(n, n = 20) |> # Deterministic extraction replaces head(20)
+  ggplot(aes(x = n, y = reorder(word, n))) +
+  geom_col(fill = "#2C3E6B", width = 0.7) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.05))) +
+  labs(
+    title = "Frequency of AI signature words in abstracts",
+    subtitle ="Top 20 terms, excluding generic policy and analysis vocabulary",
+    x = "Count",
+    y = "Word"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title         = element_text(size = 14, face = "bold",
+                                      color = "#1a1a2e"),
+    plot.subtitle      = element_text(size = 10, color = "#4a4a6a"), 
+    axis.text.y        = element_text(color = "#4a4a6a",
+                                      margin = margin(r = 0)),
+    axis.text.x        = element_text(color = "#4a4a6a"),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+```{r}
+# Select the top 10 most frequent LLM words and compute yearly frequency
+# as a proportion of total papers, for both LLM and control words
+top10_words_clean <- llm_words_freq |>
+  filter(!word %in% control_words$word) |>
+  slice_max(n, n = 10) |>
+  pull(word)
+
+papers_per_year <- tidy_abstracts_raw |>
+  distinct(id, publication_year) |>
+  count(publication_year, name = "total_papers")
+
+
+
+# Plot trend over time for LLM words (blue) and control words (gray)
+plot_data <- tidy_abstracts_raw |>
+  filter(word %in% c(top10_words_clean, control_words$word)) |>
+  count(word, publication_year) |>
+  left_join(papers_per_year, by = "publication_year") |>
+  mutate(pct = n / total_papers * 100)
+
+shared_theme <- theme_minimal(base_family = "serif") +
+  theme(
+    strip.text         = element_text(face = "bold", size = 9,
+                                      color = "#1a1a2e"),
+    axis.text.x        = element_text(size = 7, color = "#4a4a6a"),
+    axis.text.y        = element_text(size = 7, color = "#4a4a6a"),
+    axis.title         = element_text(size = 9, color = "#4a4a6a"),
+    panel.grid.minor   = element_blank(),
+    panel.grid.major   = element_line(color = "#e8e8f0", linewidth = 0.4),
+    plot.title         = element_text(size = 10, face = "bold",
+                                      color = "#1a1a2e"),
+    plot.background    = element_rect(fill = "white", color = NA)
+  )
+
+p_llm <- plot_data |>
+  filter(word %in% top10_words_clean) |>
+  ggplot(aes(x = publication_year, y = pct)) +
+  geom_line(color = "#2C3E6B", linewidth = 0.4) +
+  geom_point(color = "#2C3E6B", size = 0.6) +
+  facet_wrap(~ word, scales = "free_y", ncol = 2) +
+  scale_x_continuous(breaks = seq(2016, 2025, by = 3)) +
+  labs(title = "Top 10 LLM Words", x = NULL, y = "% of Papers") +
+  shared_theme
+
+p_control <- plot_data |>
+  filter(word %in% control_words$word) |>
+  ggplot(aes(x = publication_year, y = pct)) +
+  geom_line(color = "#7F8C8D", linewidth = 0.6) +
+  geom_point(color = "#7F8C8D", size = 1) +
+  facet_wrap(~ word, scales = "free_y", ncol = 1) +
+  scale_x_continuous(breaks = seq(2016, 2025, by = 3)) +
+  labs(title = "Control Words", x = NULL, y = "% of Papers") +
+  shared_theme
+
+p_control | p_llm
+```
+
+Our top 10 most frequent AI-words have a distribution that goes exponentially higher after 2023, while our control words either were going up even before AI chatbots or have different patterns, such as "support". "Underscore", "score", "pivotal" and "foster" become more frequent after the launch of ChatGPT. "Core" was at its lowest just before ChatGPT came out, and then started going up in recent years, supporting other's findings.
+
+The word “delve", which was considered one of the words that the OpenAI favored the most, also follows the same trend, but with a twist. After the developers noticed the excessive use of the word, they tweaked the model so that it appears less. This is also shown in our corpus, which strongly suggests that AI may be used systematically for abstracts, since not only do AI-words appear, but also AI developer decisions.
+
+```{r}
+# Plot yearly frequency of "delve" as a proportion of total papers
+papers_per_year <- tidy_abstracts_raw |>
+  distinct(id, publication_year) |>
+  count(publication_year, name = "total_papers")
+
+tidy_abstracts_raw |>
+  filter(word == "delve") |>
+  count(publication_year) |>
+  left_join(papers_per_year, by = "publication_year") |>
+  mutate(pct = n / total_papers * 100) |>
+  ggplot(aes(x = publication_year, y = pct)) +
+  geom_line(color = "#2C3E6B", linewidth = 0.7) +
+  geom_point(color = "#2C3E6B", size = 1.3) +
+  scale_x_continuous(breaks = seq(2016, 2025, by = 1)) +
+  labs(
+    title = 'Distribution of "delve" by year',
+    x = NULL,
+    y = "% of Papers"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title       = element_text(size = 12, face = "bold",
+                                    color = "#1a1a2e"),
+    axis.text.x      = element_text(size = 7, color = "#4a4a6a"),
+    axis.text.y      = element_text(size = 7, color = "#4a4a6a"),
+    axis.title       = element_text(size = 9, color = "#4a4a6a"),
+    plot.background  = element_rect(fill = "white", color = NA)
+  )
+```
+
+There are 1445 out of 5843 of total papers published after 2022 have used our AI-words in the corpus. This is 24.73 % of the published articles after the AI boom.
+
+```{r}
+articles_with_words <- tidy_abstracts_raw |>
+  filter(word %in% llm_words$word, publication_year > 2022) |>
+  distinct(id) |>
+  left_join(
+    articles |> select(id, title, publication_year, source_display_name, doi),
+    by = "id"
+  ) |>
+  count()
+articles_with_words
+
+after_ai_papers <- 
+  articles |> filter(publication_year > 2022) |> count()
+
+articles_with_words/after_ai_papers * 100
+```
+
+This doesn’t prove that a given abstract has been written by AI. This can’t be even proven really, neither if we used an AI detector, because they aren't always reliable (Erol et al., 2025). Nevertheless, We’ll pass an AI detector to a sample of 10 of the flagged abstracts to see if it was written by AI, using the API of Sapling, an AI detector.
+
+```{r}
+#| fig-width: 9
+#| fig-height: 3
+
+# We pass a sample of 10 abstracts flagged as containing LLM words to the
+# Sapling AI detector API, which returns a score between 0 and 1 indicating
+# the probability that the text was AI-generated.
+
+# Pre-computed results (obtained on March 31st, 2026):
+sapling_results <- readRDS("data/sapling_results.RDS")
+
+# If you wish to reproduce this result, create a free account at
+# https://sapling.ai to get an API key, then uncomment the code below:
+
+# api_key <- "YOUR_API_KEY_HERE"
+# set.seed(4823)
+# sample_ids <- tidy_abstracts_raw |>
+#   filter(word %in% llm_words$word, publication_year > 2022) |>
+#   distinct(id) |>
+#   slice_sample(n = 10) |>
+#   pull(id)
+# sample_abstracts <- articles |>
+#   filter(id %in% sample_ids) |>
+#   select(id, title, abstract)
+# sapling_results <- sample_abstracts |>
+#   rowwise() |>
+#   mutate(
+#     response = list(
+#       request("https://api.sapling.ai/api/v1/aidetect") |>
+#         req_body_json(list(key = api_key, text = abstract)) |>
+#         req_perform() |>
+#         resp_body_json()
+#     ),
+#     ai_score = response$score
+#   ) |>
+#   ungroup() |>
+#   select(id, title, ai_score)
+
+# Plot AI detection scores as a lollipop chart, sorted by score
+sapling_results |>
+  arrange(ai_score) |>
+  mutate(abstract_n = fct_inorder(paste0("Abstract ", row_number()))) |>
+  ggplot(aes(x = ai_score, y = abstract_n)) +
+  geom_segment(aes(x = 0, xend = ai_score, yend = abstract_n),
+               color = "#e8e8f0", linewidth = 0.8) +
+  geom_point(color = "#2C3E6B", size = 2.5) +
+  geom_vline(xintercept = 0.5, linetype = "dashed",
+             color = "#7F8C8D", linewidth = 0.4) +
+  scale_x_continuous(limits = c(0, 1),
+                     labels = scales::percent_format(accuracy = 1)) +
+  labs(
+   title = "AI detection scores for sampled abstracts",
+   subtitle =
+   "Scores above 0.5 suggest likely AI-assisted writing (Sapling AI detector)",
+   x ="AI score",
+   y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title    = element_text(size = 12, face = "bold", color = "#1a1a2e"),
+    plot.subtitle = element_text(size = 9, color = "#4a4a6a"),
+    axis.text.x   = element_text(size = 7, color = "#4a4a6a"),
+    axis.text.y   = element_text(size = 7, color = "#4a4a6a"),
+    panel.grid.minor  = element_blank(),
+    panel.grid.major  = element_line(color = "#e8e8f0", linewidth = 0.4),
+    plot.background   = element_rect(fill = "white", color = NA)
+  )
+```
+
+As we can see, 8 out of 10 have nearly 100% ai_score, which means that they most probably were at least partially written with AI help. Again, this doesn't prove AI wrote it, but it points towards how big of an impact it has had in abstract writing styles, even in highly ranked indexed journals.
+
+## Section 5. Sentiment towards AI in social science journals
+
+Our fourth research question looks at how sentiments towards AI have changed during the period studied. The main **limitation** here is that we cannot guarantee the sentiment is generated by evaluations directed specifically at AI itself, it may be influenced by words part of the research context ---for instance, "discrimination"---. We acknowledge this as a limitation of our project.
+
+To tackle this limitation, the analysis has been designed sequentially: first, sentiment analysis is conducted on the full abstracts that mention AI-related terms. Secondly, only sentences that contain explicit AI terms are used. Third, we select only those sentences that have bigrams/trigrams/fourgrams explicitly addressing the effects or consequences of AI, thus undoubtedly making AI the focus of interest in that sentence ---and not just a simple mention---.
+
+In addition, we acknowledge the difficulty of analyzing sentiment in abstracts of scientific texts, which are characterized by the neutrality of the vocabulary used. This is reflected in the exclusion of some abstracts and sentences (across all three levels of analysis) because none of their words appear in the sentiment lexicons used, Bing and AFINN ---although their omission may capture limitations of lexicon-based sentiment analysis---.
+
+### 5.1 Set-up for sentiment analysis
+
+We need to define the abstracts that will be analyzed. We subset the corpus to abstracts that included at least one AI-related n-gram ---we use the previously created `ai_hits`---.
+
+```{r}
+# Creating the sentiment analysis subcorpus, selecting only the abstracts that contain the n-grams in ai_hits 
+ai_abstracts <- ai_hits |>
+  distinct(id) |>
+  inner_join(abstracts_base, by = "id")
+ai_abstracts
+```
+
+Abstracts with no matches in the sentiment lexicons are excluded from the sentiment computing step. In both cases ---Bing and AFINN---, 2 abstracts are excluded.
+
+We modified the Bing lexicon removing the word "intelligence", which we realized was contributing disproportionately to positive sentiment ---unsurprisingly, we are talking about "artificial intelligence"---.
+
+```{r, warning = FALSE}
+# Remove "intelligence" from bing lexicon
+bing_lexicon <- get_sentiments("bing") |>
+  filter(word != "intelligence") 
+
+# Total of AI-related abstracts: 529 
+ai_abstracts |> 
+  summarise(n_ai_abstracts = n_distinct(id))
+
+# Abstracts that have at least one word in the lexicon Bing: 527 
+ai_abstracts |>
+  unnest_tokens(word, abstract) |>
+  inner_join(bing_lexicon, by = "word") |>
+  summarise(n_scored_abstracts = n_distinct(id))
+
+# Abstracts that have at least one word in the lexicon Bing AFINN: 527 
+ai_abstracts |>
+  unnest_tokens(word, abstract) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  summarise(n_scored_abstracts = n_distinct(id))
+```
+
+Since both lexicons are negatively biased, this could influence the direction of the sentiment results. For this reason, all analyses are performed using both lexicons, which serves as a robustness check.
+
+```{r}
+# Calculating the number of times that a sentiment or a value appears in each
+# lexicon > negatively biased
+get_sentiments("bing") |>
+  count(sentiment)
+
+get_sentiments("afinn") |>
+  count(value)
+```
+
+### 5.2 General sentiment in AI-related abstracts over time
+
+This is the first approach aims to estimate the general sentiment in abstracts that mention AI-related terms.
+
+The methodological choice was to calculate a sentiment score per abstract, and then obtain the annual value as the average sentiment score of the articles published in a specific year. This ensures that abstracts remain the unit of analysis, each abstract having the same weight. We use `net_sentiment_norm` for Bing (tells us if the sentiment balance is more positive or negative, ranges from −1 to 1) and `afinn_mean` for AFINN (tells us how positive or negative the matched words are on average and is normalized, thus ranges from −1 to 1). This is appropriate for our research since the goal is to get a sentiment measure comparable across abstracts that does not depend on how many sentiment words each abstract contains.
+
+The subsequent analysis must be interpreted taking into account the unbalanced nature of our dataset, can affect the result of any sentiment metric.
+
+```{r, warning=FALSE}
+# In this chunk we create two tibbles, one per lexicon, that contain the id,
+# the publication year and the sentiment variables related to each lexicon.
+
+# Bing
+# We compute the number of positive and negative words, the net
+# sentiment (positive - negative) and the total sentiment words (positive +
+# negative). With these last two values we obtain the variable of interest
+# net_sentiment_norm (net sentiment / total sentiment words).
+bing_abstract_sentiment <- ai_abstracts |>
+  unnest_tokens(word, abstract) |>
+  inner_join(bing_lexicon, by = "word") |>
+  count(id, publication_year, sentiment) |>
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |>
+  mutate(
+    net_sentiment = positive - negative,
+    total_sentiment_words = positive + negative,
+    net_sentiment_norm = if_else(
+      total_sentiment_words > 0,
+      (positive - negative) / total_sentiment_words,
+      NA_real_))
+
+bing_abstract_sentiment
+
+# AFINN
+# In the AFINN tibble we computed the afinn sum and the number of
+# sentiment words, and with these two values we obtain the variable of interest
+# afinn_mean.  
+afinn_abstract_sentiment <- ai_abstracts |>
+  unnest_tokens(word, abstract) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  group_by(id, publication_year) |>
+  summarise(
+    afinn_sum = sum(value, na.rm = TRUE),
+    afinn_mean = mean(value, na.rm = TRUE),
+    n_sentiment_words = n(),
+    .groups = "drop")
+
+afinn_abstract_sentiment
+```
+
+```{r}
+# Combining both lexicons into one single tibble 
+bing_scores <- bing_abstract_sentiment |>
+  transmute(
+    id,
+    publication_year,
+    lexicon = "Bing",
+    sentiment_score = net_sentiment_norm)
+
+afinn_scores <- afinn_abstract_sentiment |>
+  transmute(
+    id,
+    publication_year,
+    lexicon = "AFINN",
+    sentiment_score = afinn_mean / 5)  # normalizing it [-1, 1]
+
+sentiment_scores <- bind_rows(bing_scores, afinn_scores)
+
+# Calculating the annual average sentiment by lexicon 
+sentiment_yearly <- sentiment_scores |>
+  group_by(lexicon, publication_year) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+sentiment_yearly
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the evolution of the annual average sentiment score: line chart 
+ggplot(sentiment_yearly, aes(x = publication_year, y = mean_sentiment,
+                             color = lexicon)) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 2) +
+  
+  geom_vline(xintercept = 2020, linetype = "dotted", color = "#4a4a6a",
+             linewidth = 0.7) +
+  annotate(
+    "text",
+    x = 2020, y = Inf,
+    label = "< 10 articles before 2020",
+    hjust = 1.05, vjust = 1,
+    size = 3, color = "#4a4a6a", family = "serif") +
+  
+  scale_x_continuous(
+    breaks = 2016:2025,
+    labels = 2016:2025
+  ) +
+  scale_color_manual(values = c("Bing" = "#2C3E6B", "AFINN" = "#8E44AD")) +
+  labs(
+    title = "Sentiment in AI-related abstracts over time",
+    subtitle =
+      "Yearly mean sentiment per abstract using Bing and AFINN lexicons",
+    x = NULL,
+    y = "Mean sentiment score",
+    color = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "top",
+    legend.text          = element_text(size = 9, color = "#4a4a6a"),
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank())
+
+# Plotting the comparison before-after the rise of AI of the annual average
+# sentiment score: boxplot 
+
+period_scores <- sentiment_scores |>
+  mutate(
+    period = if_else(
+      publication_year < 2023,
+      "Before rise of AI",
+      "After rise of AI"))
+
+period_summary <- period_scores |>
+  group_by(lexicon, period) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    median_sentiment = median(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+
+ggplot(
+  period_scores,
+  aes(x = period, y = sentiment_score, fill = period)) +
+  geom_boxplot(alpha = 0.85, width = 0.6, outlier.alpha = 0.2) +
+  scale_fill_manual(values = c(
+    "Before rise of AI" = "steelblue",
+    "After rise of AI"  = "#2C3E6B"
+  )) +
+  facet_wrap(~ lexicon, ncol = 2, scales = "free_y") +
+  labs(
+    title = "Sentiment in AI-related abstracts before and after generative AI",
+    x = NULL,
+    y = "Sentiment score") +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "none",
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    strip.text           = element_text(face = "bold", size = 10,
+                                        color = "#1a1a2e"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank()
+  )
+```
+
+The annual mean sentiment scores show the predominant positive tone of AI-related abstracts across the entire period. `net_sentiment_norm` (Bing) illustrates a positive word balance, while `afinn_mean` (AFINN) shows a low-moderate intensity on average. For instance, in 2025, we can see that average sentiment intensity is low-moderate with a value around 0.162 and the balance of words is positive (0.40), meaning that 70% of words are positive and 30% negative. Since 2020, AFINN is stable, whereas Bing shows a declining trend until 2022 followed by an increasing one until 2025. This could reflect a period of more cautious framing of AI that becomes more positive in recent years. The boxplots show that the central tendency of the years after the rise of AI in 2023 has higher values according to both lexicons (which is consistent across the analysis).
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+# Plotting the number of positive, negative, and neutral AI-related abstracts
+# by year
+
+# Bing
+bing_year_polarity <- bing_abstract_sentiment |>
+  mutate(
+    polarity = case_when(
+      net_sentiment_norm > 0 ~ "Positive",
+      net_sentiment_norm < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "Bing")
+
+# AFINN
+afinn_year_polarity <- afinn_abstract_sentiment |>
+  mutate(
+    polarity = case_when(
+      afinn_mean > 0 ~ "Positive",
+      afinn_mean < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "AFINN")
+
+# Combining both lexicons, calculating the total number of abstracts and the
+# percentages of each category 
+year_polarity <- bind_rows(
+  bing_year_polarity,
+  afinn_year_polarity) |>
+  group_by(publication_year, lexicon) |>
+  mutate(
+    total = sum(n),
+    pct = n / total * 100) |>
+  ungroup() |>
+  mutate(polarity = factor(polarity, levels = c("Positive",
+                                                "Neutral",
+                                                "Negative")))
+
+# Plotting the graph 
+ggplot(year_polarity,
+  aes(x = publication_year, y = pct, color = polarity, group = polarity)) +
+  geom_line(linewidth = 1) +
+  geom_point(aes(size = total)) +
+  scale_color_manual(values = c(
+    "Positive" = "#27AE60",
+    "Negative" = "#C0392B",
+    "Neutral"  = "#2C3E6B"
+  )) +
+  scale_size_continuous(name = "Total abstracts", range = c(1, 6)) +
+  scale_x_continuous(breaks = 2017:2025) +
+  scale_y_continuous(labels = scales::label_percent(scale = 1)) +
+  facet_wrap(~ lexicon, ncol = 2) +
+  labs(
+   title =
+   "Percentage of positive, negative, and neutral AI-related abstracts by year",
+   x = NULL,
+   y = "% of abstracts",
+   color = "Overall sentiment"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title       = element_text(face = "bold", color = "#1a1a2e",
+                                    size = 12),
+    strip.text       = element_text(face = "bold", size = 11, color =
+                                      "#1a1a2e"),
+    axis.text        = element_text(color = "#4a4a6a", size = 10),
+    legend.position  = "bottom",
+    panel.grid.minor = element_blank(),
+    panel.spacing    = unit(1.5, "lines"))
+```
+
+This graph confirms the predominant presence of positively-toned abstracts in both lexicons across years. The percentage of positive abstracts stabilizes after 2020 around 80% in AFINN and again showing an increasing tendency 2021-2025 in Bing, ranging around 60%-75%. The size of the points shows that the stabilization happens when the volume of abstracts becomes larger.
+
+### 5.3 General sentiment in AI-related abstracts over time: using sentences mentioning AI
+
+In the second step in our analytical sequence, we select only the sentences explictly mentioning at least one AI-related term from our custom lexicon. To ensure comparability with the previous abstract-level results, we computed the sentence-level sentiment (with the net_sentiment_norm and the afinn_mean) and then averaged it back to the abstract level, making each AI-mentioning sentence contribute equally to the abstract's overall score.
+
+```{r}
+# Creating the subcorpus of sentences that explicitly mention AI-related terms 
+# Base sentences from AI-related abstracts
+sentences_base <- ai_abstracts |>
+  unnest_tokens(sentence, abstract, token = "sentences", drop = FALSE) |>
+  group_by(id) |>
+  mutate(sentence_id = row_number()) |>
+  ungroup() |>
+  select(id, publication_year, sentence_id, sentence, abstract)
+
+# Unigram in sentences
+sentence_hits_unigrams <- sentences_base |>
+  unnest_tokens(word, sentence, token = "words") |>
+  filter(word %in% ai_lexicon_unigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Bigram in sentences
+sentence_hits_bigrams <- sentences_base |>
+  unnest_tokens(bigram, sentence, token = "ngrams", n = 2) |>
+  filter(!is.na(bigram)) |>
+  filter(bigram %in% ai_lexicon_bigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Trigram in sentences
+sentence_hits_trigrams <- sentences_base |>
+  unnest_tokens(trigram, sentence, token = "ngrams", n = 3) |>
+  filter(!is.na(trigram)) |>
+  filter(trigram %in% ai_lexicon_trigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Combining all sentence-level AI n-grams 
+sentence_ai_hits <- bind_rows(
+  sentence_hits_unigrams,
+  sentence_hits_bigrams,
+  sentence_hits_trigrams) |>
+  distinct(id, publication_year, sentence_id)
+
+# Keeping the sentences that explicitly mention AI-related terms
+ai_sentences <- sentences_base |>
+  semi_join(sentence_ai_hits, by = c("id", "publication_year", "sentence_id"))
+
+ai_sentences
+```
+
+Following the previous logic, sentences with no matches in the sentiment lexicons are excluded from the sentiment computing step:
+
+```{r, warning=FALSE}
+# We create a sentence-level id 
+ai_sentences_ids <- ai_sentences |>
+  mutate(sentence_uid = paste(id, sentence_id, sep = "_"))
+
+# Total/Bing/AFINN sentences and abstract correspondence 
+ai_sentences_ids |>
+  summarise(
+    n_sentences = n_distinct(sentence_uid),
+    n_abstracts = n_distinct(id)) |>
+  mutate(lexicon = "Total") |>
+  bind_rows(
+    ai_sentences_ids |>
+      unnest_tokens(word, sentence) |>
+      inner_join(bing_lexicon, by = "word") |>
+      summarise(
+        n_sentences = n_distinct(sentence_uid),
+        n_abstracts = n_distinct(id)) |>
+      mutate(lexicon = "Bing"),
+    ai_sentences_ids |>
+      unnest_tokens(word, sentence) |>
+      inner_join(get_sentiments("afinn"), by = "word") |>
+      summarise(
+        n_sentences = n_distinct(sentence_uid),
+        n_abstracts = n_distinct(id)) |>
+      mutate(lexicon = "AFINN")) |>
+  select(lexicon, n_sentences, n_abstracts)
+```
+
+```{r}
+# In this chunk we create two tibbles, one per lexicon, that contain the id of
+# the abstract and sentence, the publication year and the sentiment variables
+# related to each lexicon.
+
+# Bing 
+bing_sentence_sentiment <- ai_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(bing_lexicon, by = "word") |>
+  count(id, publication_year, sentence_id, sentiment) |>
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |>
+  mutate(
+    net_sentiment = positive - negative,
+    total_sentiment_words = positive + negative,
+    net_sentiment_norm = if_else(
+      total_sentiment_words > 0,
+      (positive - negative) / total_sentiment_words,
+      NA_real_))
+bing_sentence_sentiment
+
+# AFINN
+afinn_sentence_sentiment <- ai_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  group_by(id, publication_year, sentence_id) |>
+  summarise(
+    afinn_sum = sum(value, na.rm = TRUE),
+    afinn_mean = mean(value, na.rm = TRUE),
+    n_sentiment_words = n(),
+    .groups = "drop")
+afinn_sentence_sentiment
+```
+
+```{r}
+# Aggregating sentence-level sentiment to abstract level
+
+# BING
+bing_sentence_to_abstract <- bing_sentence_sentiment |>
+  group_by(id, publication_year) |>
+  summarise(
+    sentiment_score = mean(net_sentiment_norm, na.rm = TRUE),
+    n_ai_sentences = n(),
+    .groups = "drop") |>
+  mutate(lexicon = "Bing")
+
+# AFINN
+afinn_sentence_to_abstract <- afinn_sentence_sentiment |>
+  group_by(id, publication_year) |>
+  summarise(
+    sentiment_score = mean(afinn_mean / 5, na.rm = TRUE), #normalizing it [-1,1]
+    n_ai_sentences = n(),
+    .groups = "drop") |>
+  mutate(lexicon = "AFINN")
+
+# Combine both lexicons into one single tibble 
+sentence_abstract_scores <- bind_rows(
+  bing_sentence_to_abstract,
+  afinn_sentence_to_abstract)
+
+# Calculating the annual average sentiment by lexicon 
+sentence_abstract_yearly <- sentence_abstract_scores |>
+  group_by(lexicon, publication_year) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+sentence_abstract_yearly
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the evolution of the annual average sentiment score
+# (using sentences): line chart 
+ggplot(sentence_abstract_yearly, aes(x = publication_year,
+                                     y = mean_sentiment,
+                                     color = lexicon)) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 2) +
+  geom_vline(xintercept = 2020, linetype = "dotted", color = "#4a4a6a",
+             linewidth = 0.7) +
+  annotate(
+    "text",
+    x = 2020, y = Inf,
+    label = "< 10 articles before 2020",
+    hjust = 1.05, vjust = 1,
+    size = 3, color = "#4a4a6a", family = "serif"
+  ) +
+  scale_x_continuous(
+    breaks = 2016:2025,
+    labels = 2016:2025
+  ) +
+  scale_color_manual(values = c("Bing" = "#2C3E6B", "AFINN" = "#8E44AD")) +
+  labs(
+    title = "Sentiment in AI-related abstracts over time",
+    subtitle =
+    "Yearly mean sentiment per abstract based on AI-mentioning sentences only",
+    x = NULL,
+    y = "Mean sentiment score",
+    color = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "top",
+    legend.text          = element_text(size = 9, color = "#4a4a6a"),
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank())
+
+# Plotting the comparison before-after the rise of AI of the annual 
+# avergae sentiment score (using sentences): boxplot 
+
+sentence_period_scores <- sentence_abstract_scores |>
+  mutate(
+    period = if_else(
+      publication_year < 2023,
+      "Before rise of AI",
+      "After rise of AI"))
+
+sentence_period <- sentence_period_scores |>
+  group_by(lexicon, period) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    median_sentiment = median(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+
+ggplot(
+  sentence_period_scores,
+  aes(x = period, y = sentiment_score, fill = period)
+) +
+  geom_boxplot(alpha = 0.85, width = 0.6, outlier.alpha = 0.2) +
+  scale_fill_manual(values = c(
+    "Before rise of AI" = "steelblue",
+    "After rise of AI"  = "#2C3E6B"
+  )) +
+  facet_wrap(~ lexicon, ncol = 2, scales = "free_y") +
+  labs(
+    title = "Sentiment in AI-related abstracts before and after generative AI",
+    subtitle = "Based on AI-mentioning sentences only",
+    x = NULL,
+    y = "Sentiment score"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "none",
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    strip.text           = element_text(face = "bold", size = 10,
+                                        color = "#1a1a2e"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank()
+  )
+```
+
+The general patterns remain very similar: both lexicons show a positive sentiment from 2020 onwards. `afinn_mean` (AFINN) and `net_sentiment_norm` (Bing) scores increase, meaning that both the intensity of sentiment words on average, and the presence of positive words compared to negative words, grow when selecting AI-mentioning sentences.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+# Plotting the number of positive, negative, and neutral AI-related abstracts
+# by year (using sentences)
+
+# Bing
+bing_sentence_year_polarity <- bing_sentence_to_abstract |>
+  mutate(
+    polarity = case_when(
+      sentiment_score > 0 ~ "Positive",
+      sentiment_score < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "Bing")
+
+# AFINN
+afinn_sentence_year_polarity <- afinn_sentence_to_abstract |>
+  mutate(
+    polarity = case_when(
+      sentiment_score > 0 ~ "Positive",
+      sentiment_score < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "AFINN")
+
+# Combine both lexicons
+sentence_year_polarity <- bind_rows(
+  bing_sentence_year_polarity,
+  afinn_sentence_year_polarity) |>
+  group_by(publication_year, lexicon) |>
+  mutate(
+    total = sum(n),
+    pct = n / total * 100) |>
+  ungroup() |>
+  mutate(polarity = factor(polarity, levels = c("Positive",
+                                                "Neutral",
+                                                "Negative")))
+
+# Plotting the graph
+ggplot(sentence_year_polarity,
+  aes(x = publication_year, y = pct, color = polarity, group = polarity)) +
+  geom_line(linewidth = 1) +
+  geom_point(aes(size = total)) +
+  scale_color_manual(values = c(
+    "Positive" = "#27AE60",
+    "Negative" = "#C0392B",
+    "Neutral"  = "#2C3E6B"
+  )) +
+  scale_size_continuous(name = "Total abstracts", range = c(1, 6)) +
+  scale_x_continuous(breaks = 2017:2025) +
+  scale_y_continuous(labels = scales::label_percent(scale = 1)) +
+  facet_wrap(~ lexicon, ncol = 2) +
+  labs(
+   title = 
+   "Percentage of positive, negative, and neutral AI-related abstracts by year",
+   subtitle = "Based on AI-mentioning sentences only",
+   x = NULL,
+   y = "% of abstracts",
+   color = "Overall sentiment"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title       = element_text(face = "bold",
+                                    color = "#1a1a2e",size = 12),
+    strip.text       = element_text(face = "bold", size = 11,
+                                    color = "#1a1a2e"),
+    axis.text        = element_text(color = "#4a4a6a", size = 10),
+    legend.position  = "bottom",
+    panel.grid.minor = element_blank(),
+    panel.spacing    = unit(1.5, "lines"))
+```
+
+The distribution does not illustrate pattern changes; the most notable difference would be that Bing has more variability in the positive category across years.
+
+### 5.4 Towards a more target-specific measure of sentiment around AI
+
+The final stage of the analysis moves towards a more target-specific measure of sentiment around AI, trying to identify sentences in which AI is explicitly linked to evaluations, risks, benefits or implications. To do this, the code builds a new lexicon by combining AI terms with effect and outcome terms: we defined separate vectors for AI-side components and effect-side components, and combine them into bigrams, trigrams, and fourgrams ---we used Claude Sonnet 4.6 to build the effect lexicon, full prompt in appendix II---. After that, the same sentiment analysis procedure is applied.
+
+```{r}
+# Building the AI-related N-grams lexicon 
+# AI SIDE COMPONENT VECTORS
+
+# 1-word AI terms (drawn from ai_lexicon_unigrams)
+ai_side_1w <- c(
+  # neural architecture terms
+  "autoencoder", "perceptron", "neurocomputing",
+  # specific AI systems and acronyms
+  "chatgpt", "llm",
+  # vendors and umbrella terms
+  "deepseek", "openai", "ai"
+)
+
+# 2-word AI terms (drawn from ai_lexicon_bigrams)
+ai_side_2w <- c(
+  # core ML / DL paradigms
+  "artificial intelligence", "machine learning", "deep learning",
+  "reinforcement learning", "machine intelligence",
+  "computational intelligence",
+  # network and model architectures
+  "neural network", "neural model", "deep network",
+  "learning algorithm", "backpropagation learning",
+  "backpropagation algorithm",
+  "pretrained transformer",
+  # generative and language model terms
+  "generative ai", "language model", "agentic ai",
+  # AI-generated content
+  "ai-generated content",
+  # specific systems and vendors
+  "openai gpt",
+  "claude sonnet", "claude opus", "claude haiku",
+  "google gemini", "gemini pro", "gemini ultra",
+  "microsoft copilot", "github copilot",
+  "mistral ai", "meta llama", "llama 2", "llama 3",
+  "stable diffusion",
+  "gpt 1", "gpt 2", "gpt 3", "gpt 4", "gpt 5",
+  "dall e"
+)
+
+# 3-word AI terms (drawn from ai_lexicon_trigrams)
+ai_side_3w <- c(
+  # large / generative language model formulations
+  "large language model", "generative language model",
+  "generative large language", "generative pretrained transformer",
+  # generative AI formulations
+  "generative artificial intelligence", "artificial intelligence generated",
+  # OpenAI-specific phrases
+  "openai large language", "openai language model",
+  # AI + language model phrases
+  "ai language model", "ai generated content"
+)
+
+# EFFECT / OUTCOME SIDE COMPONENT VECTORS
+
+# 1-word effect and outcome terms
+effect_side_1w <- c(
+  # direct outcome terms (neutral)
+  "effects", "impacts", "consequences", "implications", "outcomes",
+  "influence", "affect", "repercussions", "ramifications", "externalities",
+  "spillovers", "footprint",
+
+  # valence terms — NEGATIVE (~37)
+  "risks", "harms", "dangers", "threats", "hazards", "misuse", "abuse",
+  "drawbacks", "disadvantages", "limitations", "failures", "errors",
+  "vulnerabilities", "pitfalls", "toxicity", "hallucinations", "unreliability",
+  "inaccuracy", "overreliance", "dependence", "dependency", "addiction",
+  "misalignment", "deception", "manipulation", "exploitation", "disruption",
+  "fragility", "brittleness", "opacity", "obfuscation", "misinformation",
+  "disinformation", "propaganda", "plagiarism", "cheating", "displacement",
+
+  # valence terms — POSITIVE (~37)
+  "benefits", "opportunities", "advantages", "gains", "improvements",
+  "efficiency", "productivity", "innovation", "augmentation", "empowerment",
+  "democratization", "accessibility", "scalability", "sustainability",
+  "breakthroughs", "capabilities", "accuracy", "reliability", "performance",
+  "personalization", "optimization", "collaboration", "assistance",
+  "enhancement", "acceleration", "advancement", "progress", "discovery",
+  "creation", "support", "convenience", "precision", "explainability",
+  "interpretability", "quality", "usefulness", "enablement",
+
+  # neutral evaluative terms
+  "challenges", "tradeoffs", "tensions", "paradoxes", "dilemmas",
+  "uncertainties", "ambiguities",
+
+  # societal and structural dimensions (neutral descriptors)
+  "ethical", "social", "economic", "labor", "employment", "unemployment",
+  "inequality", "bias", "fairness", "privacy", "security", "trust",
+  "accountability", "transparency", "justice", "discrimination", "welfare",
+  "autonomy", "dignity", "democracy", "sovereignty", "marginalization",
+  "exclusion", "inclusion", "diversity", "racism", "sexism", "alienation",
+  "dehumanization", "commodification", "precarity", "polarization",
+  "radicalization", "deskilling", "upskilling", "reskilling", "cohesion",
+  "fragmentation", "concentration", "monopolization",
+
+  # environmental dimensions
+  "emissions", "carbon", "consumption",
+
+  # health dimensions
+  "wellbeing", "health", "safety", "diagnosis", "treatment", "triage",
+
+  # education dimensions
+  "literacy", "education", "creativity", "learning",
+
+  # governance terms
+  "regulation", "policy", "governance", "legislation", "oversight",
+  "compliance", "liability", "audit", "certification", "standards",
+  "enforcement", "prohibition", "moratorium", "ban", "restriction",
+  "responsibility", "stewardship",
+
+  # human response terms
+  "adoption", "acceptance", "resistance", "perception", "attitudes",
+  "concerns", "fears", "anxiety", "skepticism", "awareness", "distrust",
+  "mistrust", "optimism", "pessimism", "enthusiasm", "reliance",
+  "reluctance", "readiness", "preparedness",
+
+  # domain-specific effect nouns
+  "automation", "surveillance", "deepfakes", "decision-making"
+)
+
+# 2-word effect phrases (for fourgram Pattern B: [AI 2w] + [effect 2w])
+effect_side_2w <- c(
+  # labour and economic effects — NEGATIVE
+  "job displacement", "job loss", "labor disruption", "wage inequality",
+  "income inequality", "wage stagnation", "skill displacement", "skill gap",
+  "workforce disruption", "technological unemployment", "economic disruption",
+  "market concentration", "power concentration",
+
+  # labour and economic effects — POSITIVE
+  "job creation", "economic growth", "productivity gains", "wage growth",
+  "skill development", "workforce augmentation", "workforce transformation",
+  "economic efficiency", "creative destruction", "market competition",
+  "value creation",
+
+  # societal and structural effects — NEGATIVE
+  "social inequality", "social fragmentation", "digital divide",
+  "political polarization", "information disorder", "democratic erosion",
+  "civil rights violations",
+
+  # societal and structural effects — POSITIVE
+  "social cohesion", "social welfare", "human rights", "civil liberties",
+  "democratic participation", "civic engagement", "social mobility",
+  "community empowerment",
+
+  # ethical and governance effects — NEGATIVE
+  "ethical violations", "ethical concerns", "ethical challenges",
+  "ethical dilemmas", "moral hazard", "regulatory failure", "governance gap",
+
+  # ethical and governance effects — POSITIVE
+  "ethical guidelines", "ethical frameworks", "policy innovation",
+  "regulatory framework", "governance framework", "human oversight",
+  "responsible innovation", "responsible development",
+
+  # safety, trust, and reliability — NEGATIVE
+  "privacy concerns", "security risks", "data breaches", "system failures",
+  "algorithmic bias", "algorithmic discrimination", "automated discrimination",
+  "predictive policing", "privacy erosion",
+
+  # safety, trust, and reliability — POSITIVE
+  "public trust", "data privacy", "data security", "information security",
+  "system reliability", "algorithmic fairness", "algorithmic accountability",
+  "algorithmic transparency",
+
+  # health and wellbeing — NEGATIVE
+  "mental health risks", "patient harm", "clinical errors",
+  "psychological distress", "cognitive overload",
+
+  # health and wellbeing — POSITIVE
+  "mental health", "public health", "health outcomes", "patient safety",
+  "clinical decision", "early detection", "disease prevention",
+  "drug discovery", "personalized medicine",
+
+  # information and media — NEGATIVE
+  "fake news", "misinformation spread", "disinformation campaign",
+  "information manipulation", "academic dishonesty",
+
+  # information and media — POSITIVE
+  "content moderation", "fact checking", "information access",
+  "knowledge dissemination", "scientific communication",
+
+  # environmental — NEGATIVE
+  "energy consumption", "carbon footprint", "resource consumption",
+  "environmental degradation",
+
+  # environmental — POSITIVE
+  "energy efficiency", "climate solutions", "resource efficiency",
+  "environmental monitoring",
+
+  # decision and justice — NEGATIVE
+  "criminal justice bias", "unfair treatment", "rights violations",
+  "mass surveillance", "social control",
+
+  # decision and justice — POSITIVE
+  "decision making", "criminal justice", "human dignity",
+  "fundamental rights", "equal treatment", "evidence-based decision",
+
+  # existential and systemic — NEGATIVE
+  "existential risk", "catastrophic risk", "systemic risk",
+  "long-term risk", "unintended consequences",
+
+  # existential and systemic — POSITIVE
+  "long-term benefits", "systemic improvements", "transformative potential",
+  "future opportunities",
+
+  # adoption and use — NEGATIVE
+  "misuse potential", "unsafe deployment", "irresponsible use",
+
+  # adoption and use — POSITIVE
+  "responsible use", "safe use", "ethical deployment",
+  "beneficial application"
+)
+
+# 2-word effect-leading prefixes (for trigram Pattern B & fourgram Pattern A)
+effect_side_2w_pre <- c(
+  # outcome-of constructions (neutral)
+  "effects of", "impact of", "impacts of", "consequences of",
+  "implications of", "outcomes of", "influence of", "repercussions of",
+  "ramifications of", "externalities of",
+
+  # valence-of constructions — NEGATIVE
+  "risks of", "harms of", "dangers of", "threats of", "hazards of",
+  "misuse of", "abuse of", "limitations of", "failures of", "pitfalls of",
+  "disruption by", "disruption from", "downsides of", "costs of",
+
+  # valence-of constructions — POSITIVE
+  "benefits of", "opportunities of", "advantages of", "potential of",
+  "promise of", "gains from", "strengths of", "value of",
+  "utility of", "contributions of", "advances in", "progress in",
+
+  # neutral evaluative constructions
+  "challenges of", "tradeoffs of", "concerns about", "debates about",
+  "discourse on",
+
+  # governance and responsibility (neutral)
+  "governance of", "regulation of", "oversight of", "ethics of",
+  "accountability for", "responsibility for", "liability for",
+  "standards for", "audit of",
+
+  # adoption and use (neutral)
+  "adoption of", "use of", "deployment of", "integration of",
+  "reliance on", "dependence on",
+
+  # trust and perception — NEGATIVE
+  "distrust of", "mistrust of", "fears about", "anxiety about",
+  "skepticism about", "resistance to",
+
+  # trust and perception — POSITIVE
+  "trust in", "optimism about", "enthusiasm about",
+  "attitudes toward", "attitudes towards", "perceptions of", "acceptance of",
+  "awareness of",
+
+  # threat constructions — NEGATIVE
+  "threats to", "dangers to", "harm from", "damage from", "risks to",
+
+  # opportunity constructions — POSITIVE
+  "hope for", "support for", "case for",
+
+  # role constructions (neutral)
+  "role of", "power of"
+)
+
+# 3-word effect-leading prefixes
+# (for fourgram Pattern C: [effect prefix 3w] + [AI 1w])
+effect_side_3w_pre <- c(
+  # ethical / social / economic implications of — NEGATIVE
+  "ethical implications of", "social implications of",
+  "economic implications of", "societal implications of",
+  "political implications of", "legal implications of",
+  "ethical challenges of", "social challenges of", "economic challenges of",
+  "ethical concerns about", "social concerns about", "safety concerns about",
+
+  # ethical / social / economic implications of — POSITIVE
+  "ethical opportunities of", "social benefits of",
+  "economic benefits of", "societal benefits of",
+  "transformative potential of", "positive implications of",
+  "innovative potential of",
+
+  # impact on domain constructions — NEGATIVE
+  "impact on inequality", "impact on privacy", "impact on surveillance",
+  "impact on misinformation",
+
+  # impact on domain constructions — POSITIVE
+  "impact on society", "impact on democracy", "impact on employment",
+  "impact on healthcare", "impact on education", "impact on labor",
+  "impact on security", "impact on creativity", "impact on wellbeing",
+  "impact on journalism", "impact on science", "impact on research",
+  "impact on productivity",
+
+  # social / economic / societal impact of — NEGATIVE
+  "negative impact of", "harmful effects of", "adverse impact of",
+
+  # social / economic / societal impact of — POSITIVE
+  "social impact of", "economic impact of", "societal impact of",
+  "environmental impact of", "positive impact of", "beneficial impact of",
+
+  # public and societal framing — NEGATIVE
+  "societal risks of", "societal harms of",
+
+  # public and societal framing — POSITIVE
+  "public perception of", "societal effects of", "societal benefits of",
+  "societal contributions of",
+
+  # risk / benefit framing (inherently balanced pairs)
+  "risks and benefits", "benefits and risks", "risks and opportunities",
+  "threats and opportunities", "costs and benefits",
+  "risks associated with", "effects associated with",
+  "impact associated with", "challenges associated with",
+  "opportunities associated with", "concerns associated with",
+  "harms associated with", "benefits associated with",
+  "dangers associated with", "implications associated with",
+
+  # potential framing — NEGATIVE
+  "potential risks of", "potential harms of", "potential dangers of",
+
+  # potential framing — POSITIVE
+  "potential benefits of", "potential impact of", "potential effects of",
+  "potential implications of", "potential value of",
+
+  # responsible / ethical use framing — NEGATIVE
+  "misuse and abuse", "unsafe deployment of",
+
+  # responsible / ethical use framing — POSITIVE
+  "responsible use of", "ethical use of", "safe use of",
+  "responsible deployment of", "beneficial use of",
+
+  # governance and policy framing (neutral)
+  "governance and regulation", "policy implications of",
+  "regulation and governance", "ethical governance of",
+  "regulatory challenges of", "policy challenges of",
+
+  # bias / fairness / privacy framing (neutral)
+  "bias and fairness", "bias and discrimination",
+  "privacy and security", "privacy and surveillance",
+  "fairness and accountability", "transparency and accountability",
+  "trust and accountability", "safety and security",
+
+  # threat and opportunity framing — NEGATIVE
+  "threats posed by", "risks posed by", "dangers posed by",
+  "harms caused by", "disruption caused by",
+
+  # threat and opportunity framing — POSITIVE
+  "opportunities presented by", "benefits offered by",
+  "value created by", "progress enabled by",
+
+  # labour and displacement framing — NEGATIVE
+  "labor market disruption", "displacement caused by",
+
+  # labour and displacement framing — POSITIVE
+  "labor market effects", "labor market impact", "labor market consequences",
+  "automation driven by", "growth driven by",
+
+  # temporal framing — NEGATIVE
+  "long-term risks of", "short-term risks of",
+
+  # temporal framing — POSITIVE
+  "long-term effects of", "short-term effects of",
+  "long-term impact of", "short-term impact of",
+  "long-term benefits of", "long-term implications of",
+
+  # unintended / adverse vs. intended / positive framing
+  "unintended consequences of", "adverse effects of",
+  "negative consequences of", "negative effects of",
+  "positive effects of", "positive impact of",
+  "intended benefits of",
+
+  # public debate and discourse framing (neutral)
+  "public debate on", "public discourse on",
+  "debate about the", "concerns regarding the",
+  "questions about the"
+)
+
+# COMBINATION STEPS
+
+# ~1,800 bigrams
+# [AI 1w] + [effect 1w]  AND  [effect 1w] + [AI 1w]
+ai_sentiment_bigrams <- unique(trimws(c(
+  as.vector(outer(ai_side_1w,     effect_side_1w, paste)),
+  as.vector(outer(effect_side_1w, ai_side_1w,     paste))
+)))
+
+# ~5,400 trigrams
+# Pattern A: [AI 2w]            + [effect 1w]
+# Pattern B: [effect prefix 2w] + [AI 1w]
+trigrams_a <- as.vector(outer(ai_side_2w,         effect_side_1w, paste))
+trigrams_b <- as.vector(outer(effect_side_2w_pre, ai_side_1w,     paste))
+ai_sentiment_trigrams <- unique(trimws(c(trigrams_a, trigrams_b)))
+
+# ~10,200 fourgrams
+# Pattern A: [effect prefix 2w] + [AI 2w] — e.g. "risks of machine learning"
+# Pattern B: [AI 2w] + [effect 2w] — e.g. "machine learning job displacement"
+# Pattern C: [effect prefix 3w] + [AI 1w] — e.g. "ethical implications of ai"
+# Pattern D: [AI 3w] + [effect 1w] — e.g. "large language model risks"
+fourgrams_a <- as.vector(outer(effect_side_2w_pre, ai_side_2w,    paste))
+fourgrams_b <- as.vector(outer(ai_side_2w,         effect_side_2w, paste))
+fourgrams_c <- as.vector(outer(effect_side_3w_pre, ai_side_1w,    paste))
+fourgrams_d <- as.vector(outer(ai_side_3w,         effect_side_1w, paste))
+ai_sentiment_fourgrams <- unique(trimws(c(fourgrams_a, fourgrams_b,
+                                          fourgrams_c, fourgrams_d)))
+```
+
+```{r}
+# Creating the subcorpus of sentences that explicitly talk about AI  
+# Base sentences from AI-related abstracts
+target_sentences_base <- ai_abstracts |>
+  unnest_tokens(sentence, abstract, token = "sentences", drop = FALSE) |>
+  group_by(id) |>
+  mutate(sentence_id = row_number()) |>
+  ungroup() |>
+  select(id, publication_year, sentence_id, sentence, abstract)
+
+# Bigram hits in sentences
+target_hits_bigrams <- target_sentences_base |>
+  unnest_tokens(bigram, sentence, token = "ngrams", n = 2) |>
+  filter(!is.na(bigram)) |>
+  filter(bigram %in% ai_sentiment_bigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Trigram hits in sentences
+target_hits_trigrams <- target_sentences_base |>
+  unnest_tokens(trigram, sentence, token = "ngrams", n = 3) |>
+  filter(!is.na(trigram)) |>
+  filter(trigram %in% ai_sentiment_trigrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Fourgram hits in sentences
+target_hits_fourgrams <- target_sentences_base |>
+  unnest_tokens(fourgram, sentence, token = "ngrams", n = 4) |>
+  filter(!is.na(fourgram)) |>
+  filter(fourgram %in% ai_sentiment_fourgrams) |>
+  transmute(id, publication_year, sentence_id)
+
+# Combining all target-specific hits
+target_sentence_hits <- bind_rows(
+  target_hits_bigrams,
+  target_hits_trigrams,
+  target_hits_fourgrams
+) |>
+  distinct(id, publication_year, sentence_id)
+
+# Keeping only target-specific sentences
+ai_target_sentences <- target_sentences_base |>
+  semi_join(target_sentence_hits, by = c("id", "publication_year",
+                                         "sentence_id"))
+
+ai_target_sentences
+```
+
+This target-specific filtering step reduces drastically the number of selected sentences:
+
+```{r}
+# We create a sentence-level id 
+ai_target_sentences_ids <- ai_target_sentences |>
+  mutate(sentence_uid = paste(id, sentence_id, sep = "_"))
+
+# Total/Bing/AFINN sentences and abstract correspondence 
+ai_target_sentences_ids |>
+  summarise(
+    n_sentences = n_distinct(sentence_uid),
+    n_abstracts = n_distinct(id)) |>
+  mutate(lexicon = "Total") |>
+  bind_rows(
+    ai_target_sentences_ids |>
+      unnest_tokens(word, sentence) |>
+      inner_join(bing_lexicon, by = "word") |>
+      summarise(
+        n_sentences = n_distinct(sentence_uid),
+        n_abstracts = n_distinct(id)) |>
+      mutate(lexicon = "Bing"),
+    ai_target_sentences_ids |>
+      unnest_tokens(word, sentence) |>
+      inner_join(get_sentiments("afinn"), by = "word") |>
+      summarise(
+        n_sentences = n_distinct(sentence_uid),
+        n_abstracts = n_distinct(id)) |>
+      mutate(lexicon = "AFINN")) |>
+  select(lexicon, n_sentences, n_abstracts)
+```
+
+```{r}
+# In this chunk we create two tibbles, one per lexicon, that contain the id of
+# the abstract and sentence, the publication year and the sentiment variables
+# related to each lexicon.
+
+# Bing sentiment by target-specific sentence
+bing_target_sentence_sentiment <- ai_target_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(bing_lexicon, by = "word") |>
+  count(id, publication_year, sentence_id, sentiment) |>
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |>
+  mutate(
+    net_sentiment = positive - negative,
+    total_sentiment_words = positive + negative,
+    net_sentiment_norm = if_else(
+      total_sentiment_words > 0,
+      (positive - negative) / total_sentiment_words,
+      NA_real_))
+
+bing_target_sentence_sentiment
+
+# AFINN sentiment by target-specific sentence
+afinn_target_sentence_sentiment <- ai_target_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  group_by(id, publication_year, sentence_id) |>
+  summarise(
+    afinn_sum = sum(value, na.rm = TRUE),
+    afinn_mean = mean(value, na.rm = TRUE),
+    n_sentiment_words = n(),
+    .groups = "drop")
+
+afinn_target_sentence_sentiment
+```
+
+```{r}
+# Target-specific sentence-level sentiment aggregated back to abstract level
+
+# BING: average target-specific sentence sentiment within each abstract
+bing_target_sentence_to_abstract <- bing_target_sentence_sentiment |>
+  group_by(id, publication_year) |>
+  summarise(
+    sentiment_score = mean(net_sentiment_norm, na.rm = TRUE),
+    n_target_sentences = n(),
+    .groups = "drop"
+  ) |>
+  mutate(lexicon = "Bing")
+
+# AFINN: average target-specific sentence sentiment within each abstract
+afinn_target_sentence_to_abstract <- afinn_target_sentence_sentiment |>
+  group_by(id, publication_year) |>
+  summarise(
+    sentiment_score = mean(afinn_mean / 5, na.rm = TRUE), # normalizing it [-1, 1]
+    n_target_sentences = n(),
+    .groups = "drop"
+  ) |>
+  mutate(lexicon = "AFINN")
+
+# Combining both lexicons
+target_sentence_abstract_scores <- bind_rows(
+  bing_target_sentence_to_abstract,
+  afinn_target_sentence_to_abstract)
+
+# Calculating the annual average sentiment by lexicon 
+target_sentence_abstract_yearly <- target_sentence_abstract_scores |>
+  group_by(lexicon, publication_year) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop")
+target_sentence_abstract_yearly
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the evolution of the annual average sentiment score
+# (using target-specific sentences): line graph
+ggplot(
+  target_sentence_abstract_yearly,
+  aes(x = publication_year, y = mean_sentiment, color = lexicon)
+) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 2) +
+  
+  geom_vline(xintercept = 2024, linetype = "dotted", color = "#4a4a6a",
+             linewidth = 0.7) +
+  annotate(
+    "text",
+    x = 2024, y = Inf,
+    label = "< 10 articles before 2024",
+    hjust = 1.05, vjust = 1,
+    size = 3, color = "#4a4a6a", family = "serif"
+  ) +
+  
+  scale_x_continuous(
+    breaks = 2016:2025,
+    labels = 2016:2025
+  ) +
+  scale_color_manual(values = c("Bing" = "#2C3E6B", "AFINN" = "#8E44AD")) +
+  labs(
+    title = "Target-specific sentiment in AI-related abstracts over time",
+    subtitle = "Yearly mean sentiment per abstract based on target-specific AI-effect sentences",
+    x = NULL,
+    y = "Mean sentiment score",
+    color = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "top",
+    legend.text          = element_text(size = 9, color = "#4a4a6a"),
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank()
+  )
+
+# Plotting the comparison before-after the rise of AI of the annual avergae
+# sentiment score (using target-specific sentences): boxplot 
+
+target_sentence_period_scores <- target_sentence_abstract_scores |>
+  mutate(
+    period = if_else(
+      publication_year < 2023,
+      "Before rise of AI",
+      "After rise of AI"))
+
+target_sentence_period <- target_sentence_period_scores |>
+  group_by(lexicon, period) |>
+  summarise(
+    mean_sentiment = mean(sentiment_score, na.rm = TRUE),
+    median_sentiment = median(sentiment_score, na.rm = TRUE),
+    n_abstracts = n(),
+    .groups = "drop"
+  )
+
+ggplot(
+  target_sentence_period_scores,
+  aes(x = period, y = sentiment_score, fill = period)
+) +
+  geom_boxplot(alpha = 0.85, width = 0.6, outlier.alpha = 0.2) +
+  scale_fill_manual(values = c(
+    "Before rise of AI" = "steelblue",
+    "After rise of AI"  = "#2C3E6B"
+  )) +
+  facet_wrap(~ lexicon, ncol = 2, scales = "free_y") +
+  labs(
+    title = "Sentiment in AI-related abstracts before and after generative AI",
+    subtitle = "Based on target-specific AI-effect sentences only",
+    x = NULL,
+    y = "Sentiment score"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    legend.position      = "none",
+    plot.title           = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle        = element_text(color = "#4a4a6a"),
+    strip.text           = element_text(face = "bold", size = 10,
+                                        color = "#1a1a2e"),
+    axis.text.x          = element_text(color = "#4a4a6a"),
+    axis.text.y          = element_text(color = "#4a4a6a"),
+    panel.grid.minor     = element_blank()
+  )
+```
+
+In 2024 and 2025 both lexicons increase showing a moderately positive sentiment (AFINN around 0.22) and Bing around 0.33-0.58, which indicates that around 65%-80% of sentiment words are positive respectively.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+# Plotting the number of positive, negative, and neutral AI-related abstracts
+# by year (using target-specific sentences)
+
+#| fig-width: 7
+#| fig-height: 5
+
+# Bing
+bing_target_sentence_year_polarity <- bing_target_sentence_to_abstract |>
+  mutate(
+    polarity = case_when(
+      sentiment_score > 0 ~ "Positive",
+      sentiment_score < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "Bing")
+
+# AFINN
+afinn_target_sentence_year_polarity <- afinn_target_sentence_to_abstract |>
+  mutate(
+    polarity = case_when(
+      sentiment_score > 0 ~ "Positive",
+      sentiment_score < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  count(publication_year, polarity) |>
+  mutate(lexicon = "AFINN")
+
+# Combining both lexicons, calculating the total number of abstracts and the percentages of each category
+target_sentence_year_polarity <- bind_rows(
+  bing_target_sentence_year_polarity,
+  afinn_target_sentence_year_polarity) |>
+  group_by(publication_year, lexicon) |>
+  mutate(
+    total = sum(n),
+    pct = n / total * 100) |>
+  ungroup() |>
+  mutate(polarity = factor(polarity, levels = c("Positive", "Neutral", "Negative")))
+
+# Plotting the graph
+ggplot(target_sentence_year_polarity,
+  aes(x = publication_year, y = pct, color = polarity, group = polarity)) +
+  geom_line(linewidth = 1) +
+  geom_point(aes(size = total)) +
+  scale_color_manual(values = c(
+    "Positive" = "#27AE60",
+    "Negative" = "#C0392B",
+    "Neutral"  = "#2C3E6B"
+  )) +
+  scale_size_continuous(name = "Total abstracts", range = c(1, 6)) +
+  scale_x_continuous(breaks = 2017:2025) +
+  scale_y_continuous(labels = scales::label_percent(scale = 1)) +
+  facet_wrap(~ lexicon, ncol = 2) +
+  labs(
+    title = "Percentage of positive, negative, and neutral AI-related abstracts by year",
+    subtitle = "Based on target-specific AI-effect sentences only",
+    x = NULL,
+    y = "% of abstracts",
+    color = "Overall sentiment"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title       = element_text(face = "bold", color = "#1a1a2e", size = 12),
+    strip.text       = element_text(face = "bold", size = 11, color = "#1a1a2e"),
+    axis.text        = element_text(color = "#4a4a6a", size = 10),
+    legend.position  = "bottom",
+    panel.grid.minor = element_blank(),
+    panel.spacing    = unit(1.5, "lines"))
+```
+
+The distribution of abstracts is very similar; the most remarkable difference is the neutral category in Bing reaching around 25% in 2024 before dropping in 2025; which could reflect that sentences addressing AI's effects tend to be somehow more descriptive that sentences that mentioning AI.
+
+### 5.5 Which words drive the sentiment in target-specific AI-effect sentences?
+
+Counting the frequency of positive and negative words we can observe that positive ones contribute more to the overall sentiment ("trust", "ethical", "support" and "positive").
+
+```{r}
+# We create a data frame with word, sentiment, and number of mentions to see which words are more common
+
+# Bing 
+bing_target_word_counts <- ai_target_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(bing_lexicon, by = "word") |>
+  count(word, sentiment, sort = TRUE)
+bing_target_word_counts
+
+# AFINN 
+afinn_target_word_counts <- ai_target_sentences |>
+  unnest_tokens(word, sentence) |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  mutate(
+    sentiment = case_when(
+      value > 0 ~ "Positive",
+      value < 0 ~ "Negative",
+      TRUE ~ "Neutral")) |>
+  filter(sentiment != "Neutral") |>
+  count(word, sentiment, sort = TRUE)
+afinn_target_word_counts
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+
+# Plotting the top contributing words by sentiment by lexicon 
+
+target_word_counts <- bind_rows(
+  bing_target_word_counts |>
+    mutate(
+      lexicon = "Bing",
+      sentiment = case_when(
+        sentiment == "positive" ~ "Positive",
+        sentiment == "negative" ~ "Negative",
+        TRUE ~ sentiment)),
+  afinn_target_word_counts |>
+    mutate(lexicon = "AFINN"))
+
+target_word_counts |>
+  group_by(lexicon, sentiment) |>
+  slice_max(n, n = 15, with_ties = FALSE) |>
+  ungroup() |>
+  mutate(panel = paste(lexicon, sentiment, sep = " - ")) |>
+  ggplot(aes(x = n, y = reorder(word, n), fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ panel, scales = "free_y") +
+  scale_fill_manual(values = c(
+    "Positive" = "#27AE60",
+    "Negative" = "#C0392B")) +
+  labs(
+    title = "Words driving sentiment in target-specific AI-effect sentences",
+    subtitle = "Top 15 positive and negative words matched by each lexicon",
+    x = "Contribution to sentiment",
+    y = NULL
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title       = element_text(face = "bold", color = "#1a1a2e"),
+    plot.subtitle    = element_text(color = "#4a4a6a"),
+    strip.text       = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    axis.text.x      = element_text(color = "#4a4a6a"),
+    axis.text.y      = element_text(size = 8, color = "#4a4a6a"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank()
+  )
+```
+
+## Section 6. Conclusions and limitations
+
+In this final section we summarize the results of our project and discuss its limitations.
+
+Starting with **RQ1**, we found that topics addressed by social scientists do not change abruptly from year to year, they evolve gradually over time ---unsurprisingly, since scientific production takes time and specialization cannot be achieved overnight---. That said, our results show that certain events redirect social scientists' attention. Two events are highlighted by our results. First, the COVID-19 pandemic greatly attracted the attention of social scientists, dominating TF-IDF rankings at every n-gram level since 2020 and defining a topic by itself in LDA. Second ---connecting with **RQ2**---, AI attracted substantially more attention with the rise of generative AI. This pattern is visible in the TF-IDF analysis, where AI-related terms appear from 2023 onwards, and in the AI-lexicon frequency analysis: our conservative estimations show that abstracts containing AI-related terms increase from almost 0% in 2019 to over 10% in 2025. In the LDA results, we do not find a topic exclusively devoted to AI ---it appears as an important term within an education-related topic---. However, when examining the evolution of topics over time, we observe substantial shifts coinciding with the rise of generative AI, suggesting AI has had an influence in the second way we hypothesized in the introduction: affecting the evolution of other topics.
+
+Regarding **RQ3**, our results suggest that the rise of generative AI has had a detectable effect on the writing patterns of social science abstracts. The frequency of LLM signature words ---terms identified in the literature as favored by LLMs--- increases greatly from 2023 onwards. A particularly suggestive finding is the trajectory of "delve": after peaking following the release of ChatGPT, its frequency declines in recent years, mirroring a well-documented developer intervention to reduce its overuse. The fact that this decision appears traceable in top social science abstracts constitutes arguably the strongest evidence of systematic AI use in academic writing.
+
+As for **RQ4**, the results obtained across the three levels of analysis explain that the abstracts discussing AI have a predominant positive sentiment in 2017-2025, especially after 2023. In the most reliable years, the balance of positive-negative words is positive, and the average intensity of sentiment is low-moderate, and both tend to increase as we attempt to approach AI in each step of analysis. Regarding the distributions, positive abstracts account for around 60-85% of the corpus in all cases, although we also observe that abstracts directly addressing AI are scarce. Finally, the words driving sentiment in target-specific sentences are associated with AI benefits showing that literature holds a positive view of AI but also accounts for some important critical concerns.
+
+Several limitations must be acknowledged. Our corpus is imbalanced across years (few abstracts at the start of the study period) and journals (HSSC accounts for over 60% of the corpus); potentially introducing biases that are difficult to fully assess, as discussed in section 2. Future work should examine more journals. In addition, our analysis is restricted to abstracts, which may not fully represent the content of the articles, exploring full article text could improve the analysis across the three dimensions studied. Finally, our findings are descriptive: we identify patterns consistent with the rise of generative AI, but cannot establish causality. Lexicon-based sentiment analysis also carries well-known limitations in the neutral register of scientific writing.
+
+## References
+
+American Sociological Association (ASA) (2025). *American Sociological Review*: About the journal. Retrieved March 27, 2026, from https://www.asanet.org/journals/asr/
+
+American Political Science Association (APSA) (2025). *American Political Science Review*: About the journal. Retrieved March 27, 2026, from https://www.apsanet.org/apsr
+
+Derner, E., Kučera, D., Gulati, A., Bagheri, A., & Oliver, N. (2026). Mind the style: Impact of communication style on human-chatbot interaction. *arXiv*. https://arxiv.org/abs/2602.17850
+
+Ding, L., Lawson, C., & Shapira, P. (2025). Rise of generative artificial intelligence in science. *Scientometrics*, 130(9), 5093–5114. https://doi.org/10.1007/s11192-025-05413-z
+
+Erol, G., Ergen, A., Gülşen Erol, B., Kaya Ergen, Ş., Bora, T. S., Çölgeçen, A. D., Araz, B., Şahin, C., Bostancı, G., Kılıç, İ., Macit, Z. B., Sevgi, U. T., & Güngör, A. (2025). Can we trust academic AI detective? Accuracy and limitations of AI-output detectors. *Acta Neurochirurgica*, *167*(1), 214. https://doi.org/10.1007/s00701-025-06622-4
+
+European Consortium for Political Research (ECPR) (2025). *European Journal of Political Research*: Journal metrics. Retrieved March 27, 2026, from https://ecpr.eu/ContentPage.aspx?ID=122
+
+Gray, A. (2024). ChatGPT "contamination": Estimating the prevalence of LLMs in the scholarly literature. *arXiv*. https://arxiv.org/abs/2403.16887
+
+Kousha, K., & Thelwall, M. (2025). How much are LLMs changing the language of academic papers after ChatGPT? A multi-database and full text analysis. *arXiv*. https://arxiv.org/abs/2509.09596
+
+Kwon, D. (2025, May 14). Is it OK for AI to write science papers? Nature survey shows researchers are split. *Nature*, *641*, 574–578. https://doi.org/10.1038/d41586-025-01463-8
+
+Liu, N., Shapira, P., & Yue, X. (2021). Tracking developments in artificial intelligence research: Constructing and applying a new search strategy. *Scientometrics*, 126(4), 3153–3192. https://doi.org/10.1007/s11192-021-03868-4
+
+Merrill, J. B., Chen, S. Y., & Kumer, E. (2025, November 13). What are the clues that ChatGPT wrote something? We analyzed its style. *The Washington Post*. https://www.washingtonpost.com/technology/interactive/2025/how-detect-chatgpt-em-dash/
+
+Oxford University Press (2025). *European Sociological Review*: About the journal. Retrieved March 27, 2026, from https://academic.oup.com/esr
+
+Morrone, M. (2025, October 14). Exclusive: AI writing hasn't overwhelmed the web yet. *Axios*. https://www.axios.com/2025/10/14/ai-generated-writing-humans
+
+Rudnicka, K. (2025, July 9). Each AI chatbot has its own distinctive writing style — just as humans do. *Scientific American*. https://www.scientificamerican.com/article/chatgpt-and-gemini-ai-have-uniquely-different-writing-styles/
+
+Springer Nature (2025a). Journal metrics. *Nature Human Behaviour*. Retrieved March 27, 2026, from https://www.nature.com/nathumbehav/journal-impact
+
+Springer Nature (2025b). Indexing. *Humanities and Social Sciences Communications*. Retrieved March 27, 2026, from https://www.nature.com/palcomms/journal-information/indexing
+
+## Appendix I - Domain specific stopword list prompt
+
+The domain-specific stopword list used in Section 3 was generated with the assistance of a large language model (Claude Sonnet 4.6, Anthropic). The complete prompt is reproduced below.
+
+::: {style="border: 1px solid #ccc; padding: 1em; border-radius: 4px;"}
+```         
+You are an expert computational linguist and text mining specialist with deep 
+knowledge of social science research and academic writing conventions. You are 
+working on a large-scale corpus analysis project described in the context below.
+
+<project_context>
+The project analyzes a corpus of journal abstracts drawn from six leading social 
+science journals over the period 2016–2025:
+
+  - Nature Human Behaviour (behavioral science, interdisciplinary)
+  - Humanities and Social Sciences Communications (interdisciplinary)
+  - American Sociological Review (sociology, North America)
+  - American Political Science Review (political science, North America)
+  - European Sociological Review (sociology, Europe)
+  - European Journal of Political Research (political science, Europe)
+
+The corpus spans the period before and after the public rise of generative AI 
+(November 2022, release of ChatGPT). Section 3 of the project (for which these 
+stopwords are being prepared) addresses two research questions:
+
+  RQ1: What are the predominant topics in top social science journals, by journal 
+       and by year?
+  RQ2: Has AI (in the broad sense) become one of the predominant topics, and has 
+       it influenced the broader topical landscape?
+
+The unit of analysis is the abstract (short, dense, highly formulaic texts 
+averaging 150–250 words), written in academic English.
+</project_context>
+
+<corpus_frequency_data>
+The file corpus_word_freq.csv is attached. It contains the top words in the
+corpus  after removing standard English stopwords  and  numeric tokens,
+generated directly from thousands of abstracts using tidytext. Columns:
+  - word: the token (lowercase)
+  - n: raw frequency count across all abstracts
+
+Use this frequency data as empirical grounding for your stopword list:
+  - Words that appear here at high frequency AND carry no thematic or
+  discriminative  value are strong candidates for inclusion in the stopword list
+  - Do not limit yourself to words in this list — be exhaustive across all 7 
+    categories — but treat high-frequency words as a priority checklist to 
+    ensure nothing obvious is missed
+  - High-frequency words that carry topical signal (per the preservation rules 
+    below) must NOT be added to the stopword list even if they rank highly
+    (e.g. "policy", "political", "education", "health")
+</corpus_frequency_data>
+
+<task>
+Generate a comprehensive, categorised list of domain-specific stopwords to be 
+removed from this corpus. These are words that:
+
+  (a) carry no thematic or discriminative value for social science research AND
+  (b) appear at high frequency across the corpus, AND
+
+Before generating each category, check it against the corpus_frequency_data 
+above to ensure all high-frequency uninformative words are captured.
+
+Return the list as a clean, categorised R tibble with a column for the stopword 
+and a column for its category, preceded by commented section headers explaining 
+the rationale for each category.
+</task>
+
+<categories_to_cover>
+Generate stopwords across ALL of the following categories. For each category,
+think  systematically about what words in that class appear in social science
+abstracts, words like:
+
+1. ACADEMIC BOILERPLATE VERBS
+   Verbs used generically across all abstracts regardless of topic: reporting
+   verbs ("examine", "investigate", "explore", "suggest", "find", "show",
+   "demonstrate", "analyze", "assess", "evaluate", "discuss", "argue",
+   "propose", "address",  "consider", "focus", "aim", "seek", "test", "draw",
+   "provide", "offer", "highlight", "reveal", "indicate", "identify",
+   "contribute", "develop"), and their inflected forms where relevant.
+
+2. GENERIC METHODOLOGICAL TERMS
+   Words describing research designs, data types, and analytical approaches that 
+   are ubiquitous across social science and carry no topical signal: "survey", 
+   "questionnaire", "interview", "sample", "dataset",  "longitudinal",
+   "cross-sectional", "regression", "model", "framework",  "approach", "method",
+   "methodology", "analysis", "data", "measure", "variable", "coefficient",
+   "estimate", "robustness", "validity", "reliability", etc.
+
+3. ABSTRACT-STRUCTURAL BOILERPLATE
+   Phrases and words used to signal the structure of an abstract itself rather
+   than its content: "paper", "study", "article", "research", "literature",
+   "review", "background", "objective", "purpose", "contribution",
+   "implication", "finding", "result", "conclusion", "evidence", "prior",
+   "existing", "previous", "recent", "current", "present", "based", "using",
+   "used", "given", "among", "across".
+
+4. GENERIC SOCIAL SCIENCE CONCEPTS
+   Terms so broadly used in social science that they provide no discriminative 
+   topical signal between documents: "society", "social", "individual",
+   "group", "population", "people", "person", "human", "behavior", "behaviour",
+   "attitude", "perception", "factor", "role", "relationship", "impact",
+   "effect", "influence", "context", "level", "process", "system", "structure",
+   "pattern", "change", "difference", "association", "correlation", etc.
+
+5. JOURNAL-SPECIFIC AND PUBLICATION BOILERPLATE
+   Words likely introduced by journal formatting, editorial conventions, or
+   abstract templates specific to these six journals: copyright notices,
+   volume/issue markers, DOI fragments, and any words that appear due to
+   systematic metadata leakage.
+
+6. ENCODING ARTEFACTS AND NOISE
+   Tokens that result from text extraction, encoding issues, or tokenisation: 
+   single characters (except meaningful ones), numeric tokens, garbled unicode 
+   fragments, OCR noise, HTML remnants, and other non-linguistic tokens.
+
+7. HIGH-FREQUENCY FUNCTION WORDS NOT CAUGHT BY STANDARD STOPWORD LISTS
+   Domain-specific function-like words that standard English stopword lists 
+   (e.g., the Snowball or SMART lists) miss but which are uninformative in this 
+   corpus: discipline-specific connectives, hedging phrases reduced to single 
+   tokens ("however", "furthermore", "moreover", "nevertheless", "thus",
+   "therefore", "hence", "whereas", "whereby", "therein"), and academic filler 
+   adjectives ("important", "significant", "key", "major", "critical", "novel",
+   "robust", "comprehensive", "systematic", "rigorous", "substantial").
+</categories_to_cover>
+
+<preservation_rules>
+CRITICAL: The following word classes must NOT appear in the stopword list, even
+if they are frequent. Removing them would destroy the thematic signal needed for
+RQ1 and RQ2:
+
+ - AI and technology terms: any term related to artificial intelligence, machine 
+   learning, large language models, specific model names, or related technology. 
+   These are central to RQ2 and must be preserved.
+ - Substantive social science topic terms: words indexing real research topics 
+   such as "inequality", "democracy", "migration", "climate", "health", "labor", 
+   "race", "gender", "education", "voting", "polarization", "trust", "identity", 
+   "discrimination", "poverty", "welfare", etc.
+ - Sentiment-bearing terms: words with clear positive or negative valence that 
+   will be needed for the sentiment analysis in Section 5.
+ - Proper nouns and named entities: country names, institutional names, author 
+   names — these may carry topical signal.
+ - Temporally specific terms: words that may index pre/post ChatGPT content, 
+   which are needed for the temporal analyses in Sections 3–6.
+
+When in doubt about whether a word carries signal, keep it.
+</preservation_rules>
+
+<output_format>
+Return only executable R code. Structure it as follows:
+
+  library(tibble)
+
+  domain_stopwords <- tibble(
+    word = c(
+      # 1. ACADEMIC BOILERPLATE VERBS
+      # These verbs appear in virtually every abstract regardless of topic.
+      # Removing them prevents them from dominating topic-word distributions
+      # in LDA and collapsing IDF weights in TF-IDF.
+      "examine", "investigate", ...
+
+      # 2. GENERIC METHODOLOGICAL TERMS
+      # ...
+
+      # [continue for all 7 categories]
+    ),
+    category = c(
+      # mirror the word vector exactly, one category label per word
+      "boilerplate_verb", "boilerplate_verb", ...
+    )
+  )
+
+Rules:
+  - All stopwords in lowercase
+  - One row per word (not per phrase, we operate on unigrams after tokenisation)
+  - The word and category vectors must be exactly the same length
+  - Category labels should be short snake_case strings matching the 7 categories
+  - Add a final comment line reporting the total count: # Total: N stopwords
+  - Be exhaustive, put lots of effort
+</output_format>
+```
+:::
+
+## Appendix II - AI effects lexicon prompt
+
+::: {style="border: 1px solid #ccc; padding: 1em; border-radius: 4px;"}
+```         
+You are an expert computational linguist and text mining specialist working on a 
+systematic literature review about AI and its effects. Your task is to create
+three R vectors of n-grams that will be used to identify academic journal
+abstracts addressing artificial intelligence (AI) or its effects, consequences,
+risks,  benefits, or impacts.
+
+<objective>
+Precision over recall. We accept missing relevant abstracts, but every abstract 
+matched by these n-grams must unambiguously be about AI or its effects.
+</objective>
+
+<existing_ai_lexicon>
+We already have a lexicon that identifies AI-related vocabulary. Use it as your 
+reference for how AI is referred to across our corpus. Your component vectors
+must  be compatible with this lexicon —meaning the AI-side tokens should draw
+from these  terms or their natural variants—.
+
+# AI unigram lexicon
+ai_lexicon_unigrams <- c(
+  "autoencoder", "perceptron", "neurocomputing",
+  "chatgpt", "llm",
+  "deepseek", "openai", "ai"
+)
+# AI bigram lexicon
+ai_lexicon_bigrams <- c(
+  "artificial intelligence", "neural network", "machine learning",
+  "deep learning", "reinforcement learning", "learning algorithm",
+  "backpropagation learning", "backpropagation algorithm",
+  "machine intelligence", "computational intelligence",
+  "neural model", "deep network",
+  "generative ai", "language model", "pretrained transformer",
+  "ai-generated content", "openai gpt",
+  "claude sonnet", "claude opus", "claude haiku",
+  "google gemini", "gemini pro", "gemini ultra",
+  "microsoft copilot", "github copilot", "mistral ai",
+  "meta llama", "llama 2", "llama 3",
+  "stable diffusion", "gpt 5", "gpt 4", "gpt 3", "gpt 2", "gpt 1",
+  "dall e", "agentic ai"
+)
+# AI trigram lexicon
+ai_lexicon_trigrams <- c(
+  "large language model", "generative language model",
+  "generative large language", "generative pretrained transformer",
+  "generative artificial intelligence", "artificial intelligence generated",
+  "openai large language", "openai language model",
+  "ai language model", "ai generated content"
+)
+</existing_ai_lexicon>
+
+<task>
+Rather than writing every n-gram by hand, use a **combinatorial approach**:
+define separate component vectors for the AI side and the effects side, then
+generate the final n-gram vectors programmatically using outer() and paste().
+This makes thelexicon scalable and easy to maintain.
+The architecture for each n-gram size is as follows:
+## BIGRAMS (2 words total)
+Combine:
+  - ai_side_1w: AI unigrams (1-word AI terms, e.g. "ai", "llm", "chatgpt")
+  - effect_side_1w: effect unigrams (1-word effect/outcome terms, e.g. "risks", 
+    "benefits")
+Generate with:
+  ai_sentiment_bigrams <- unique(trimws(as.vector(
+    outer(ai_side_1w, effect_side_1w, paste)
+  )))
+Note: outer() by default produces [AI term] + [effect term] order. To also
+capture [effect term] + [AI term] order (e.g. "risks ai", "benefits llm"),
+generate both directions and combine:
+  ai_sentiment_bigrams <- unique(trimws(c(
+    as.vector(outer(ai_side_1w, effect_side_1w, paste)),
+    as.vector(outer(effect_side_1w, ai_side_1w, paste))
+  )))
+## TRIGRAMS (3 words total)
+Trigrams can be formed from two structural patterns. Generate both and combine:
+Pattern A — [2-word AI term] + [1-word effect term]:
+  Uses: ai_side_2w (AI bigrams) × effect_side_1w (effect unigrams)
+  Example: "machine learning" + "risks" → "machine learning risks"
+Pattern B — [2-word effect prefix] + [1-word AI term]:
+  Define effect_side_2w_pre as 2-word effect-leading phrases like 
+  "effects of", "risks of", "impact of", etc., then combine with ai_side_1w:
+  Example: "effects of" + "ai" → "effects of ai"
+  effect_side_2w_pre <- c("effects of", "impact of", "risks of", ...)
+  
+  # Pattern A: [2-word AI term] + [1-word effect term]
+  trigrams_a <- as.vector(outer(ai_side_2w, effect_side_1w, paste))
+  
+  # Pattern B: [2-word effect prefix] + [1-word AI term]
+  trigrams_b <- as.vector(outer(effect_side_2w_pre, ai_side_1w, paste))
+  
+  ai_sentiment_trigrams <- unique(trimws(c(trigrams_a, trigrams_b)))
+  
+## FOURGRAMS (4 words total)
+Fourgrams can be formed from 3 structural patterns. Generate all and combine:
+Pattern A — [2-word effect prefix] + [2-word AI term]:
+  effect_side_2w_pre × ai_side_2w
+  Example: "effects of" + "machine learning" → "effects of machine learning"
+Pattern B — [2-word AI term] + [2-word effect term]:
+  ai_side_2w × effect_side_2w
+  Example: "machine learning" + "job displacement" → 
+           "machine learning job displacement"
+Pattern C — [3-word effect prefix] + [1-word AI term]:
+ effect_side_3w_pre × ai_side_1w
+ Example: "ethical implications of" + "ai" → "ethical implications of ai"
+ fourgrams_a <- as.vector(outer(effect_side_2w_pre, ai_side_2w, paste))
+ fourgrams_b <- as.vector(outer(ai_side_2w, effect_side_2w, paste))
+ fourgrams_c <- as.vector(outer(effect_side_3w_pre, ai_side_1w, paste))
+ ai_sentiment_fourgrams <- unique(trimws(c(fourgrams_a, fourgrams_b,
+                                           fourgrams_c)))
+</task>
+
+<component_vector_requirements>
+Define all component vectors clearly before the combination step, with inline 
+comments grouping terms by semantic category. All strings must be lowercase.
+The effects/outcome side vectors must cover a broad semantic field, including:
+- Direct outcome terms: effects, impacts, consequences, implications, outcomes, 
+  influence
+- Valence terms: benefits, risks, harms, dangers, threats, opportunities, 
+  advantages, disadvantages, challenges (IMPORTANT: make sure that non-neutral
+  terms are balanced, that is, make sure there is no bias towards "positive" or
+  "negative" valence)
+- Societal dimensions: ethical, social, economic, labor, employment, inequality, 
+  bias, fairness, privacy, security, trust, accountability, transparency
+- Governance terms: regulation, policy, governance, legislation, oversight
+- Human response terms: adoption, acceptance, resistance, perception, attitudes, 
+  concerns, fears
+- Domain-specific effect nouns: automation, misinformation, discrimination, 
+  creativity, decision-making, displacement, surveillance
+Use ALL terms from the existing lexicon on the AI side —include every term
+across unigrams, bigrams, and trigrams without exception—.
+</component_vector_requirements>
+
+<precision_rules>
+The only constraint on generated combinations is semantic unambiguity: if a 
+combination appears in an abstract, it must mean that AI or its effects
+addressed. Whether a combination actually occurs in the corpus is irrelevant 
+—unmatched n-grams are harmless—. Go for exhaustive coverage. Do not prune for 
+plausibility. 
+Apply unique() and trimws() to deduplicate and clean whitespace.
+</precision_rules>
+
+<output_format>
+Return only executable R code. Structure it in this order:
+1. All component vectors (with inline comments by semantic category)
+2. The three combination steps producing ai_sentiment_bigrams, 
+   ai_sentiment_trigrams, ai_sentiment_fourgrams
+3. A brief comment above each final vector stating how many n-grams 
+   it contains, e.g.: # ~120 bigrams
+No prose before or after the code block.
+</output_format>
+```
+:::
+
+## Appendix III - Unigram TF-IDF context windows
+
+Some of the terms in the TF-IDF results were unclear: they were abbreviations or unexpected terms with no immediately evident interpretation. In order to understand them better, we explored their context windows using the `kwic` function from the `quanteda` package. We include them here for transparency and to allow the reader to verify our interpretations.
+
+```{r}
+# Create the corpus, linking text to our ID column
+abstracts_corpus <- corpus(articles,
+                           text_field = "abstract",
+                           docid_field = "id")
+```
+
+```{r}
+# Year 2016
+# kwic = 400th
+# We specify `quanteda::tokens` because there are conflicts with other libraries
+kwic(quanteda::tokens(abstracts_corpus), "400th", window = 8)
+# kwic = geg
+kwic(quanteda::tokens(abstracts_corpus), "geg", window = 8)
+# kwic = mlg
+kwic(quanteda::tokens(abstracts_corpus), "mlg", window = 8)
+
+# Year 2017
+# kwic = gothic
+kwic(quanteda::tokens(abstracts_corpus), "gothic", window = 8)
+# kwic = fia
+kwic(quanteda::tokens(abstracts_corpus), "fia", window = 8)
+
+# Year 2018
+# kwic = graffiti
+kwic(quanteda::tokens(abstracts_corpus), "graffiti", window = 8)
+# kwic = revok
+kwic(quanteda::tokens(abstracts_corpus), "revok", window = 8)
+# kwic = tves
+kwic(quanteda::tokens(abstracts_corpus), "tves", window = 8)
+# kwic = gamh
+kwic(quanteda::tokens(abstracts_corpus), "gamh", window = 8)
+# kwic = nua
+kwic(quanteda::tokens(abstracts_corpus), "nua", window = 8)
+
+# Year 2019
+# kwic = gun
+kwic(quanteda::tokens(abstracts_corpus), "gun", window = 8)
+# kwic = guns
+kwic(quanteda::tokens(abstracts_corpus), "guns", window = 8)
+# kwic = lgds
+kwic(quanteda::tokens(abstracts_corpus), "lgds", window = 8)
+# kwic = ccs
+kwic(quanteda::tokens(abstracts_corpus), "ccs", window = 8)
+
+# Year 2020
+# kwic = pea
+kwic(quanteda::tokens(abstracts_corpus), "pea", window = 6)
+# kwic = mta
+kwic(quanteda::tokens(abstracts_corpus), "mta", window = 6)
+# kwic = silcrete
+kwic(quanteda::tokens(abstracts_corpus), "silcrete", window = 8)
+
+# Year 2021
+# kwic = coconut
+kwic(quanteda::tokens(abstracts_corpus), "coconut", window = 8)
+# kwic = hcws
+kwic(quanteda::tokens(abstracts_corpus), "hcws", window = 6)
+# kwic = wc
+kwic(quanteda::tokens(abstracts_corpus), "wc", window = 6)
+
+# Year 2023
+# kwic = csr
+kwic(quanteda::tokens(abstracts_corpus), "csr", window = 6)
+# kwic = dms
+kwic(quanteda::tokens(abstracts_corpus), "dms", window = 6)
+# kwic = smmes
+kwic(quanteda::tokens(abstracts_corpus), "smmes", window = 6)
+
+# Year 2024-2025
+# kwic = esg
+kwic(quanteda::tokens(abstracts_corpus), "esg", window = 6)
+# kwic = efl
+kwic(quanteda::tokens(abstracts_corpus), "efl", window = 6)
+# kwic = fintech
+kwic(quanteda::tokens(abstracts_corpus), "fintech", window = 6)
+```
+
+## Appendix IV - Bigram TF-IDF context windows
+
+Some of the terms in the TF-IDF results were unclear: they were abbreviations or unexpected terms with no immediately evident interpretation. In order to understand them better, we explored their context windows using the `kwic` function from the `quanteda` package. We include them here for transparency and to allow the reader to verify our interpretations.
+
+```{r}
+# Year 2016
+# kwic = european sociological (this is metadata that we cannot filter without
+# potentially losing relevant information, since the bigram is composed by
+# two terms that could be meaninful in other combinations)
+kwic(quanteda::tokens(abstracts_corpus), phrase("european sociological"),
+     window = 8)
+
+# Year 2017
+# kwic = social pact
+kwic(quanteda::tokens(abstracts_corpus), phrase("social pact"), window = 8)
+# kwic = veto player
+kwic(quanteda::tokens(abstracts_corpus), phrase("veto player"), window = 8)
+
+# Year 2018
+# kwic = mind upload
+kwic(quanteda::tokens(abstracts_corpus), phrase("mind upload"), window = 8)
+# kwic = fairy tale
+kwic(quanteda::tokens(abstracts_corpus), phrase("fairy tale"), window = 8)
+
+# Year 2020
+# kwic = science diplomacy
+kwic(quanteda::tokens(abstracts_corpus), phrase("science diplomacy"),
+     window = 8)
+# kwic = grass pea
+kwic(quanteda::tokens(abstracts_corpus), phrase("grass pea"), window = 8)
+# kwic = gun culture
+kwic(quanteda::tokens(abstracts_corpus), phrase("gun culture"), window = 8)
+# kwic = agile sd
+kwic(quanteda::tokens(abstracts_corpus), phrase("agile sd"), window = 8)
+# kwic = uhi tools
+kwic(quanteda::tokens(abstracts_corpus), phrase("uhi tools"), window = 8)
+# kwic = sa mta
+kwic(quanteda::tokens(abstracts_corpus), phrase("sa mta"), window = 8)
+
+# Year 2021
+# kwic = frontline hcws
+kwic(quanteda::tokens(abstracts_corpus), phrase("frontline hcws"), window = 8)
+
+# Year 2023
+# kwic = burden reduction
+kwic(quanteda::tokens(abstracts_corpus), phrase("burden reduction"), window = 8)
+
+# Year 2025
+kwic(quanteda::tokens(abstracts_corpus), phrase("carbon emissions"), window = 8)
+```
+
+## Appendix V - Trigram TF-IDF context windows
+
+Some of the terms in the TF-IDF results were unclear: they were abbreviations or unexpected terms with no immediately evident interpretation. In order to understand them better, we explored their context windows using the `kwic` function from the `quanteda` package. We include them here for transparency and to allow the reader to verify our interpretations.
+
+```{r}
+# Year 2016
+# kwic = balance lifestyle mental
+kwic(quanteda::tokens(abstracts_corpus), phrase("balance lifestyle mental"), window = 8)
+
+# Year 2017
+# kwic = veto player theory
+kwic(quanteda::tokens(abstracts_corpus), phrase("veto player theory"), window = 8)
+
+# Year 2018
+# kwic = search query data
+kwic(quanteda::tokens(abstracts_corpus), phrase("search query data"), window = 8)
+# kwic = axial age concept
+kwic(quanteda::tokens(abstracts_corpus), phrase("axial age concept"), window = 8)
+
+# Year 2019
+# kwic = eclipse prediction scheme
+kwic(quanteda::tokens(abstracts_corpus), phrase("eclipse prediction scheme"), window = 8)
+# kwic = zika conspiracy theories
+kwic(quanteda::tokens(abstracts_corpus), phrase("zika conspiracy theories"), window = 8)
+
+# Year 2020
+# kwic = grass pea production
+kwic(quanteda::tokens(abstracts_corpus), phrase("grass pea production"), window = 8)
+# kwic = agile sd implementation
+kwic(quanteda::tokens(abstracts_corpus), phrase("agile sd implementation"), window = 8)
+# kwic = probability ratio index
+kwic(quanteda::tokens(abstracts_corpus), phrase("probability ratio index"), window = 8)
+
+# Year 2021
+# kwic = dravidian tooth word
+kwic(quanteda::tokens(abstracts_corpus), phrase("dravidian tooth word"), window = 8)
+# kwic = proto dravidian tooth
+kwic(quanteda::tokens(abstracts_corpus), phrase("proto dravidian tooth"), window = 8)
+# kwic = av pilot projects
+kwic(quanteda::tokens(abstracts_corpus), phrase("av pilot projects"), window = 8)
+# kwic = short run sustainability
+kwic(quanteda::tokens(abstracts_corpus), phrase("short run sustainability"), window = 8)
+
+# Year 2022
+# kwic = golf simulation industry
+kwic(quanteda::tokens(abstracts_corpus), phrase("golf simulation industry"), window = 8)
+# kwic = significantly lower sle
+kwic(quanteda::tokens(abstracts_corpus), phrase("significantly lower sle"), window = 8)
+
+# Year 2024
+# kwic = squares structural equation
+kwic(quanteda::tokens(abstracts_corpus), phrase("squares structural equation"), window = 8)
+```
