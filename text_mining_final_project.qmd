@@ -1439,7 +1439,7 @@ The shift coinciding with the rise of generative AI is consistent across all val
 
 As discussed, papers on AI have increased exponentially since ChatGPT’s launch in 2022. At the same time, the use of AI to help scientists in their research has exploded: 28 % of scientists use AI to write their manuscripts, according to a survey of Nature (Kwon, 2025). That figure is likely to have increased, since there AI providers have multiplied and its use has been democratized.
 
-When writing text, it appears that chatbots have a specific “tone”, which is previously designed (for a study of how a chatbot’s “voice” is designed, see Derner et al., 2026). This communication style, which varies from chatbot to chatbot, will systematically push some words or grammatical forms more than others (Rudnika and Mukerjee, 2025).
+When writing text, it appears that chatbots have a specific “tone”, which is previously designed (for a study of how a chatbot’s “voice” is designed, see Derner et al., 2026). This communication style, which varies from chatbot to chatbot, will systematically push some words or grammatical forms more than others (Rudnicka, 2025).
 
 From the beginning of the chatbot era, linguists have pointed out that there are certain words that ChatGPT favors. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak, since it’s estimated that more than half of today’s text in the internet is AI generated (Matsui, 2025; Morrone, 2025). Some studies have shown that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We’ll look into our corpus to see if there is an increase of LLM-favored words.
 
