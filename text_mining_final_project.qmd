@@ -186,7 +186,7 @@ We begin by examining the structure of the raw dataset.
 describe(articles_raw)
 ```
 
-Not all records include abstracts (19.6% NAs). Since our entire analysis is based on abstract text, we remove records without abstracts or publication year, and restrict the corpus to our study period (2016–2025). Another relevant column is `publication_year`, there are no missing values, so we do not need to filter any observations out.
+Not all records include abstracts (19.6% NAs). Since our entire analysis is based on abstract text, we remove records without abstracts or publication year, and restrict the corpus to our study period (2016–2025).
 
 ```{r warning=FALSE}
 # Filter: keep only records with an abstract, within our study period
@@ -322,13 +322,13 @@ p_total / p_facets / p_bar +
 
 The number of articles in our journals is not balanced: HSSC accounts for more than 60% of the corpus, the other five journals are relatively balanced between them. We also observe a temporal imbalance: with publications greatly increasing after 2022. Both imbalances are driven by the same factor: the increase of publications in journals part of the Nature Portfolio, particularly HSSC. 
 
-The temporal imbalance should be acknowledged when interpreting results. About the journal imbalance: we are interested in trends in social science papers, and the Nature Portfolio is a rightful and big part of that corpus, we will thus not exclude their articles, that decision would make the corpus less representative arbitrarily ---we acknowledge this journal imbalance as a limitation that could potentially introduce biases, however, determining what the case actually is would require an exploration of the publications landscape that is beyond the scope of this project---. 
+The temporal imbalance should be acknowledged when interpreting results. Regarding the journal imbalance: we are interested in trends in social science papers, and the Nature Portfolio is a rightful and large part of that corpus; excluding their articles would make the corpus less representative. We acknowledge this imbalance as a limitation that could potentially introduce biases, but determining whether this is actually the case would require an exploration of the publishing landscape that is beyond the scope of this project.
 
 ## Section 3. AI and the evolution of social science journals' interests
 
 ### 3.1 Preprocessing setup
 
-The techniques in this section use different tokenization and filtering strategies. We will define all shared elements here ---stopwords and filtered unigram corpus---, and explain which subsections use which.
+The techniques in this section use different tokenization and filtering strategies. We will define all shared elements here, and explain which subsections use which.
 
 We work with two filtering tools:
 
@@ -612,11 +612,12 @@ domain_stopwords <- tibble(
 
 #### 3.1.2 N-gram stopwords (subset for bigram/trigram pipelines)
 
-For bigram and trigram analyses, we apply just a subset of `domain_stopwords`. Single words like "social" or "people" do not provide relevant information in our current context, but form meaningful n-grams ("social media" or "Roma people"), we should thus keep them. But we do filter terms that only produce noise: publication metadata, abstract specific words, or journal self-references.
+For bigram and trigram analyses, we apply just a subset of `domain_stopwords`. Single words like "social" or "people" do not provide relevant information in our current context, but form meaningful n-grams ("social media" or "Roma people"), we should thus keep them. But we do filter terms that only produce noise.
 
 ```{r}
-# Subset of domain stopwords need for n-gram filtering. Since we defined
-# categories, we can easily choose the relevant subset
+# Subset of domain stopwords need for n-gram filtering (publication metadata,
+# abstract specific words, journal self-references, etc.). Since we defined
+# categories, we can easily choose the relevant subset.
 ngram_stopwords <- domain_stopwords |>
   filter(category %in% c("boilerplate_verb",
                          "abstract_boilerplate",
@@ -634,7 +635,7 @@ articles |>
      pull(abstract)
 ```
 
-We do not filter all numbers out, since they could be relevant ---referring to historic events, or other meaningful values---.
+We do not filter all numbers out, since they could be meaningful figures.
 
 ```{r}
 # Recent years as noise tokens
@@ -647,17 +648,13 @@ ngram_stopwords <- bind_rows(ngram_stopwords, year_noise)
 
 Since both the unigram TF-IDF (section 3.2.1) and the LDA (section 3.2.3) use the same tokenization and filtering, we perform it here, to avoid repetitions.
 
-We start by tokenizing at the word level:
-
 ```{r}
-# Tokenize at word level, keeping metadata columns
+# We start by tokenizing at the word level, keeping metadata columns
 tidy_abstracts <- articles |>
   unnest_tokens(word, abstract, token = "words")
-```
 
-Then filter standard stopwords, the full set of domain-specific stopwords, and recent years.
-
-```{r}
+# Then filter standard stopwords, the full set of domain-specific stopwords,
+# and recent years.
 tidy_abstracts <- tidy_abstracts |> 
   # Standard stopwords
   anti_join(stop_words, by = "word") |>
@@ -669,14 +666,13 @@ tidy_abstracts <- tidy_abstracts |>
 tidy_abstracts
 ```
 
+### 3.2 Analysis
 
-### 3.2 Analysis \[RQ1 + RQ2\]
-
-In order to address RQ1 and RQ2, we will use three complementary techniques: TF-IDF to identify distinctive vocabulary by year (and also for the period before and after the public release of ChatGPT); word frequency analysis using a custom set of AI-related words to measure the growth of AI-related terminology by year; and LDA topic modelling.
+In order to address RQ1 and RQ2, we will use three complementary techniques: TF-IDF to identify distinctive vocabulary by year; word frequency analysis using a custom set of AI-related words to measure the growth of AI-related terminology by year; and LDA topic modelling.
 
 #### 3.2.1 Distinctive vocabulary by year (TF-IDF)
 
-We use TF-IDF to identify the most distinctive terms of each year, treating each year as a single document. We apply this at three levels: unigram, bigram, and trigram level.
+We use TF-IDF to identify the most distinctive terms of each year, treating each year as a single document. We apply this at three n-gram levels.
 
 ##### Unigram TF-IDF by year
 
@@ -860,7 +856,6 @@ We excluded terms like "random forest" because they refer to statistical methods
 
 We included extra n-grams to capture named generative AI models and providers absent from both sources, such as Gemini, Claude, or LLama ---while the names by themselves could lead to ambiguity (the zodiac sign, Claude Lévi-Strauss, the animal, etc.), including the version number in bigrams solves this ambiguity---.
 
-While not perfect, this approach is more than sufficient to capture broad trends necessary to answer our research questions.
 
 ```{r}
 # AI unigram lexicon
@@ -942,7 +937,7 @@ ai_lexicon_trigrams <- c(
 
 ##### Tokenizing abstracts at each n-gram level
 
-Since we have a unigram, bigram, and trigram AI lexicon, we need to tokenize the abstracts separately for each, and then match against the corresponding lexicon.
+We tokenize abstracts at the three n-gram levels and match each against the corresponding lexicon.
 
 ```{r}
 # Source abstracts. We start from articles each time since n-gram tokenization
@@ -1027,7 +1022,7 @@ ggplot(ai_proportion, aes(x = publication_year, y = proportion_ai_articles)) +
   )
 ```
 
-The presence of AI-related terms was insignificant before 2019, but it quickly grew, reaching 4% in 2022 ---the year of ChatGPT's public release---, and surpassing 10% in 2025. Since our lexicon prioritizes precision over recall, these are probably underestimates. But the trend is clear: attention to AI has greatly increased following the rise of generative AI tools. Let's explore which terms are driving the trend.
+The presence of AI-related terms was insignificant before 2019, but it quickly grew, reaching 4% in 2022 ---ChatGPT's public release---, and surpassing 10% in 2025. Since our lexicon prioritizes precision over recall, these are probably underestimates. But the trend is clear: attention to AI has greatly increased following the rise of generative AI tools. Let's explore which terms are driving the trend.
 
 ```{r}
 #| fig-width: 6
@@ -1083,7 +1078,7 @@ ai_hits |>
   )
 ```
 
-Before 2020 fewer than five abstracts match any lexicon term; from 2020 onwards, *artificial intelligence* and its abbreviation are the main drivers; from 2023, *chatgpt* and *generative ai* appear at the same time as mentions to AI greatly increase, suggesting the rise of generative AI influenced academic interests in the social sciences. Since the term *"ai"* is the main driver, we explore it by itself:
+Before 2020 fewer than five abstracts match any lexicon term; from 2020 onwards, *artificial intelligence* and its abbreviation are the main drivers; from 2023, *chatgpt* and *generative ai* appear at the same time as mentions to AI greatly increase, suggesting the rise of generative AI influenced academic interests in the social sciences. Since *"ai"* is the main driver, we explore it by itself:
 
 ```{r}
 # Filter and count for just the term "ai"
@@ -1119,11 +1114,11 @@ ai_hits |>
   )
 ```
 
-When examining "AI" in isolation, the pattern becomes even clearer: its usage explodes from 2023 onwards, coinciding with the rise of generative AI.
+Examining "AI" in isolation, the pattern becomes even clearer: its usage explodes from 2023 onwards, coinciding with the rise of generative AI.
 
 #### 3.2.3 Topic modelling (LDA)
 
-We now move from individual words to latent topics. We use LDA to discover the main topics in our corpus and then examine how the weight of these topics has shifted year by year across our full study period (2016–2025).
+We move from individual words to latent topics, using LDA to discover the main topics in our corpus, and examine how their weights have evolved over our study period.
 
 ##### Preparing the Document-Term Matrix
 
@@ -3015,7 +3010,7 @@ The distribution of abstracts is very similar; the most remarkable difference is
 
 ### 5.4 Which words drive the sentiment in target-specific AI-effect sentences?
 
-Finally, we explore which words drive the sentiment in these target-specific AI-effect sentences of scientific papers' abstracts. Counting the frequency of positive and negative words we can observe that psoitive ones contribute more to the overall sentiment (trust, ethical, support and positive).
+Finally, we explore which words drive the sentiment in these target-specific AI-effect sentences of scientific papers' abstracts. Counting the frequency of positive and negative words we can observe that positive ones contribute more to the overall sentiment (trust, ethical, support and positive).
 
 ```{r}
 # We create a data frame with word, sentiment, and number of mentions to see which words are more common
@@ -3087,11 +3082,7 @@ target_word_counts |>
   )
 ```
 
-CONCLUSION:
 
-The results obtained across the three levels of analysis explain that social science abstracts discussing AI have a predominant positive sentiment throughout the period 2017-2025 studied. In the most reliable years, the balance of positive-negative words is positive, and the average intensity of sentiment is low-moderate, and both tend to increase at each step of the analysis, validating the sequential approach to the object of study. Consistently across the levels of analysis, the period after the rise of AI in 2023 also has slightly higher central values in both lexicons.
-
-Regarding the distribution of abstracts, Bing and AFINN lexicons confirm that positive abstracts account for around 60-85% of the corpus, with Bing showing a generally increasing tendency from 2021 to 2025 and AFINN remaining more stable, as the volume of AI-related abstracts grows over time. We also observe that abstracts that directly address and evaluate AI are scarce. Finally, the words driving sentiment in these target-specific sentences are mainly associated with AI benefits – trust, ethical, support, positive – showing that the literature holds a positive view of AI but also accounts for some important critical concerns.
 ## Section 6. Conclussions and limitations
 
 ## References
