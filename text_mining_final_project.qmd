@@ -1470,7 +1470,7 @@ tidy_abstracts |>
   )
 ```
 
-We’ll use the words that Kousha and Thelwall used in their paper, which are “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These are terms that have the support of other researchers in the area as well. To them, we’ll add “core” which is a word that according to journalists in the Washington Post has been pushed by the newer versions of ChatGPT (Merrill et al., 2025).
+We’ll use the words that Kousha and Thelwall used in their paper, which are “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These are terms that have the support of other researchers in the area as well. To them, we’ll add “core”, a word favored by the newer versions of ChatGPT (Merrill et al., 2025).
 
 ```{r}
 # LLM signature words, based on Kousha & Thelwall (2025) and control words
@@ -1730,7 +1730,7 @@ Our fourth research question looks at how sentiments towards AI have changed dur
 
 To tackle this limitation, the analysis has been designed sequentially: first, sentiment analysis is conducted on the full abstracts that mention AI-related terms. Secondly, only sentences that contain explicit AI terms are used. Third, we select only those sentences that have bigrams/trigrams/fourgrams explicitly addressing the effects or consequences of AI, thus undoubtedly making AI the focus of interest in that sentence ---and not just a simple mention---.
 
-In addition, we acknowledge the difficulty of analyzing sentiment in abstracts of scientific texts, which are characterized by the neutrality of the vocabulary used. This is reflected in the exclusion of some abstracts and sentences (across all three levels of analysis) because none of their words appear in the sentiment lexicons used, Bing and AFFIN ---although their omission may capture limitations of lexicon-based sentiment analysis---.
+In addition, we acknowledge the difficulty of analyzing sentiment in abstracts of scientific texts, which are characterized by the neutrality of the vocabulary used. This is reflected in the exclusion of some abstracts and sentences (across all three levels of analysis) because none of their words appear in the sentiment lexicons used, Bing and AFINN ---although their omission may capture limitations of lexicon-based sentiment analysis---.
 
 ### 5.1 Set-up for sentiment analysis
 
@@ -1773,7 +1773,8 @@ ai_abstracts |>
 Since both lexicons are negatively biased, this could influence the direction of the sentiment results. For this reason, all analyses are performed using both lexicons, which serves as a robustness check.
 
 ```{r}
-# Calculating the number of times that a sentiment or a value appears in each lexicon > negatively biased
+# Calculating the number of times that a sentiment or a value appears in each
+# lexicon > negatively biased
 get_sentiments("bing") |>
   count(sentiment)
 
@@ -1814,8 +1815,9 @@ bing_abstract_sentiment <- ai_abstracts |>
 bing_abstract_sentiment
 
 # AFINN
-# In the AFINN tibble we computed the afinn sum and the number of sentiment
-# words, and with these two values we obtain the variable of interest afinn_mean.  
+# In the AFINN tibble we computed the afinn sum and the number of
+# sentiment words, and with these two values we obtain the variable of interest
+# afinn_mean.  
 afinn_abstract_sentiment <- ai_abstracts |>
   unnest_tokens(word, abstract) |>
   inner_join(get_sentiments("afinn"), by = "word") |>
@@ -1862,11 +1864,13 @@ sentiment_yearly
 #| fig-height: 5
 
 # Plotting the evolution of the annual average sentiment score: line chart 
-ggplot(sentiment_yearly, aes(x = publication_year, y = mean_sentiment, color = lexicon)) +
+ggplot(sentiment_yearly, aes(x = publication_year, y = mean_sentiment,
+                             color = lexicon)) +
   geom_line(linewidth = 0.9) +
   geom_point(size = 2) +
   
-  geom_vline(xintercept = 2020, linetype = "dotted", color = "#4a4a6a", linewidth = 0.7) +
+  geom_vline(xintercept = 2020, linetype = "dotted", color = "#4a4a6a",
+             linewidth = 0.7) +
   annotate(
     "text",
     x = 2020, y = Inf,
@@ -1881,7 +1885,8 @@ ggplot(sentiment_yearly, aes(x = publication_year, y = mean_sentiment, color = l
   scale_color_manual(values = c("Bing" = "#2C3E6B", "AFINN" = "#8E44AD")) +
   labs(
     title = "Sentiment in AI-related abstracts over time",
-    subtitle = "Yearly mean sentiment per abstract using Bing and AFINN lexicons",
+    subtitle =
+      "Yearly mean sentiment per abstract using Bing and AFINN lexicons",
     x = NULL,
     y = "Mean sentiment score",
     color = NULL
@@ -1931,7 +1936,8 @@ ggplot(
   theme(
     legend.position      = "none",
     plot.title           = element_text(face = "bold", color = "#1a1a2e"),
-    strip.text           = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    strip.text           = element_text(face = "bold", size = 10,
+                                        color = "#1a1a2e"),
     axis.text.x          = element_text(color = "#4a4a6a"),
     axis.text.y          = element_text(color = "#4a4a6a"),
     panel.grid.minor     = element_blank()
@@ -1944,7 +1950,8 @@ The annual mean sentiment scores show the predominant positive tone of AI-relate
 #| fig-width: 10
 #| fig-height: 6
 
-# Plotting the number of positive, negative, and neutral AI-related abstracts by year
+# Plotting the number of positive, negative, and neutral AI-related abstracts
+# by year
 
 # Bing
 bing_year_polarity <- bing_abstract_sentiment |>
@@ -1966,7 +1973,8 @@ afinn_year_polarity <- afinn_abstract_sentiment |>
   count(publication_year, polarity) |>
   mutate(lexicon = "AFINN")
 
-# Combining both lexicons, calculating the total number of abstracts and the percentages of each category 
+# Combining both lexicons, calculating the total number of abstracts and the
+# percentages of each category 
 year_polarity <- bind_rows(
   bing_year_polarity,
   afinn_year_polarity) |>
@@ -1975,7 +1983,9 @@ year_polarity <- bind_rows(
     total = sum(n),
     pct = n / total * 100) |>
   ungroup() |>
-  mutate(polarity = factor(polarity, levels = c("Positive", "Neutral", "Negative")))
+  mutate(polarity = factor(polarity, levels = c("Positive",
+                                                "Neutral",
+                                                "Negative")))
 
 # Plotting the graph 
 ggplot(year_polarity,
@@ -1992,15 +2002,18 @@ ggplot(year_polarity,
   scale_y_continuous(labels = scales::label_percent(scale = 1)) +
   facet_wrap(~ lexicon, ncol = 2) +
   labs(
-    title = "Percentage of positive, negative, and neutral AI-related abstracts by year",
-    x = NULL,
-    y = "% of abstracts",
-    color = "Overall sentiment"
+   title =
+   "Percentage of positive, negative, and neutral AI-related abstracts by year",
+   x = NULL,
+   y = "% of abstracts",
+   color = "Overall sentiment"
   ) +
   theme_minimal(base_family = "serif") +
   theme(
-    plot.title       = element_text(face = "bold", color = "#1a1a2e", size = 12),
-    strip.text       = element_text(face = "bold", size = 11, color = "#1a1a2e"),
+    plot.title       = element_text(face = "bold", color = "#1a1a2e",
+                                    size = 12),
+    strip.text       = element_text(face = "bold", size = 11, color =
+                                      "#1a1a2e"),
     axis.text        = element_text(color = "#4a4a6a", size = 10),
     legend.position  = "bottom",
     panel.grid.minor = element_blank(),
@@ -2089,7 +2102,9 @@ ai_sentences_ids |>
 ```
 
 ```{r}
-# In this chunk we create two tibbles, one per lexicon, that contain the id of the abstract and sentence, the publication year and the sentiment variables related to each lexicon.
+# In this chunk we create two tibbles, one per lexicon, that contain the id of
+# the abstract and sentence, the publication year and the sentiment variables
+# related to each lexicon.
 
 # Bing 
 bing_sentence_sentiment <- ai_sentences |>
@@ -2135,7 +2150,7 @@ bing_sentence_to_abstract <- bing_sentence_sentiment |>
 afinn_sentence_to_abstract <- afinn_sentence_sentiment |>
   group_by(id, publication_year) |>
   summarise(
-    sentiment_score = mean(afinn_mean / 5, na.rm = TRUE),  # normalizing it [-1, 1]
+    sentiment_score = mean(afinn_mean / 5, na.rm = TRUE), #normalizing it [-1,1]
     n_ai_sentences = n(),
     .groups = "drop") |>
   mutate(lexicon = "AFINN")
@@ -2159,11 +2174,15 @@ sentence_abstract_yearly
 #| fig-width: 7
 #| fig-height: 5
 
-# Plotting the evolution of the annual average sentiment score (using sentences): line chart 
-ggplot(sentence_abstract_yearly, aes(x = publication_year, y = mean_sentiment, color = lexicon)) +
+# Plotting the evolution of the annual average sentiment score
+# (using sentences): line chart 
+ggplot(sentence_abstract_yearly, aes(x = publication_year,
+                                     y = mean_sentiment,
+                                     color = lexicon)) +
   geom_line(linewidth = 0.9) +
   geom_point(size = 2) +
-  geom_vline(xintercept = 2020, linetype = "dotted", color = "#4a4a6a", linewidth = 0.7) +
+  geom_vline(xintercept = 2020, linetype = "dotted", color = "#4a4a6a",
+             linewidth = 0.7) +
   annotate(
     "text",
     x = 2020, y = Inf,
@@ -2178,7 +2197,8 @@ ggplot(sentence_abstract_yearly, aes(x = publication_year, y = mean_sentiment, c
   scale_color_manual(values = c("Bing" = "#2C3E6B", "AFINN" = "#8E44AD")) +
   labs(
     title = "Sentiment in AI-related abstracts over time",
-    subtitle = "Yearly mean sentiment per abstract based on AI-mentioning sentences only",
+    subtitle =
+    "Yearly mean sentiment per abstract based on AI-mentioning sentences only",
     x = NULL,
     y = "Mean sentiment score",
     color = NULL
@@ -2193,7 +2213,8 @@ ggplot(sentence_abstract_yearly, aes(x = publication_year, y = mean_sentiment, c
     axis.text.y          = element_text(color = "#4a4a6a"),
     panel.grid.minor     = element_blank())
 
-# Plotting the comparison before-after the rise of AI of the annual avergae sentiment score (using sentences): boxplot 
+# Plotting the comparison before-after the rise of AI of the annual 
+# avergae sentiment score (using sentences): boxplot 
 
 sentence_period_scores <- sentence_abstract_scores |>
   mutate(
@@ -2231,7 +2252,8 @@ ggplot(
     legend.position      = "none",
     plot.title           = element_text(face = "bold", color = "#1a1a2e"),
     plot.subtitle        = element_text(color = "#4a4a6a"),
-    strip.text           = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    strip.text           = element_text(face = "bold", size = 10,
+                                        color = "#1a1a2e"),
     axis.text.x          = element_text(color = "#4a4a6a"),
     axis.text.y          = element_text(color = "#4a4a6a"),
     panel.grid.minor     = element_blank()
@@ -2244,7 +2266,8 @@ The general patterns remain very similar: both lexicons show a positive sentimen
 #| fig-width: 10
 #| fig-height: 6
 
-# Plotting the number of positive, negative, and neutral AI-related abstracts by year (using sentences)
+# Plotting the number of positive, negative, and neutral AI-related abstracts
+# by year (using sentences)
 
 # Bing
 bing_sentence_year_polarity <- bing_sentence_to_abstract |>
@@ -2275,7 +2298,9 @@ sentence_year_polarity <- bind_rows(
     total = sum(n),
     pct = n / total * 100) |>
   ungroup() |>
-  mutate(polarity = factor(polarity, levels = c("Positive", "Neutral", "Negative")))
+  mutate(polarity = factor(polarity, levels = c("Positive",
+                                                "Neutral",
+                                                "Negative")))
 
 # Plotting the graph
 ggplot(sentence_year_polarity,
@@ -2292,16 +2317,19 @@ ggplot(sentence_year_polarity,
   scale_y_continuous(labels = scales::label_percent(scale = 1)) +
   facet_wrap(~ lexicon, ncol = 2) +
   labs(
-    title = "Percentage of positive, negative, and neutral AI-related abstracts by year",
-    subtitle = "Based on AI-mentioning sentences only",
-    x = NULL,
-    y = "% of abstracts",
-    color = "Overall sentiment"
+   title = 
+   "Percentage of positive, negative, and neutral AI-related abstracts by year",
+   subtitle = "Based on AI-mentioning sentences only",
+   x = NULL,
+   y = "% of abstracts",
+   color = "Overall sentiment"
   ) +
   theme_minimal(base_family = "serif") +
   theme(
-    plot.title       = element_text(face = "bold", color = "#1a1a2e", size = 12),
-    strip.text       = element_text(face = "bold", size = 11, color = "#1a1a2e"),
+    plot.title       = element_text(face = "bold",
+                                    color = "#1a1a2e",size = 12),
+    strip.text       = element_text(face = "bold", size = 11,
+                                    color = "#1a1a2e"),
     axis.text        = element_text(color = "#4a4a6a", size = 10),
     legend.position  = "bottom",
     panel.grid.minor = element_blank(),
@@ -2332,10 +2360,12 @@ ai_side_1w <- c(
 ai_side_2w <- c(
   # core ML / DL paradigms
   "artificial intelligence", "machine learning", "deep learning",
-  "reinforcement learning", "machine intelligence", "computational intelligence",
+  "reinforcement learning", "machine intelligence",
+  "computational intelligence",
   # network and model architectures
   "neural network", "neural model", "deep network",
-  "learning algorithm", "backpropagation learning", "backpropagation algorithm",
+  "learning algorithm", "backpropagation learning",
+  "backpropagation algorithm",
   "pretrained transformer",
   # generative and language model terms
   "generative ai", "language model", "agentic ai",
@@ -2573,7 +2603,8 @@ effect_side_2w_pre <- c(
   "role of", "power of"
 )
 
-# 3-word effect-leading prefixes (for fourgram Pattern C: [effect prefix 3w] + [AI 1w])
+# 3-word effect-leading prefixes
+# (for fourgram Pattern C: [effect prefix 3w] + [AI 1w])
 effect_side_3w_pre <- c(
   # ethical / social / economic implications of — NEGATIVE
   "ethical implications of", "social implications of",
@@ -2699,15 +2730,16 @@ trigrams_b <- as.vector(outer(effect_side_2w_pre, ai_side_1w,     paste))
 ai_sentiment_trigrams <- unique(trimws(c(trigrams_a, trigrams_b)))
 
 # ~10,200 fourgrams
-# Pattern A: [effect prefix 2w] + [AI 2w]    — e.g. "risks of machine learning"
-# Pattern B: [AI 2w]            + [effect 2w] — e.g. "machine learning job displacement"
-# Pattern C: [effect prefix 3w] + [AI 1w]    — e.g. "ethical implications of ai"
-# Pattern D: [AI 3w]            + [effect 1w] — e.g. "large language model risks"
+# Pattern A: [effect prefix 2w] + [AI 2w] — e.g. "risks of machine learning"
+# Pattern B: [AI 2w] + [effect 2w] — e.g. "machine learning job displacement"
+# Pattern C: [effect prefix 3w] + [AI 1w] — e.g. "ethical implications of ai"
+# Pattern D: [AI 3w] + [effect 1w] — e.g. "large language model risks"
 fourgrams_a <- as.vector(outer(effect_side_2w_pre, ai_side_2w,    paste))
 fourgrams_b <- as.vector(outer(ai_side_2w,         effect_side_2w, paste))
 fourgrams_c <- as.vector(outer(effect_side_3w_pre, ai_side_1w,    paste))
 fourgrams_d <- as.vector(outer(ai_side_3w,         effect_side_1w, paste))
-ai_sentiment_fourgrams <- unique(trimws(c(fourgrams_a, fourgrams_b, fourgrams_c, fourgrams_d)))
+ai_sentiment_fourgrams <- unique(trimws(c(fourgrams_a, fourgrams_b,
+                                          fourgrams_c, fourgrams_d)))
 ```
 
 ```{r}
@@ -2751,7 +2783,8 @@ target_sentence_hits <- bind_rows(
 
 # Keeping only target-specific sentences
 ai_target_sentences <- target_sentences_base |>
-  semi_join(target_sentence_hits, by = c("id", "publication_year", "sentence_id"))
+  semi_join(target_sentence_hits, by = c("id", "publication_year",
+                                         "sentence_id"))
 
 ai_target_sentences
 ```
@@ -2788,7 +2821,9 @@ ai_target_sentences_ids |>
 ```
 
 ```{r}
-# In this chunk we create two tibbles, one per lexicon, that contain the id of the abstract and sentence, the publication year and the sentiment variables related to each lexicon.
+# In this chunk we create two tibbles, one per lexicon, that contain the id of
+# the abstract and sentence, the publication year and the sentiment variables
+# related to each lexicon.
 
 # Bing sentiment by target-specific sentence
 bing_target_sentence_sentiment <- ai_target_sentences |>
@@ -2871,7 +2906,8 @@ ggplot(
   geom_line(linewidth = 0.9) +
   geom_point(size = 2) +
   
-  geom_vline(xintercept = 2024, linetype = "dotted", color = "#4a4a6a", linewidth = 0.7) +
+  geom_vline(xintercept = 2024, linetype = "dotted", color = "#4a4a6a",
+             linewidth = 0.7) +
   annotate(
     "text",
     x = 2024, y = Inf,
@@ -2903,7 +2939,8 @@ ggplot(
     panel.grid.minor     = element_blank()
   )
 
-# Plotting the comparison before-after the rise of AI of the annual avergae sentiment score (using target-specific sentences): boxplot 
+# Plotting the comparison before-after the rise of AI of the annual avergae
+# sentiment score (using target-specific sentences): boxplot 
 
 target_sentence_period_scores <- target_sentence_abstract_scores |>
   mutate(
@@ -2942,7 +2979,8 @@ ggplot(
     legend.position      = "none",
     plot.title           = element_text(face = "bold", color = "#1a1a2e"),
     plot.subtitle        = element_text(color = "#4a4a6a"),
-    strip.text           = element_text(face = "bold", size = 10, color = "#1a1a2e"),
+    strip.text           = element_text(face = "bold", size = 10,
+                                        color = "#1a1a2e"),
     axis.text.x          = element_text(color = "#4a4a6a"),
     axis.text.y          = element_text(color = "#4a4a6a"),
     panel.grid.minor     = element_blank()
