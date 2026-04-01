@@ -104,7 +104,7 @@ words <- sum(sapply(strsplit(clean, "\\s+"), function(x) sum(x != "")))
 ```
 
 ::: {.text-end}
-<br>[*Word count: `r words` words.*]{style="font-size: 78%"} <br> [\**Excluding abstract, references, and appendices.*]{style="font-size: 65%"}
+<br>[*Word count in body text: `r words` words.*]{style="font-size: 78%"} <br> [*[Excluding abstract, references, and appendices.]*]{style="font-size: 65%"}
 :::
 
 ## Section 1. Introduction
@@ -1430,9 +1430,9 @@ The shift coinciding with the rise of generative AI is consistent across all val
 
 ## Section 4. Social science journals' writting style and the rise of generative AI
 
-As we have seen until now, papers on AI have risen exponentially since ChatGPT’s launch in 2022. At the same time, the use of AI itself to, at least, help scientists in their research has exploded: 28 % of scientists use AI to write their manuscripts, according to a 2023 survey of Nature (Kwon, 2025). That figure is likely to have increased a lot since there AI providers have multiplied and its use has been democratized.
+As discussed, papers on AI have risen exponentially since ChatGPT’s launch in 2022. Coincidentally, the use of AI to assist scientific research has exploded: 28 % of scientists use AI to write their manuscripts, according to a 2023 survey of Nature (Kwon, 2025). That figure is likely to have increased, since AI tools have multiplied and improved.
 
-When writing text, it appears that chatbots have a specific “tone”, a way of speaking, which is previously designed (for a study of how a chatbot’s “voice” is designed, see Derner et al., 2026) This communication style varies from chatbot to chatbot, they will systematically use some words or grammatical forms more than others (Rudnika and Mukerjee, 2025). For instance, from the beginning of the chatbot era linguists have pointed out that there are certain words that ChatGPT loves to use. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak (Matsui, 2025), since it’s estimated that more than half of today’s text in the internet is AI generated (Morrone, 2025). Some studies have already tested that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We’ll look into our corpus to see if there is an increase of LLM-related words.
+When writing text, chatbots seem to have a specific “tone”, which is previously designed ---on how a chatbot’s “voice” is designed, see Derner et al., 2026---. This communication style varies between chatbots, they will systematically use some words or grammatical forms more than others (Rudnika and Mukerjee, 2025). For instance, from the beginning of the chatbot era linguists have pointed out that there are certain words that ChatGPT loves to use. These are words that weren’t as prominently used prior to AI’s explosion and have literally changed the way we speak (Matsui, 2025); it’s estimated that more than half of today’s text in the internet is AI generated (Morrone, 2025). Some studies show that these “AI-Words” appear much more frequently after 2023 in academic papers (Gray, 2024; Kousha and Thelwall, 2025). We'll analyze if this trend is confirmed in our corpus.
 
 ```{r}
 # Plot top 20 most frequent words in the corpus
@@ -1461,9 +1461,9 @@ tidy_abstracts |>
   )
 ```
 
-We’ll use the words that Kousha and Thelwall used in their paper, which are “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These are terms that have the support of other researchers in the area as well. To them, we’ll add “core” which is a word that according to journalists in the Washington Post has been pushed by the newer versions of ChatGPT (Merrill et al, 2025).
+We’ll use the words proposed by Kousha and Thelwall (2025): “underscore”, “delve”, “showcase”, “unveil”, “intricate”, “meticulous”, “pivotal”, “nuance”, “bolster”, “foster” and “interplay”. These terms are supported by other researchers in the area as well. To them, we’ll add “core” which is a word that seems to be have been pushed by the newer versions of ChatGPT (Merrill et al, 2025).
 
-Other 4 control terms will be added so that we can compare them to the AI words. This words will be taken out of the most frequently used words in our corpus. Of them, we finally decided on “research”, “analysis”, “policy” and “support”. We also controlled for the fact that there are more papers after 2023 in our corpus by dividing the word frequency by the total papers of that year.
+We use 4 control terms to be able to compare them to the AI words. These words will be taken out of the most frequently used words in our corpus. We eventually decided on “research”, “analysis”, “policy” and “support”. We controlled for the fact that there are more papers after 2023 in our corpus by dividing the word frequency by the total papers of that year.
 
 ```{r}
 # LLM signature words, based on Kousha & Thelwall (2025) and control words
@@ -1585,8 +1585,7 @@ p_control <- plot_data |>
 p_control | p_llm
 ```
 
-
-As we can see, our top 10 most frequent AI-words have a distribution that goes mostly up exponentially after 2023, while our control words either were going up even before AI chatbots or have different patterns, such as "support"."Underscore", "score", "pivotal" and "foster" become more frequent after the lauch of ChatGPT. "Core" was at its lowest just before ChatGPT came out, started being used more and then started to be used again.
+Our top 10 most frequent AI-words have a distribution that goes mostly up exponentially after 2023, while our control words either were going up even before AI chatbots or have different patterns, such as "support"."Underscore", "score", "pivotal" and "foster" become more frequent after the lauch of ChatGPT. "Core" was at its lowest just before ChatGPT came out, started being used more and then started to be used again.
 
 The word “delve", which was considered one of the words that revealed the most if a text was written by AI since the bot pushed it constantly, also follows the same trend, but with a twist. After the developers noticed the excessive use of the word in ChatGPT, much more than of actual human writings, they tweaked the model so that it appears less. This is also shown in our corpus, which strongly suggests that AI may be used systematically for abstracts, since not only do AI-words appear, but also AI developer decisions.
 
@@ -1722,11 +1721,11 @@ The main **limitation** in answering this research question is that we cannot gu
 
 For this reason, the analysis has been designed sequentially to approach the object of study. First, a sentiment analysis is conducted on the full abstracts that mention terms related to AI. In the second step, only sentences that contain explicit AI terms are used to calculate the general sentiment of each abstract. In the third analysis, we select only those sentences that have bigrams/trigrams/fourgrams addressing AI and its effects or consequences, thus making AI the focus of interest in that sentence and not just a simple mention.
 
-In addition, we acknowledge the difficulty of analyzing sentiment in abstracts of scientific texts, which are characterized by the neutrality of the vocabulary used. This is reflected in the exclusion of some abstracts and sentences (across all three levels of analysis) because none of their words appear in the sentiment lexicons used, Bing and AFFIN.
+In addition, we acknowledge the difficulty of analyzing sentiment in abstracts of scientific texts, which are characterized by the neutrality of the vocabulary used. This is reflected in the exclusion of some abstracts and sentences (across all three levels of analysis) because none of their words appear in the sentiment lexicons used, Bing and AFFIN - although their omission may capture limitations of lexicon-based sentiment analysis.
 
 ### 5.0 Set-up for sentiment analysis
 
-We need to define de abstracts that would be part of the subcorpus of analysis. In this case the object of the sentiment is the "artificial intelligence", therefore, we just select the abstracts that have AI related terms/n-grams, using the object ai_hits created above.
+We need to define de abstracts that would be part of the subcorpus of analysis. Therefore, we just select the abstracts that have AI related terms/n-grams, using the object ai_hits created above.
 
 ```{r}
 # Creating the sentiment analysis subcorpus, selecting only the abstracts that contain the n-grams in ai_hits 
@@ -1736,7 +1735,7 @@ ai_abstracts <- ai_hits |>
 ai_abstracts
 ```
 
-As mentioned, abstracts with no matches in the sentiment lexicons are excluded from the sentiment computing step. These texts probably have a more neutral and technical language, although their omission may capture limitations of lexicon-based sentiment analysis. In both cases of Bing and AFINN the number of abstracts excluded are 2.
+As mentioned, abstracts with no matches in the sentiment lexicons are excluded from the sentiment computing step. In both cases of Bing and AFINN the number of abstracts excluded are 2.
 
 ```{r, warning = FALSE}
 # Total of AI-related abstracts: 529 
@@ -1756,7 +1755,7 @@ ai_abstracts |>
   summarise(n_scored_abstracts = n_distinct(id))
 ```
 
-Here, we can observe that both lexicons are negatively biased; this choice of lexicons could influence sentiment results, making them more likely to lean to a negative direction. For this reason, all of the analysis are performed using both lexicons, which serves as a robustness check.
+Since both lexicons are negatively biased, this could influence the direction of the sentiment results. For this reason, all analyses are performed using both lexicons, which serves as a robustness check.
 
 ```{r}
 # Calculating the number of times that a sentiment or a value appears in each lexicon > negatively biased
@@ -1998,7 +1997,7 @@ With this graph we confirm the predominant presence of positively-toned abstract
 
 ### 5.2 General sentiment in AI-related abstracts over time: using sentences mentioning AI
 
-In the second step, we select only the sentences that explicitly mention at least one AI-related term from the unigram, bigram, or trigram lexicons. In this case, the methodological pipeline follows a three-level aggregation strategy: to ensure comparability with the previous abstract-level results, we computed the sentence-level sentiment (with the net_sentiment_norm and the afinn_mean) and then average it back to the abstract level, making each AI-mentioning sentence contributes equally to the abstract's overall score.
+In the second step, we select only the sentences that explicitly mention at least one AI-related term from the unigram, bigram, or trigram lexicons. To ensure comparability with the previous abstract-level results, we computed the sentence-level sentiment (with the net_sentiment_norm and the afinn_mean) and then average it back to the abstract level, making each AI-mentioning sentence contributes equally to the abstract's overall score.
 
 ```{r}
 # Creating the subcorpus of sentences that explicitly mention AI-related terms 
@@ -3010,7 +3009,7 @@ The distribution of abstracts is very similar; the most remarkable difference is
 
 ### 5.4 Which words drive the sentiment in target-specific AI-effect sentences?
 
-Finally, we explore which words drive the sentiment in these target-specific AI-effect sentences of scientific papers' abstracts. Counting the frequency of positive and negative words we can observe that positive ones contribute more to the overall sentiment (trust, ethical, support and positive).
+Finally, we explore which words drive the sentiment in these target-specific AI-effect sentences of scientific papers' abstracts. Counting the frequency of positive and negative words we can observe that psoitive ones contribute more to the overall sentiment (trust, ethical, support and positive).
 
 ```{r}
 # We create a data frame with word, sentiment, and number of mentions to see which words are more common
@@ -3081,7 +3080,6 @@ target_word_counts |>
     panel.grid.major.y = element_blank()
   )
 ```
-
 
 ## Section 6. Conclussions and limitations
 
