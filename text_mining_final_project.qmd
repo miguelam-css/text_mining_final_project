@@ -1435,7 +1435,7 @@ ggplot(all_topics_by_year,
 
 The shift coinciding with the rise of generative AI is consistent across all values of k.
 
-## Section 4. Social science journals' writting style and the rise of generative AI
+## Section 4. Social science journals' writing style and the rise of generative AI
 
 As discussed, papers on AI have increased exponentially since ChatGPT’s launch in 2022. At the same time, the use of AI to help scientists in their research has exploded: 28 % of scientists use AI to write their manuscripts, according to a survey of Nature (Kwon, 2025). That figure is likely to have increased, since there AI providers have multiplied and its use has been democratized.
 
@@ -1938,7 +1938,7 @@ ggplot(
   )
 ```
 
-The annual mean sentiment scores show the predominant positive tone of AI-related abstracts across the entire period. `net_sentiment_norm` (Bing) illustrates a positive word balance, while `afinn_mean` (AFINN) shows a low-moderate intensity on average. For instance, in 2025, we can see that average sentiment intensity is low-moderate with a value around 0.162 and the balance of words is positive (0.40), meaning that 60% of words are positive and 40% negative. Since 2020, AFINN is stable, whereas Bing shows a declining trend until 2022 followed by an increasing one until 2025. This could reflect a period of more cautious framing of AI that becomes more positive in recent years. The boxplots show that the central tendency of the years after the rise of AI in 2023 has higher values according to both lexicons (which is consistent across the analysis).
+The annual mean sentiment scores show the predominant positive tone of AI-related abstracts across the entire period. `net_sentiment_norm` (Bing) illustrates a positive word balance, while `afinn_mean` (AFINN) shows a low-moderate intensity on average. For instance, in 2025, we can see that average sentiment intensity is low-moderate with a value around 0.162 and the balance of words is positive (0.40), meaning that 70% of words are positive and 30% negative. Since 2020, AFINN is stable, whereas Bing shows a declining trend until 2022 followed by an increasing one until 2025. This could reflect a period of more cautious framing of AI that becomes more positive in recent years. The boxplots show that the central tendency of the years after the rise of AI in 2023 has higher values according to both lexicons (which is consistent across the analysis).
 
 ```{r}
 #| fig-width: 10
@@ -3100,7 +3100,7 @@ target_word_counts |>
 ```
 
 
-## Section 6. Conclussions and limitations
+## Section 6. Conclusions and limitations
 
 In this final section we summarize the results of our project and discuss its limitations.
 
